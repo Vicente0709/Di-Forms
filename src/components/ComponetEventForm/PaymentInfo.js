@@ -12,7 +12,7 @@ function PaymentInfo() {
 
   return (
     <div className="form-container">
-      <h3>4. INFORMACIÓN DE PAGO</h3>
+      <h3>4. Valor de la inscripción</h3>
 
       {/* Tabla Dinámica */}
       <table className="payment-table">
@@ -90,7 +90,7 @@ function PaymentInfo() {
         </div>
         {metodoPago === "Transferencia" && (
           <div className="sub-group">
-            <p>Adjuntar los siguientes documentos:</p>
+            <p>En la solicitud se debe adjuntar los siguientes documentos:</p>
             <ul>
               <li>Formulario de pagos al exterior (Anexo 6)</li>
               <li>Documento donde se puede verificar el costo y fechas de la inscripción al evento</li>

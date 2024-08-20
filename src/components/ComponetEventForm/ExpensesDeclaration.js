@@ -11,7 +11,7 @@ function ExpensesDeclaration() {
     <div className="form-container">
       <h3>5. DECLARACIÓN DE GASTOS, CONFORME REGLAMENTO DE VIÁTICOS AL EXTERIOR</h3>
       
-      <p>Marcar con una X según corresponda. Responda SI aunque la organización del evento cubra el rubro parcialmente.</p>
+      <p>Selecciona segunn corresponda. Responda SI aunque la organización del evento cubra el rubro parcialmente.</p>
 
       <div className="form-group">
         <h4>La organización del evento cubre los siguientes rubros:</h4>
