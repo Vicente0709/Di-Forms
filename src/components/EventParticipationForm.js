@@ -10,133 +10,12 @@ import InstitutionalServices from "./ComponetEventForm/InstitutionalServices";
 import ActivitySchedule from "./ComponetEventForm/ActivitySchedule";
 import Transportation from "./ComponetEventForm/Transportation";
 
-import { Document, Packer, Paragraph, TextRun } from "docx";
-import { saveAs } from "file-saver";
-
-function generateMemorandum(data) {
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Formato de memorando",
-                bold: true,
-                size: 24,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 300 },
-            alignment: "start",
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PARA:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Dr. Marco Santorum",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "ASUNTO:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: " Solicitud dentro de proyecto, de auspicio para movilidad al exterior para participar en evento académico",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `En mi calidad de ${data.cargo} del Proyecto ${data.codigoProyecto}, AUTORIZO EL GASTO y solicito a usted se realicen las gestiones correspondientes para participar en el Evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. Para lo cual, adjunto los correspondientes documentos.`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Con sentimientos de distinguida consideración.",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Atentamente,",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: data.nombreCompleto,
-                size: 20,
-                bold: true,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `${data.cargo.toUpperCase()} DEL PROYECTO ${data.codigoProyecto}`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "memorandum.docx");
-  });
-}
+import { generateMemorandum, generateAnexoA } from "../utils/documentGenerator";
+import { Alert } from "react-bootstrap";
 
 function EventParticipationForm() {
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-  
+
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -160,7 +39,20 @@ function EventParticipationForm() {
 
   const handleGenerateDocx = () => {
     const formData = methods.getValues(); // Obtener los valores actuales del formulario
-    generateMemorandum(formData); // Generar el documento con los datos
+
+    // Verificar si el rol es "Director"
+    if (formData.rolEnProyecto === "Director") {
+      generateMemorandum(formData); // Generar el documento con los datos
+    } else {
+      // Mostrar una alerta si el rol no es "Director"
+      alert("Solo el Director puede generar el memorando.");
+    }
+  };
+
+  const handleGeneratePdf = () => {
+    const formData = methods.getValues(); // Obtener los valores actuales del formulario
+
+    generateAnexoA(formData); // Generar el PDF con los datos
   };
 
   const handleClearForm = () => {
@@ -213,13 +105,37 @@ function EventParticipationForm() {
             onClick={handleGenerateDocx}
           >
             <img
-              src="IconWord.png" // Coloca aquí la ruta a tu icono de Word
+              src="IconWord.png"
               alt="Word Icon"
               style={{ width: "32px", height: "45px", marginRight: "8px" }}
             />
             <span>Descargar Memorando</span>
           </div>
         </div>
+        <div
+  style={{
+    maxHeight: showDownloadSection ? "300px" : "0px",
+    overflow: "hidden",
+    transition: "max-height 0.5s ease-out",
+  }}
+>
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      marginTop: "20px",
+      cursor: "pointer",
+    }}
+    onClick={handleGeneratePdf}
+  >
+    <img
+      src="IconPdf.png"
+      alt="PDF Icon"
+      style={{ width: "32px", height: "45px", marginRight: "8px" }}
+    />
+    <span>Descargar Anexo A</span>
+  </div>
+</div>
 
         {/* Botón para limpiar el formulario */}
         <button
