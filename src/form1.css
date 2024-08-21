@@ -1,12 +1,12 @@
 .form-container {
-  max-width: 1000px;  /* Aumenta un poco el ancho máximo para más espacio */
+  max-width: 1200px;  /* Aumenta un poco el ancho máximo para más espacio */
   margin: 0 auto;
   padding: 20px;
   background-color: #f9f9f9;  /* Fondo suave para destacar la sección */
   border-radius: 10px;  /* Bordes redondeados */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Sombra suave para elevar la sección */
 }
-
+.bolded { font-weight: bold; }
 .form-group {
   margin-bottom: 20px;  /* Aumenta el espaciado entre grupos de formulario */
 }
@@ -85,4 +85,38 @@ button[type="button"] {
 
 button[type="button"]:hover {
   background-color: #c82333;  /* Rojo más oscuro al pasar el ratón */
+}
+
+/* Estilos generales para el formulario y botones */
+.clear-button {
+  margin-top: 20px;
+  background-color: red;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.download-section {
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height 0.5s ease-out;
+}
+
+.download-section.show {
+  max-height: 300px;
+}
+
+.download-item {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+.download-icon {
+  width: 32px;
+  height: 45px;
+  margin-right: 8px;
 }

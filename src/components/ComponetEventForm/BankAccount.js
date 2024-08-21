@@ -23,7 +23,7 @@ function BankAccount() {
 
   return (
     <div className="form-container">
-      <h3>8. CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS</h3>
+      <h3>• CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS</h3>
       <p>Obligatorio si marcó viáticos en la sección 2.</p>
 
       <div className="form-group">

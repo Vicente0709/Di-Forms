@@ -14,6 +14,7 @@ function EventDetails() {
   const tipoEvento = watch("tipoEvento"); // Escucha los cambios en el tipo de evento
   const [showOtherEvent, setShowOtherEvent] = useState(false);
   const fechaInicioEvento = watch('fechaInicioEvento'); 
+
   // Validación para asegurar que la fecha de inicio no sea menor a la fecha actual
   const validateFechaInicio = (value) => {
     const today = new Date().toISOString().split("T")[0];
@@ -22,6 +23,7 @@ function EventDetails() {
       "La fecha de inicio no puede ser anterior a la fecha actual."
     );
   };
+
  // Validación personalizada para la fecha de finalización
  const validateFechaFin = (fechaFin) => {
   if (!fechaInicioEvento) {
@@ -29,6 +31,7 @@ function EventDetails() {
   }
   return fechaFin >= fechaInicioEvento || "La fecha de finalización no puede ser anterior a la fecha de inicio.";
 };
+
   // Control de campo "Otro evento académico"
   useEffect(() => {
     setShowOtherEvent(tipoEvento === "Otro evento académico");
@@ -49,7 +52,7 @@ function EventDetails() {
 
   return (
     <div className="form-container">
-      <h3>2. DETALLES DEL EVENTO</h3>
+      <h3>• DETALLES DEL EVENTO</h3>
 
       <div className="form-group">
         <label htmlFor="tituloEvento" className="form-label">
@@ -159,7 +162,7 @@ function EventDetails() {
               required: "El tipo de evento es requerido",
             })}
           />
-          <label htmlFor="taller">Taller</label>
+          <label htmlFor="taller">    Taller</label>
         </div>
         <div>
           <input
@@ -170,7 +173,7 @@ function EventDetails() {
               required: "El tipo de evento es requerido",
             })}
           />
-          <label htmlFor="otroEvento">Otro evento académico</label>
+          <label htmlFor="otroEvento">    Otro evento académico</label>
           {showOtherEvent && (
             <input
               type="text"

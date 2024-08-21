@@ -6,7 +6,7 @@ function InstitutionalServices() {
 
   return (
     <div className="form-container">
-      <h3>9. SERVIDORES QUE INTEGRAN LOS SERVICIOS INSTITUCIONALES (opcional)</h3>
+      <h3>• SERVIDORES QUE INTEGRAN LOS SERVICIOS INSTITUCIONALES (opcional)</h3>
       <p>Completar esta sección solo en caso de que usted asista al mismo evento junto con otros funcionarios.</p>
 
       <div className="form-group">
@@ -15,11 +15,9 @@ function InstitutionalServices() {
         </label>
         <textarea
           id="servidores"
-          {...register("servidores", {
-            required: "Este campo es requerido",
-          })}
+          {...register("servidores")}
           className="form-input"
-          placeholder="Escriba aquí los nombres de los funcionarios, separados por comas o en líneas diferentes."
+          placeholder="Escriba aquí los nombres de los funcionarios, separados por comas"
         />
         {errors.servidores && (
           <span className="error-text">{errors.servidores.message}</span>
