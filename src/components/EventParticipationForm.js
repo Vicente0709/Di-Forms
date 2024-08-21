@@ -11,76 +11,95 @@ import ActivitySchedule from "./ComponetEventForm/ActivitySchedule";
 import Transportation from "./ComponetEventForm/Transportation";
 
 import { generateMemorandum, generateAnexoA } from "../utils/documentGenerator";
-import { Alert } from "react-bootstrap";
 
 function EventParticipationForm() {
+  // Estado para mostrar/ocultar la sección de descarga
   const [showDownloadSection, setShowDownloadSection] = useState(false);
+  // Estado para almacenar la diferencia en días entre las fechas
+  const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
 
+  // Inicialización del formulario con valores predeterminados o datos del localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues: JSON.parse(localStorage.getItem("formData")) || {}, // Cargar datos guardados si existen
+    defaultValues: JSON.parse(localStorage.getItem("formData")) || {},
   });
 
-  const { watch, reset } = methods;
+  const { watch } = methods;
 
-  // Guardar los datos en localStorage cada vez que cambien
+  // Efecto para guardar los datos en localStorage y calcular la diferencia de días cada vez que cambien
   useEffect(() => {
     const subscription = watch((data) => {
+      // Guardar datos en localStorage
       localStorage.setItem("formData", JSON.stringify(data));
+
+      // Obtener la última fecha de llegada y la primera fecha de salida
+      const ultimaFechaLlegada =
+        data.transporte.length > 0
+          ? data.transporte[data.transporte.length - 1]?.fechaLlegada
+          : "";
+      const primeraFechaSalida = data.transporte[0]?.fechaSalida;
+
+      if (ultimaFechaLlegada && primeraFechaSalida) {
+        // Convertir las fechas en objetos Date
+        const fechaInicio = new Date(primeraFechaSalida);
+        const fechaFinal = new Date(ultimaFechaLlegada);
+
+        // Calcular la diferencia en días
+        const diferenciaEnMilisegundos = fechaFinal - fechaInicio;
+        const diferenciaEnDias =
+          Math.ceil(diferenciaEnMilisegundos / (1000 * 60 * 60 * 24)) + 2;
+
+        // Actualizar el estado
+        setDiferenciaEnDias(diferenciaEnDias);
+      }
     });
+
     return () => subscription.unsubscribe();
   }, [watch]);
 
+  // Función que se ejecuta al enviar el formulario
   const onSubmit = (data) => {
-    console.log("Datos del formulario:", data);
     setShowDownloadSection(true); // Mostrar la sección de descarga
   };
 
+  // Función para generar un documento DOCX
   const handleGenerateDocx = () => {
-    const formData = methods.getValues(); // Obtener los valores actuales del formulario
+    const formData = methods.getValues();
 
-    // Verificar si el rol es "Director"
     if (formData.rolEnProyecto === "Director") {
-      generateMemorandum(formData); // Generar el documento con los datos
+      generateMemorandum(formData);
     } else {
-      // Mostrar una alerta si el rol no es "Director"
       alert("Solo el Director puede generar el memorando.");
     }
   };
 
+  // Función para generar un documento PDF
   const handleGeneratePdf = () => {
-    const formData = methods.getValues(); // Obtener los valores actuales del formulario
-
-    generateAnexoA(formData); // Generar el PDF con los datos
+    const formData = methods.getValues();
+    generateAnexoA(formData);
   };
 
+  // Función para limpiar el formulario
   const handleClearForm = () => {
-    reset(); // Limpiar los campos del formulario
     localStorage.removeItem("formData"); // Eliminar datos de localStorage
     setShowDownloadSection(false); // Ocultar la sección de descarga
+    window.location.reload(); // Recargar la página 
   };
 
   return (
     <FormProvider {...methods}>
+      <h1 style={{ textAlign: 'center' }}>Formulario de Participación en Eventos</h1>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
-        {/* Detalles del proyecto */}
+        {/* Renderizado de componentes del formulario */}
         <ProjectDetails />
-        {/* Detalles del evento */}
         <EventDetails />
-        {/* Justificación */}
         <Justification />
-        {/* Información de pago */}
-        <PaymentInfo />
-        {/* Declaración de gastos */}
-        <ExpensesDeclaration />
-        {/* Cronograma de actividades */}
-        <ActivitySchedule />
-        {/* Transporte */}
         <Transportation />
-        {/* Cuenta bancaria */}
+        {diferenciaEnDias > 15 && <ActivitySchedule />}
+        <PaymentInfo />
+        <ExpensesDeclaration />
         <BankAccount />
-        {/* Servicios institucionales */}
         <InstitutionalServices />
 
         <button id="btn_enviar" type="submit">
@@ -88,68 +107,30 @@ function EventParticipationForm() {
         </button>
 
         {/* Sección de descarga con animación */}
-        <div
-          style={{
-            maxHeight: showDownloadSection ? "300px" : "0px",
-            overflow: "hidden",
-            transition: "max-height 0.5s ease-out",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginTop: "20px",
-              cursor: "pointer",
-            }}
-            onClick={handleGenerateDocx}
-          >
+        <div className={showDownloadSection ? "download-section show" : "download-section"}>
+          <div className="download-item" onClick={handleGenerateDocx}>
             <img
               src="IconWord.png"
               alt="Word Icon"
-              style={{ width: "32px", height: "45px", marginRight: "8px" }}
+              className="download-icon"
             />
             <span>Descargar Memorando</span>
           </div>
+          <div className="download-item" onClick={handleGeneratePdf}>
+            <img
+              src="IconPdf.png"
+              alt="PDF Icon"
+              className="download-icon"
+            />
+            <span>Descargar Anexo A</span>
+          </div>
         </div>
-        <div
-  style={{
-    maxHeight: showDownloadSection ? "300px" : "0px",
-    overflow: "hidden",
-    transition: "max-height 0.5s ease-out",
-  }}
->
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      marginTop: "20px",
-      cursor: "pointer",
-    }}
-    onClick={handleGeneratePdf}
-  >
-    <img
-      src="IconPdf.png"
-      alt="PDF Icon"
-      style={{ width: "32px", height: "45px", marginRight: "8px" }}
-    />
-    <span>Descargar Anexo A</span>
-  </div>
-</div>
 
         {/* Botón para limpiar el formulario */}
         <button
           type="button"
           onClick={handleClearForm}
-          style={{
-            marginTop: "20px",
-            backgroundColor: "red",
-            color: "white",
-            padding: "10px 20px",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
+          className="clear-button"
         >
           Limpiar Formulario
         </button>
