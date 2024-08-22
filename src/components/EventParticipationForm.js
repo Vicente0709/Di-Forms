@@ -10,7 +10,11 @@ import InstitutionalServices from "./ComponetEventForm/InstitutionalServices";
 import ActivitySchedule from "./ComponetEventForm/ActivitySchedule";
 import Transportation from "./ComponetEventForm/Transportation";
 
-import { generateMemorandum, generateAnexoA } from "../utils/documentGenerator";
+import {
+  generateMemorandum,
+  generateAnexoA,
+  generateAnexoA2,
+} from "../utils/documentGenerator";
 
 function EventParticipationForm() {
   // Estado para mostrar/ocultar la sección de descarga
@@ -60,6 +64,7 @@ function EventParticipationForm() {
 
   // Función que se ejecuta al enviar el formulario
   const onSubmit = (data) => {
+    console.log(data);
     setShowDownloadSection(true); // Mostrar la sección de descarga
   };
 
@@ -79,17 +84,43 @@ function EventParticipationForm() {
     const formData = methods.getValues();
     generateAnexoA(formData);
   };
+  // Función para generar un documento PDF
+  const handleGeneratePdf2 = () => {
+    const formData = methods.getValues();
+    generateAnexoA2(formData);
+  };
+  // Función para descargar todos los documentos
+  const handleDownloadAll = () => {
+    const formData = methods.getValues();
+
+    if (formData.rolEnProyecto === "Director") {
+      generateAnexoA2(formData);
+      setTimeout(() => {
+        generateMemorandum(formData);
+      }, 1000); // Retraso de 1 segundo para la segunda descarga
+      setTimeout(() => {
+        generateAnexoA(formData);
+      }, 2000); // Retraso de 2 segundos para la tercera descarga
+    } else {
+      generateAnexoA(formData);
+      setTimeout(() => {
+        generateAnexoA2(formData);
+      }, 1000); // Retraso de 1 segundo para la segunda descarga
+    }
+  };
 
   // Función para limpiar el formulario
   const handleClearForm = () => {
     localStorage.removeItem("formData"); // Eliminar datos de localStorage
     setShowDownloadSection(false); // Ocultar la sección de descarga
-    window.location.reload(); // Recargar la página 
+    window.location.reload(); // Recargar la página
   };
 
   return (
     <FormProvider {...methods}>
-      <h1 style={{ textAlign: 'center' }}>Formulario de Participación en Eventos</h1>
+      <h1 style={{ textAlign: "center" }}>
+        Formulario de Participación en Eventos
+      </h1>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
         {/* Renderizado de componentes del formulario */}
         <ProjectDetails />
@@ -107,25 +138,34 @@ function EventParticipationForm() {
         </button>
 
         {/* Sección de descarga con animación */}
-        <div className={showDownloadSection ? "download-section show" : "download-section"}>
+        <div
+          className={
+            showDownloadSection ? "download-section show" : "download-section"
+          }
+        >
           <div className="download-item" onClick={handleGenerateDocx}>
-            <img
-              src="IconWord.png"
-              alt="Word Icon"
-              className="download-icon"
-            />
+            <img src="IconWord.png" alt="Word Icon" className="download-icon" />
             <span>Descargar Memorando</span>
           </div>
           <div className="download-item" onClick={handleGeneratePdf}>
-            <img
-              src="IconPdf.png"
-              alt="PDF Icon"
-              className="download-icon"
-            />
+            <img src="IconPdf.png" alt="PDF Icon" className="download-icon" />
             <span>Descargar Anexo A</span>
           </div>
+          <div className="download-item" onClick={handleGeneratePdf2}>
+            <img src="IconPdf.png" alt="PDF Icon" className="download-icon" />
+            <span>Descargar Anexo A2</span>
+          </div>
         </div>
-
+        {/* Botón para descargar todo */}
+        <div className="download-all-container">
+          <button
+            type="button"
+            onClick={handleDownloadAll}
+            className="download-all-button"
+          >
+            Descargar Todo
+          </button>
+        </div>
         {/* Botón para limpiar el formulario */}
         <button
           type="button"
