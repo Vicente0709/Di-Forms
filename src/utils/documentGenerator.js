@@ -6,6 +6,9 @@ import { text, image, barcodes } from "@pdfme/schemas";
 //basepdf and schemas AnexoA
 import { basePdfAnexoA } from "./basePdfAnexoA";
 import { schemasAnexoA } from "./schemasAnexoA";
+//basepdf and schemas AnexoA2
+import { basePdfAnexoA2 } from "./basePdfAnexoA2";
+import { schemasAnexoA2 } from "./schemasAnexoA2";
 
 //Constantes
 const today = new Date();
@@ -108,7 +111,10 @@ export function generateMemorandum(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: data.nombres.toUpperCase() +" " + data.apellidos.toUpperCase(),
+                text:
+                  data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase(),
                 size: 20,
                 bold: true,
                 font: "Times New Roman",
@@ -150,11 +156,16 @@ export async function generateAnexoA(data) {
       ? data.transporte[data.transporte.length - 1]?.horaLlegada
       : "";
   var ponentciaText = "";
-  if (data.tituloPonencia && data.tituloPonencia.trim() !== "" && data.tituloPonencia.trim() !== "No aplica") {
-    ponentciaText = "Para la participacion de la ponencia '" + data.tituloPonencia + "'";
-} else {
+  if (
+    data.tituloPonencia &&
+    data.tituloPonencia.trim() !== "" &&
+    data.tituloPonencia.trim() !== "No aplica"
+  ) {
+    ponentciaText =
+      "Para la participacion de la ponencia '" + data.tituloPonencia + "'";
+  } else {
     ponentciaText = "";
-}
+  }
   const plugins = { text, image, qrcode: barcodes.qrcode };
   const inputs = [
     {
@@ -252,6 +263,107 @@ export async function generateAnexoA(data) {
   saveAs(
     blob,
     "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
+  );
+}
+
+export async function generateAnexoA2(data) {
+  const template = {
+    schemas: schemasAnexoA2,
+    basePdf: basePdfAnexoA2,
+  };
+  
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const inputs = [
+    {
+      fechaPag1: formattedDate,
+      codigoProyecto: data.codigoProyecto,
+      tituloProyecto: data.tituloProyecto,
+      rolProyecto: data.rolEnProyecto,
+      departamento: data.departamento,
+      nombresParticipante:
+        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+      tituloEvento: data.tituloEvento,
+      fechasEvento:
+        "Desde el " +
+        data.fechaInicioEvento +
+        "hasta el " +
+        data.fechaFinEvento,
+      ciudad: data.ciudadEvento.toUpperCase(),
+      pais: data.paisEvento.toUpperCase(),
+      tipoEvento1: data.tipoEvento === "Conferencia o congreso" ? "X" : "",
+      tipoEvento2: data.tipoEvento === "Taller" ? "X" : "",
+      tipoEvento3: data.tipoEvento === "Otro evento académico" ? "X" : "",
+      tipoEvento3otro: data.otroEventoEspecificar,
+      participacion1:
+        data.participacionEvento === "Presentación de artículo indexado"
+          ? "X"
+          : "",
+      participacion2:
+        data.participacionEvento ===
+        "Presentación de póster, abstract, charla magistral u otros"
+          ? "X"
+          : "",
+      participacion3: data.participacionEvento === "Asistencia" ? "X" : "",
+      ponencia: data.tituloPonencia,
+      pasajesS: data.pasajesAereos === "SI" ? "X" : "",
+      viaticosS: data.viaticosSubsistencias === "SI" ? "X" : "",
+      inscripcionS: data.inscripcion === "SI" ? "X" : "",
+      pasajesN: data.pasajesAereos === "NO" ? "X" : "",
+      viaticosN: data.viaticosSubsistencias === "NO" ? "X" : "",
+      inscripciónN: data.inscripcion === "NO" ? "X" : "",
+      fechaPag2: formattedDate,
+      objetivoEvento: data.objetivoProyecto,
+      relevanciaEvento: data.relevanciaEvento,
+      valorInscripcion: data.inscripciones
+        .map((inscripcion) => inscripcion.valorInscripcion)
+        .join("\n"),
+      fechaPagoInscripcion: data.inscripciones.map(inscripcion => inscripcion.fechaMaximaPago).join('\n'),
+      transferencia: data.metodoPago === "Transferencia" ? "X" : "",
+      otroPago: data.metodoPago === "Otra" ? "X" : "",
+      hospedajeS: data.hospedaje === "SI" ? "X" : "",
+      hospedajeN: data.hospedaje === "NO" ? "X" : "",
+      movS: data.movilizacion === "SI" ? "X" : "",
+      movN: data.movilizacion === "NO" ? "X" : "", 
+      alimentacionS: data.alimentacion === "SI" ? "X" : "",
+      alimentacionN: data.alimentacion === "NO" ? "X" : "",
+      declaracionS: data.seleccionDeclaracion === "siCubre" ? "X" : "",
+      declaracionN: data.seleccionDeclaracion === "noCubre" ? "X" : "",
+      fechaPag3: formattedDate,
+      justificacionMas15: data.justificacionComision === "" ? "No Aplica" : data.justificacionComision,
+      nombreDirector: data.rolEnProyecto === "Director" ?  data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() : "",
+      codigoProyecto2: data.codigoProyecto,
+      activ1: "",
+      activ2: "",
+      activ3: "",
+      activ4: "",
+      activ5: "",
+      activ6: "",
+      activ7: "",
+      activ8: "",
+      activ9: "",
+      activ10: "",
+      activ11: "",
+      activ12: "",
+      activ13: "",
+      activ14: "",
+      activ15: "",
+      activ16: "",
+      activ17: "",
+      activ18: "",
+      fechaPag4: formattedDate,
+      calculo: "",
+    },
+  ];
+
+  const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    "Anexo 2a-Participación en EVENTO dentro de Proyecto " +
+      data.codigoProyecto +
+      ".pdf"
   );
 }
 function formatDate(dateString) {

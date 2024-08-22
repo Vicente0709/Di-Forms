@@ -120,3 +120,22 @@ button[type="button"]:hover {
   height: 45px;
   margin-right: 8px;
 }
+/* boton para descargar todo */
+.download-all-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.download-all-button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.download-all-button:hover {
+  background-color: #0056b3;
+}
