@@ -19,7 +19,7 @@ function Transportation() {
     <div className="form-container">
       <h3>• TRANSPORTE</h3>
       <p>
-        Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento.
+        Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento y el retorno puede ser maximo un dia después de la finalización del evento.
       </p>
 
       <table className="activity-schedule-table">
