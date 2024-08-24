@@ -32,40 +32,50 @@ function EventParticipationForm() {
   const { watch } = methods;
 
   // Efecto para guardar los datos en localStorage y calcular la diferencia de días cada vez que cambien
-  useEffect(() => {
-    const subscription = watch((data) => {
-      // Guardar datos en localStorage
+useEffect(() => {
+  const subscription = watch((data) => {
+      // Guardar datos del formulario en localStorage
       localStorage.setItem("formData", JSON.stringify(data));
 
       // Obtener la última fecha de llegada y la primera fecha de salida
       const ultimaFechaLlegada =
-        data.transporte.length > 0
-          ? data.transporte[data.transporte.length - 1]?.fechaLlegada
-          : "";
+          data.transporte.length > 0
+              ? data.transporte[data.transporte.length - 1]?.fechaLlegada
+              : "";
       const primeraFechaSalida = data.transporte[0]?.fechaSalida;
 
       if (ultimaFechaLlegada && primeraFechaSalida) {
-        // Convertir las fechas en objetos Date
-        const fechaInicio = new Date(primeraFechaSalida);
-        const fechaFinal = new Date(ultimaFechaLlegada);
+          // Convertir las fechas en objetos Date
+          const fechaInicio = new Date(primeraFechaSalida);
+          const fechaFinal = new Date(ultimaFechaLlegada);
 
-        // Calcular la diferencia en días
-        const diferenciaEnMilisegundos = fechaFinal - fechaInicio;
-        const diferenciaEnDias =
-          Math.ceil(diferenciaEnMilisegundos / (1000 * 60 * 60 * 24)) + 2;
+          // Calcular la diferencia en días
+          const diferenciaEnMilisegundos = fechaFinal - fechaInicio;
+          const diferenciaEnDias =
+              Math.ceil(diferenciaEnMilisegundos / (1000 * 60 * 60 * 24)) + 1;
 
-        // Actualizar el estado
-        setDiferenciaEnDias(diferenciaEnDias);
+          // Guardar la diferencia de días en una variable separada en el localStorage
+          localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: diferenciaEnDias }));
+
+          // Actualizar el estado
+          setDiferenciaEnDias(diferenciaEnDias);
+      } else {
+          // En caso de que no haya fechas válidas, guardamos la diferencia en días como 0
+          localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: 0 }));
+
+          // Actualizar el estado
+          setDiferenciaEnDias(0);
       }
-    });
+  });
 
-    return () => subscription.unsubscribe();
-  }, [watch]);
+  return () => subscription.unsubscribe();
+}, [watch, setDiferenciaEnDias]);
 
   // Función que se ejecuta al enviar el formulario
   const onSubmit = (data) => {
-    console.log(data);
-    setShowDownloadSection(true); // Mostrar la sección de descarga
+    setShowDownloadSection(true);
+    const formData = methods.getValues();
+    console.log(formData);
   };
 
   // Función para generar un documento DOCX
@@ -77,36 +87,46 @@ function EventParticipationForm() {
     } else {
       alert("Solo el Director puede generar el memorando.");
     }
+    setShowDownloadSection(false); // Ocultar la sección de descarga
   };
 
   // Función para generar un documento PDF
   const handleGeneratePdf = () => {
     const formData = methods.getValues();
     generateAnexoA(formData);
+    setShowDownloadSection(false); // Mostrar ocultar seccion de descarga
   };
   // Función para generar un documento PDF
   const handleGeneratePdf2 = () => {
     const formData = methods.getValues();
+
     generateAnexoA2(formData);
+    setShowDownloadSection(false); // Mostrar ocultar seccion de descarga
   };
   // Función para descargar todos los documentos
   const handleDownloadAll = () => {
     const formData = methods.getValues();
 
     if (formData.rolEnProyecto === "Director") {
-      generateAnexoA2(formData);
+      
       setTimeout(() => {
         generateMemorandum(formData);
       }, 1000); // Retraso de 1 segundo para la segunda descarga
+      
       setTimeout(() => {
         generateAnexoA(formData);
       }, 2000); // Retraso de 2 segundos para la tercera descarga
+      
+      generateAnexoA2(formData);
+
     } else {
       generateAnexoA(formData);
+
       setTimeout(() => {
         generateAnexoA2(formData);
       }, 1000); // Retraso de 1 segundo para la segunda descarga
     }
+    setShowDownloadSection(false); // Mostrar ocultar seccion de descarga
   };
 
   // Función para limpiar el formulario
@@ -119,7 +139,7 @@ function EventParticipationForm() {
   return (
     <FormProvider {...methods}>
       <h1 style={{ textAlign: "center" }}>
-        Formulario de Participación en Eventos
+        Formulario para participación en eventos dentro de proyectos
       </h1>
       <form onSubmit={methods.handleSubmit(onSubmit)}>
         {/* Renderizado de componentes del formulario */}
@@ -155,16 +175,16 @@ function EventParticipationForm() {
             <img src="IconPdf.png" alt="PDF Icon" className="download-icon" />
             <span>Descargar Anexo A2</span>
           </div>
-        </div>
-        {/* Botón para descargar todo */}
-        <div className="download-all-container">
-          <button
-            type="button"
-            onClick={handleDownloadAll}
-            className="download-all-button"
-          >
-            Descargar Todo
-          </button>
+          {/* Botón para descargar todo */}
+          <div className="download-all-container">
+            <button
+              type="button"
+              onClick={handleDownloadAll}
+              className="download-all-button"
+            >
+              Descargar Todo
+            </button>
+          </div>
         </div>
         {/* Botón para limpiar el formulario */}
         <button

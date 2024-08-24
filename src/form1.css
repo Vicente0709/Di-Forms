@@ -139,3 +139,7 @@ button[type="button"]:hover {
 .download-all-button:hover {
   background-color: #0056b3;
 }
+/* tabla de pago de inscripxiones */
+.payment-table th, .payment-table td {
+  padding: 10px; /* Controla el espacio interno de las celdas */
+}

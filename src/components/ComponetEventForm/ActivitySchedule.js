@@ -109,14 +109,13 @@ function ActivitySchedule() {
         <p className="instruction-text">
           Completar esta sección solo en caso de que la participación al evento requiera más de quince días de comisión de servicio.
           <br />
-          Caso contrario indicar No aplica.
         </p>
         
         <textarea
           id="justificacionComision"
           {...register("justificacionComision", { required: "Este campo es requerido" })}
           className="form-input"
-          placeholder="Escriba aquí la justificación o indique 'No aplica'."
+          placeholder="Escriba aquí la justificación."
         />
         {errors.justificacionComision && (
           <span className="error-text">{errors.justificacionComision.message}</span>

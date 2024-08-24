@@ -81,7 +81,7 @@ export function generateMemorandum(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, AUTORIZO EL GASTO y solicito a usted se realicen las gestiones correspondientes para participar en el Evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. Para lo cual, adjunto los correspondientes documentos.`,
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. Para lo cual, adjunto los correspondientes documentos.`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -167,96 +167,77 @@ export async function generateAnexoA(data) {
     ponentciaText = "";
   }
   const plugins = { text, image, qrcode: barcodes.qrcode };
+  const transporteInfo = {};
+  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+  for (let i = 0; i < 8; i++) {
+    transporteInfo[`transporteTipo${i + 1}`] = data.transporte[i]?.tipoTransporte || "";
+    transporteInfo[`transporteNombre${i + 1}`] = data.transporte[i]?.nombreTransporte || "";
+    transporteInfo[`transporteRuta${i + 1}`] = data.transporte[i]?.ruta || "";
+    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(data.transporte[i]?.fechaSalida) || "";
+    transporteInfo[`transporteFechaSH${i + 1}`] = data.transporte[i]?.horaSalida || "";
+    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(data.transporte[i]?.fechaLlegada) || "";
+    transporteInfo[`transporteFechaLH${i + 1}`] = data.transporte[i]?.horaLlegada || "";
+  }
   const inputs = [
     {
-      numSolicitud: "",
-      fechaSolicitud: formattedDate,
-      nombresCompletos:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      lugar: data.ciudadEvento + ", " + data.paisEvento,
-      puesto: data.cargo,
-      unidadPerteneciente: data.departamento,
+      "fechaSolicitud":     formattedDate,
+      "viaticos":           data.viaticosSubsistencias === "SI" ? "X" : "",
+      "movilizacion":       data.movilizacion === "SI" ? "X" : "",
+      "subsistencias":      data.viaticosSubsistencias === "SI" ? "X" : "",
+      "alimentacion":       data.alimentacion === "SI" ? "X" : "",
+      "nombresCompletos":   data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+      "lugar":              data.ciudadEvento + ", " + data.paisEvento,
+      "puesto":             data.cargo,
+      "unidadPerteneciente":data.departamento,
 
-      fechaSalida: formatDate(data.transporte[0]?.fechaSalida),
-      fechaLlegada: formatDate(ultimaFechaLlegada),
-      horaSalida: data.transporte[0]?.horaSalida,
-      horaLlegada: ultimaHoraLlegada,
-      servidores:
-        data.apellidos.toUpperCase() +
-        " " +
-        data.nombres.toUpperCase() +
-        data.servidores.toUpperCase(),
-      actividades:
-        "Dentro de las actividades del proyecto  " +
-        data.codigoProyecto +
-        " titulado  '" +
-        data.tituloProyecto +
-        "'  se llevará a cabo la participación en el evento  '" +
-        data.tituloEvento +
-        "', que tendrá lugar del  " +
-        data.fechaInicioEvento +
-        "  al  " +
-        data.fechaFinEvento +
-        " en la ciudad de  " +
-        data.ciudadEvento +
-        "," +
-        data.paisEvento +
-        ". " +
-        ponentciaText,
+      "fechaSalida":        formatDate(data.transporte[0]?.fechaSalida),
+      "horaSalida":         data.transporte[0]?.horaSalida,
 
-      transporteTipo1: data.transporte[0]?.tipoTransporte || "",
-      transporteRuta1: data.transporte[0]?.ruta || "",
-      transporteNombre1: data.transporte[0]?.nombreTransporte || "",
-      transporteFechaS1: formatDate(data.transporte[0]?.fechaSalida) || "",
-      transporteFechaL1: formatDate(data.transporte[0]?.fechaLlegada) || "",
-      transporteFechaSH1: data.transporte[0]?.horaSalida || "",
-      transporteFechaLH1: data.transporte[0]?.horaLlegada || "",
+      "fechaLlegada":       formatDate(ultimaFechaLlegada),
+      "horaLlegada":        ultimaHoraLlegada,
 
-      transporteTipo2: data.transporte[1]?.tipoTransporte || "",
-      transporteRuta2: data.transporte[1]?.ruta || "",
-      transporteNombre2: data.transporte[1]?.nombreTransporte || "",
-      transporteFechaS2: formatDate(data.transporte[1]?.fechaSalida) || "",
-      transporteFechaL2: formatDate(data.transporte[1]?.fechaLlegada) || "",
-      transporteFechaLH2: data.transporte[1]?.horaLlegada || "",
-      transporteFechaSH2: data.transporte[1]?.horaSalida || "",
+      "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() + data.servidores.toUpperCase(),
 
-      transporteTipo3: data.transporte[2]?.tipoTransporte || "",
-      transporteRuta3: data.transporte[2]?.ruta || "",
-      transporteNombre3: data.transporte[2]?.nombreTransporte || "",
-      transporteFechaS3: formatDate(data.transporte[2]?.fechaSalida) || "",
-      transporteFechaL3: formatDate(data.transporte[2]?.fechaLlegada) || "",
-      transporteFechaSH3: data.transporte[2]?.horaSalida || "",
-      transporteFechaLH3: data.transporte[2]?.horaLlegada || "",
+      "actividades": "Dentro de las actividades del proyecto  " +
+      data.codigoProyecto +
+      " titulado  '" +
+      data.tituloProyecto +
+      "'  se llevará a cabo la participación en el evento  '" +
+      data.tituloEvento +
+      "', que tendrá lugar del  " +
+      data.fechaInicioEvento +
+      "  al  " +
+      data.fechaFinEvento +
+      " en la ciudad de  " +
+      data.ciudadEvento +
+      "," +
+      data.paisEvento +
+      ". " +
+      ponentciaText,
 
-      transporteTipo4: data.transporte[3]?.tipoTransporte || "",
-      transporteRuta4: data.transporte[3]?.ruta || "",
-      transporteNombre4: data.transporte[3]?.nombreTransporte || "",
-      transporteFechaS4: formatDate(data.transporte[3]?.fechaSalida) || "",
-      transporteFechaL4: formatDate(data.transporte[3]?.fechaLlegada) || "",
-      transporteFechaLH4: data.transporte[3]?.horaLlegada || "",
-      transporteFechaSH4: data.transporte[3]?.horaSalida || "",
+      ...transporteInfo,
 
-      banco: data.nombreBanco,
-      viaticos: data.viaticosSubsistencias === "SI" ? "X" : "",
-      movilizacion: data.movilizacion === "SI" ? "X" : "",
-      subsistencias: data.viaticosSubsistencias === "SI" ? "X" : "",
-      alimentacion: data.alimentacion === "SI" ? "X" : "",
-      bancoTipoCuenta: data.tipoCuenta,
-      numeroCuenta: data.numeroCuenta,
-      nombresCompletos2:
-        data.nombres.toUpperCase() +
-        " " +
-        data.apellidos.toUpperCase() +
-        "\n" +
-        data.cargo.toUpperCase() +
-        "\n" +
-        data.cedula,
-      nombresCompletosJefeInmediato:
-        data.nombreJefeInmediato.toUpperCase() +
-        "\n" +
-        data.cargoJefeInmediato.toUpperCase(),
-    },
+      "banco": data.nombreBanco,
+      "bancoTipoCuenta": data.tipoCuenta,
+      "numeroCuenta": data.numeroCuenta,
+
+      "nombresCompletos2": data.nombres.toUpperCase() +
+      " " +
+      data.apellidos.toUpperCase() +
+      "\n" +
+      data.cargo.toUpperCase() +
+      "\n" +
+      data.cedula,
+
+      "nombresCompletosJefeInmediato": data.nombreJefeInmediato.toUpperCase() +
+      "\n" +
+      data.cargoJefeInmediato.toUpperCase()
+    }
   ];
+  
+  
+  
+  
   const pdf = await generate({ template, plugins, inputs });
 
   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
@@ -265,95 +246,101 @@ export async function generateAnexoA(data) {
     "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
   );
 }
-
+// Nueva función para generar el Anexo A2 en PDF
 export async function generateAnexoA2(data) {
   const template = {
     schemas: schemasAnexoA2,
     basePdf: basePdfAnexoA2,
   };
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const diferencia = JSON.parse(localStorage.getItem("diferenciaDias"))?.diferencia || 0;
+  const actividades = {};
+
+  // Genera dinámicamente las propiedades para activN, activFecha, y activDescripcion
+  for (let i = 0; i < 22; i++) {
+    actividades[`activN${i + 1}`] = (data.actividadesInmutables[i] && diferencia > 15) ? (i + 1).toString() : "";
+    actividades[`activFecha${i + 1}`] = diferencia < 16 ? "" : data.actividadesInmutables[i]?.fecha || "";
+    actividades[`activDescripcion${i + 1}`] = diferencia < 16 ? "" : data.actividadesInmutables[i]?.descripcion || "";
+  }
+  let valorInscripcionStr = "";
+  let fechaPagoInscripcionStr = "";
+
+  // Iteramos sobre cada inscripción en el array 'inscripciones'
+  data.inscripciones.forEach((inscripcion) => {
+    // Concatenamos el valor de inscripción con un '$' y un salto de línea
+    if (inscripcion.valorInscripcion) {
+      valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
+    }
+
+    // Construimos la cadena de la fecha de pago dependiendo de cuál campo tiene valor
+    if (inscripcion.antesDeFecha) {
+      fechaPagoInscripcionStr += `antes de ${formatDate(inscripcion.antesDeFecha)}\n`;
+    } else if (inscripcion.despuesDeFecha) {
+      fechaPagoInscripcionStr += `después de ${formatDate(inscripcion.despuesDeFecha)}\n`;
+    } else if (inscripcion.limiteFecha) {
+      fechaPagoInscripcionStr += `${formatDate(inscripcion.limiteFecha)}\n`;
+    }
+  });
   
 
-  const plugins = { text, image, qrcode: barcodes.qrcode };
   const inputs = [
     {
-      fechaPag1: formattedDate,
-      codigoProyecto: data.codigoProyecto,
-      tituloProyecto: data.tituloProyecto,
-      rolProyecto: data.rolEnProyecto,
-      departamento: data.departamento,
-      nombresParticipante:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      tituloEvento: data.tituloEvento,
-      fechasEvento:
-        "Desde el " +
-        data.fechaInicioEvento +
-        "hasta el " +
-        data.fechaFinEvento,
-      ciudad: data.ciudadEvento.toUpperCase(),
-      pais: data.paisEvento.toUpperCase(),
-      tipoEvento1: data.tipoEvento === "Conferencia o congreso" ? "X" : "",
-      tipoEvento2: data.tipoEvento === "Taller" ? "X" : "",
-      tipoEvento3: data.tipoEvento === "Otro evento académico" ? "X" : "",
-      tipoEvento3otro: data.otroEventoEspecificar,
-      participacion1:
-        data.participacionEvento === "Presentación de artículo indexado"
-          ? "X"
-          : "",
-      participacion2:
-        data.participacionEvento ===
-        "Presentación de póster, abstract, charla magistral u otros"
-          ? "X"
-          : "",
-      participacion3: data.participacionEvento === "Asistencia" ? "X" : "",
-      ponencia: data.tituloPonencia,
-      pasajesS: data.pasajesAereos === "SI" ? "X" : "",
-      viaticosS: data.viaticosSubsistencias === "SI" ? "X" : "",
-      inscripcionS: data.inscripcion === "SI" ? "X" : "",
-      pasajesN: data.pasajesAereos === "NO" ? "X" : "",
-      viaticosN: data.viaticosSubsistencias === "NO" ? "X" : "",
-      inscripciónN: data.inscripcion === "NO" ? "X" : "",
-      fechaPag2: formattedDate,
-      objetivoEvento: data.objetivoProyecto,
-      relevanciaEvento: data.relevanciaEvento,
-      valorInscripcion: data.inscripciones
-        .map((inscripcion) => inscripcion.valorInscripcion)
-        .join("\n"),
-      fechaPagoInscripcion: data.inscripciones.map(inscripcion => inscripcion.fechaMaximaPago).join('\n'),
-      transferencia: data.metodoPago === "Transferencia" ? "X" : "",
-      otroPago: data.metodoPago === "Otra" ? "X" : "",
-      hospedajeS: data.hospedaje === "SI" ? "X" : "",
-      hospedajeN: data.hospedaje === "NO" ? "X" : "",
-      movS: data.movilizacion === "SI" ? "X" : "",
-      movN: data.movilizacion === "NO" ? "X" : "", 
-      alimentacionS: data.alimentacion === "SI" ? "X" : "",
-      alimentacionN: data.alimentacion === "NO" ? "X" : "",
-      declaracionS: data.seleccionDeclaracion === "siCubre" ? "X" : "",
-      declaracionN: data.seleccionDeclaracion === "noCubre" ? "X" : "",
-      fechaPag3: formattedDate,
-      justificacionMas15: data.justificacionComision === "" ? "No Aplica" : data.justificacionComision,
-      nombreDirector: data.rolEnProyecto === "Director" ?  data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() : "",
-      codigoProyecto2: data.codigoProyecto,
-      activ1: "",
-      activ2: "",
-      activ3: "",
-      activ4: "",
-      activ5: "",
-      activ6: "",
-      activ7: "",
-      activ8: "",
-      activ9: "",
-      activ10: "",
-      activ11: "",
-      activ12: "",
-      activ13: "",
-      activ14: "",
-      activ15: "",
-      activ16: "",
-      activ17: "",
-      activ18: "",
-      fechaPag4: formattedDate,
-      calculo: "",
-    },
+      "fechaPag1": formattedDate,
+      "codigoProyecto": data.codigoProyecto,
+      "tituloProyecto": data.tituloProyecto,
+      "nombresParticipante":  data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+      "rolProyecto": data.rolEnProyecto,
+      "departamento": data.departamento,
+      "tituloEvento": data.tituloEvento,
+      "ciudad": data.ciudadEvento.toUpperCase(),
+      "pais": data.paisEvento.toUpperCase(),
+      "fechasEvento":  "Desde el " + data.fechaInicioEvento + " hasta el " + data.fechaFinEvento,
+      "tipoEvento1": data.tipoEvento === "Conferencia o congreso" ? "X" : "",
+      "tipoEvento2": data.tipoEvento === "Taller" ? "X" : "",
+      "tipoEvento3": data.tipoEvento === "Otro evento académico" ? "X" : "",
+      "tipoEvento3otro": data.otroEventoEspecificar,
+      "participacion1":  data.participacionEvento === "Presentación de artículo indexado"? "X": "",
+      "participacion2": data.participacionEvento === "Presentación de póster, abstract, charla magistral u otros" ? "X": "",
+      "participacion3": data.participacionEvento === "Asistencia" ? "X" : "",
+      "ponencia": data.tituloPonencia,
+      "pasajesS": data.pasajesAereos === "SI" ? "X" : "",
+      "viaticosS": data.viaticosSubsistencias === "SI" ? "X" : "",
+      "inscripcionS": data.inscripcion === "SI" ? "X" : "",
+      "pasajesN": data.pasajesAereos === "NO" ? "X" : "",
+      "viaticosN": data.viaticosSubsistencias === "NO" ? "X" : "",
+      "inscripciónN": data.inscripcion === "NO" ? "X" : "",
+
+      "fechaPag2": formattedDate,
+      "objetivoEvento": data.objetivoProyecto,
+      "relevanciaEvento": data.relevanciaEvento,
+
+      "valorInscripcion": valorInscripcionStr.trim(), // Removemos el último salto de línea
+      "fechaPagoInscripcion": fechaPagoInscripcionStr.trim(), // Removemos el último salto de línea
+
+
+      "transferencia": data.metodoPago === "Transferencia" ? "X" : "",
+      "otroPago": data.metodoPago === "Otra" ? "X" : "",
+      "hospedajeS": data.hospedaje === "SI" ? "X" : "",
+      "hospedajeN": data.hospedaje === "NO" ? "X" : "",
+      "movS": data.movilizacion === "SI" ? "X" : "",
+      "movN": data.movilizacion === "NO" ? "X" : "",
+      "alimentacionS": data.alimentacion === "SI" ? "X" : "",
+      "alimentacionN": data.alimentacion === "NO" ? "X" : "",
+      "declaraciónN": data.seleccionDeclaracion === "noCubre" ? "X" : "",
+      "declaracioneS": data.seleccionDeclaracion === "siCubre" ? "X" : "",
+
+      "fechaPag3": formattedDate,
+
+      ...actividades,
+
+      "justificacionMas15":diferencia < 16 ? "No aplica" :data.justificacionComision,
+      "fechaSolicitud": formattedDate,
+      "nombreDirector":  data.nombres.toUpperCase()+ " "+data.apellidos.toUpperCase(),
+      "codigoProyecto2": data.codigoProyecto,
+
+      "fechaPag4": formattedDate,
+      "calculo": "Calculo dias de comision entre las fechas de salida y de regreso: " + diferencia
+    }
   ];
 
   const pdf = await generate({ template, plugins, inputs });
@@ -366,6 +353,7 @@ export async function generateAnexoA2(data) {
       ".pdf"
   );
 }
+//formatear la fecha en formato dd/mm/yyyy
 function formatDate(dateString) {
   if (!dateString) return "";
   const [year, month, day] = dateString.split("-");
