@@ -28,4 +28,5 @@ yarn-error.log*
 # Temporary files macOS and Windows
 .DS_Store
 Thumbs.db
-
+# IntelliJ IDEA files 
+.idea/
