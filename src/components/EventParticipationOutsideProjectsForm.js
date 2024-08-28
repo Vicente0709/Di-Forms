@@ -4,6 +4,11 @@ import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
 import PersonalDetails from "./ComponetOutsideProjects/PersonalDetails.js";
+import EventDetails from "./ComponetOutsideProjects/EventDetails.js";
+import PaymentDetail from "./ComponetOutsideProjects/PaymentDetail.js"
+import ExpensesDeclaration from "./ComponetOutsideProjects/ExpensesDeclaration.js";
+import BankAccount from "./ComponetOutsideProjects/BankAccount.js";
+import Transportation from "./ComponetOutsideProjects/Transportation.js";
 
 // Importación de las funciones para generar documentos
 function EventParticipationOutsideProjectsForm() {
@@ -80,6 +85,12 @@ function EventParticipationOutsideProjectsForm() {
         <Form onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}>
           {/* Formulario con diferentes secciones */}
           <PersonalDetails /> 
+          <EventDetails />
+          <PaymentDetail />
+          <ExpensesDeclaration />
+          <BankAccount />
+          <Transportation />
+
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
