@@ -36,3 +36,31 @@
     transform: rotate(360deg);
   }
 }
+
+
+/* Inicio footer */
+/* Asegúrate de que el contenedor principal ocupe el 100% de la altura del viewport */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Configura el contenedor principal como flexbox */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* El contenido principal se expande para llenar el espacio disponible */
+.content {
+  flex: 1;
+}
+
+/* Estilo del footer */
+footer {
+  background-color: #282c34;
+  color: white;
+}
+/* Fin footer */
