@@ -20,72 +20,20 @@ const validarCedulaEcuatoriana = (cedula) => {
   const digitoVerificador = (10 - (suma % 10)) % 10;
   return digitoVerificador === parseInt(cedula[9], 10);
 };
-// Verificar el valor de la cédula en tiempo real
 
-function ProjectDetails() {
+function PersonalDetails() {
   const {
     register,
     watch,
     formState: { errors },
   } = useFormContext();
-  // observando el valor de la cedula
+
   const cedulaValue = watch("cedula");
-  // Nueva expresión regular para validar el formato del código del proyecto
-  const codigoProyectoPattern = /^[A-Za-z]+(-[A-Za-z0-9]+)+$/;
-
-  // Observando el valor del código del proyecto
-  const codigoProyectoValue = watch("codigoProyecto");
-
-  // Validación en tiempo real
-  const codigoProyectoError =
-    codigoProyectoValue && !codigoProyectoPattern.test(codigoProyectoValue)
-      ? "Error en el formato del código del proyecto: "
-      : null;
 
   return (
     <div className="form-container">
-      <h3>• DATOS DEL PROYECTO Y DEL INVESTIGADOR PARTICIPANTE</h3>
-      {/* código del proyecto */}
-      <div className="form-group">
-        <label htmlFor="codigoProyecto" className="form-label">
-          Código del proyecto:
-        </label>
-        <input
-          type="text"
-          id="codigoProyecto"
-          {...register("codigoProyecto", {
-            required: "El código del proyecto es requerido",
-            validate: (value) =>
-              codigoProyectoPattern.test(value) ||
-              "El código del proyecto debe esta conformado por una combinación de letras y números separados por guiones",
-          })}
-          className="form-input"
-        />
-        {codigoProyectoError && (
-          <span className="error-text">{codigoProyectoError}</span>
-        )}
-        {errors.codigoProyecto && (
-          <span className="error-text">{errors.codigoProyecto.message}</span>
-        )}
-      </div>
-      {/* titulo del proeycto */}
-      <div className="form-group">
-        <label htmlFor="tituloProyecto" className="form-label">
-          Título de proyecto:
-        </label>
-        <input
-          type="text"
-          id="tituloProyecto"
-          {...register("tituloProyecto", {
-            required: "El título del proyecto es requerido",
-          })}
-          className="form-input"
-        />
-        {errors.tituloProyecto && (
-          <span className="error-text">{errors.tituloProyecto.message}</span>
-        )}
-      </div>
-      {/* Cédula */}
+      <h2 className="form-title">• Datos personales</h2>
+      
       <div className="form-group">
         <label htmlFor="cedula" className="form-label">
           Cédula de ciudadanía:
@@ -113,7 +61,7 @@ function ProjectDetails() {
             <span className="error-text">La cédula no es válida</span>
           )}
       </div>
-      {/* Nombres del participante */}
+
       <div className="form-group">
         <label htmlFor="nombres" className="form-label">
           Nombres del participante:
@@ -129,7 +77,7 @@ function ProjectDetails() {
           <span className="error-text">{errors.nombres.message}</span>
         )}
       </div>
-      {/* Apellidos del participante */}
+
       <div className="form-group">
         <label htmlFor="apellidos" className="form-label">
           Apellidos del participante:
@@ -148,17 +96,15 @@ function ProjectDetails() {
         )}
       </div>
 
-      {/* Cargo */}
       <div className="form-group">
         <label htmlFor="cargo" className="form-label">
           Cargo:
         </label>
-        <label htmlFor="cargo">Tal como consta en su acción de personal.</label>
         <label htmlFor="cargo">
-          Ejemplos: Profesor Agregado a Tiempo Completo; Profesor Auxiliar a
-          Tiempo Completo; Profesor Principal a Tiempo Completo.
+          Tal como consta en su acción de personal. Ejemplos: Profesor
+          Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
+          Profesor Principal a Tiempo Completo.
         </label>
-
         <input
           type="text"
           id="cargo"
@@ -170,7 +116,7 @@ function ProjectDetails() {
           <span className="error-text">{errors.cargo.message}</span>
         )}
       </div>
-      {/* telefono */}
+
       <div className="form-group">
         <label htmlFor="rolEnProyecto" className="form-label">
           Rol en el proyecto:
@@ -191,7 +137,7 @@ function ProjectDetails() {
           <span className="error-text">{errors.rolEnProyecto.message}</span>
         )}
       </div>
-      {/* departamento */}
+
       <div className="form-group">
         <label htmlFor="departamento" className="form-label">
           Departamento / Instituto:
@@ -203,7 +149,7 @@ function ProjectDetails() {
           })}
           className="form-select"
         >
-          <option value="">Seleccione un rol</option>
+          <option value="">Seleccione un departamento</option>
           <option value="DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL">
             DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL
           </option>
@@ -272,7 +218,7 @@ function ProjectDetails() {
           <span className="error-text">{errors.departamento.message}</span>
         )}
       </div>
-      {/* nombre del jefe inmediato */}
+
       <div className="form-group">
         <label htmlFor="nombreJefeInmediato" className="form-label">
           Nombres y apellidos del Jefe inmediato:
@@ -291,17 +237,14 @@ function ProjectDetails() {
           </span>
         )}
       </div>
-      {/* Cargo del jefe inmediato */}
+
       <div className="form-group">
         <label htmlFor="cargoJefeInmediato" className="form-label">
           Cargo del Jefe inmediato:
         </label>
         <label htmlFor="cargoJefeInmediato">
-          Favor colocar el cargo del Jefe inmediato, puede usar las siglas para
-          referirse al departamento.
-        </label>
-        <label htmlFor="cargoJefeInmediato">
-          Por ejemplo: Jefe del DICC ; Jefe del DICC, subrogante.
+          Favor colocar el cargo del Jefe inmediato, puede usar las siglas
+          para referirse al departamento.
         </label>
         <input
           type="text"
@@ -310,7 +253,7 @@ function ProjectDetails() {
             required: "El cargo del jefe inmediato es requerido",
             minLength: {
               value: 10,
-              message: "El cargo que escribio es demaciado corto",
+              message: "El cargo que escribio es demasiado corto",
             },
           })}
           className="form-input"
@@ -325,4 +268,4 @@ function ProjectDetails() {
   );
 }
 
-export default ProjectDetails;
+export default PersonalDetails;

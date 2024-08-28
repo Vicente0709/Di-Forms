@@ -15,15 +15,6 @@ function EventDetails() {
   const [showOtherEvent, setShowOtherEvent] = useState(false);
   const fechaInicioEvento = watch('fechaInicioEvento'); 
 
-  // Validación para asegurar que la fecha de inicio no sea menor a la fecha actual
-  const validateFechaInicio = (value) => {
-    const today = new Date().toISOString().split("T")[0];
-    return (
-      value >= today ||
-      "La fecha de inicio no puede ser anterior a la fecha actual."
-    );
-  };
-
  // Validación personalizada para la fecha de finalización
  const validateFechaFin = (fechaFin) => {
   if (!fechaInicioEvento) {

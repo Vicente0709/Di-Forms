@@ -1,25 +1,41 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Home from './pages/Home';
-import About from './pages/About';
-import FormParticipationPage from './pages/FormParticipationPage';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+
+// Importación de componentes comunes
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+
+// Importación de las páginas de la aplicación
+import Home from "./pages/Home";
+import About from "./pages/About";
+import EventParticipationWithinProjects from "./pages/EventParticipationWithinProjects";
+import EventParticipationOutsideProjects from "./pages/EventParticipationOutsideProjects";
+import TechnicalTripWithinProjects from "./pages/TechnicalTripWithinProjects";
+
+// Importación del archivo CSS para los estilos de la aplicación
+import "./App.css";
 
 function App() {
   return (
-    <Router>
-      <div className="App">
+    <Router>  {/* El componente Router de React Router que envuelve toda la aplicación, permitiendo la navegación entre diferentes rutas */}
+      <div className="wrapper">
+        {/* Componente de encabezado que se muestra en todas las páginas */}
         <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/form1" element={<FormParticipationPage />} />
-        </Routes>
+        <div className="content">
+            {/* Definición de rutas de la aplicación */}
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/EventParticipationWithinProjects" element={<EventParticipationWithinProjects />} />
+            <Route path="/EventParticipationOutsideProjects" element={<EventParticipationOutsideProjects />} />
+            <Route path="/TechnicalTripWithinProjects" element={<TechnicalTripWithinProjects />} />
+          </Routes>
+        </div>
+        {/* Componente de pie de página que se muestra en todas las páginas */}
         <Footer />
       </div>
     </Router>
   );
 }
 
-export default App;
+export default App; // Exportación del componente App como el componente principal de la aplicación

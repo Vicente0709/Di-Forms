@@ -1,9 +1,16 @@
 import React from 'react';
+import { Container, Row, Col } from 'react-bootstrap';
 
 function Footer() {
   return (
-    <footer style={{ backgroundColor: '#282c34', padding: '10px', color: 'white', textAlign: 'center', marginTop: '20px' }}>
-      <p>&copy; 2024 Di-Forms. Todos los derechos reservados.</p>
+    <footer>
+      <Container>
+        <Row>
+          <Col className="text-center py-3">
+            <p>&copy; 2024 Di-Forms. Todos los derechos reservados.</p>
+          </Col>
+        </Row>
+      </Container>
     </footer>
   );
 }
