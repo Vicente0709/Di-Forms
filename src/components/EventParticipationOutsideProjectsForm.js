@@ -9,6 +9,8 @@ import PaymentDetail from "./ComponetOutsideProjects/PaymentDetail.js"
 import ExpensesDeclaration from "./ComponetOutsideProjects/ExpensesDeclaration.js";
 import BankAccount from "./ComponetOutsideProjects/BankAccount.js";
 import Transportation from "./ComponetOutsideProjects/Transportation.js";
+import InstitutionalServices from "./ComponetOutsideProjects/InstitutionalServices.js";
+import ExteriorDetail from "./ComponetOutsideProjects/ExteriorDetail.js";
 
 // Importación de las funciones para generar documentos
 function EventParticipationOutsideProjectsForm() {
@@ -86,10 +88,12 @@ function EventParticipationOutsideProjectsForm() {
           {/* Formulario con diferentes secciones */}
           <PersonalDetails /> 
           <EventDetails />
+          <Transportation />
           <PaymentDetail />
           <ExpensesDeclaration />
           <BankAccount />
-          <Transportation />
+          <InstitutionalServices/>
+          <ExteriorDetail />
 
 
           {/* Botón para enviar el formulario */}

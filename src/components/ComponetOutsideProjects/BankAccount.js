@@ -5,8 +5,8 @@ function BankAccount() {
   const { register, watch, setValue, clearErrors, formState: { errors } } = useFormContext();
   
   // Monitorea el campo Transferencia directamente aquí
-  const seleccionTransferencia = watch("metodoPago");
-  const habilitarCampos = seleccionTransferencia === "Transferencia";
+  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
+  const habilitarCampos = seleccionViaticosSubsistencias === "SI";
 
   // UseEffect para manejar el caso cuando la selección es "NO"
   useEffect(() => {

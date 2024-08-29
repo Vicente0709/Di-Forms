@@ -25,13 +25,17 @@ function EventDetails() {
 };
 
 
+
  
   // Control del campo "Título de la Ponencia"
   const isAsistencia = participacionEvento === "Asistencia";
   useEffect(() => {
 
     setshowInputArticulo (seleccionArticulo === "SI");
-       
+    if (seleccionArticulo==="NO"){
+        setValue ("detalleArticuloSI","");
+    }
+   
     if (isAsistencia) {
       setValue("tituloPonencia", "No aplica");
     } else if (participacionEvento) {
@@ -41,6 +45,7 @@ function EventDetails() {
 
   
   return (
+    
     <div className="form-container">
       <h3>• DETALLES DEL EVENTO</h3>
 
@@ -175,6 +180,7 @@ function EventDetails() {
         <input
           type="text"
           id="tipoPonencia"
+          placeholder="Plenaria, poster, otros"
           {...register("tipoPonencia", {
             required: !isAsistencia && "El tipo de ponencia es requerido",
           })}
@@ -185,11 +191,11 @@ function EventDetails() {
           <span className="error-text">{errors.tipoPonencia.message}</span>
         )}
       </div>
-
+       
 
       <div className="form-group">
             
-          <label>¿El Artículo será publicado?</label>
+          <label htmlFor="articuloPublicado" className="form-label">¿El Artículo será publicado?</label>
 
           <p>
         Por favor, ingrese el nombre de la revista y base de datos indexadas, 
