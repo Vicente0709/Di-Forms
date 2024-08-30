@@ -4,8 +4,22 @@ import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
 import PersonalDetails from "./ComponetOutsideProjects/PersonalDetails.js";
+import EventDetails from "./ComponetOutsideProjects/EventDetails.js";
+import PaymentDetail from "./ComponetOutsideProjects/PaymentDetail.js"
+import ExpensesDeclaration from "./ComponetOutsideProjects/ExpensesDeclaration.js";
+import BankAccount from "./ComponetOutsideProjects/BankAccount.js";
+import Transportation from "./ComponetOutsideProjects/Transportation.js";
+import InstitutionalServices from "./ComponetOutsideProjects/InstitutionalServices.js";
+import ExteriorDetail from "./ComponetOutsideProjects/ExteriorDetail.js";
 
 // Importación de las funciones para generar documentos
+
+import{
+  generateMemoOutsideProject1,
+  generateMemoOutsideProject2,
+  generateAnexoAOutsideProject,
+} from"../utils/documentGenerator.js"
+
 function EventParticipationOutsideProjectsForm() {
   // Estado para controlar la visibilidad de la sección de descargas
   const [showDownloadSection, setShowDownloadSection] = useState(false);
@@ -36,16 +50,24 @@ function EventParticipationOutsideProjectsForm() {
   };
 
   // Función para generar un documento DOCX
-  const handleGenerateDocx = () => {
-    // const formEventOutsideProject = methods.getValues();
-
+  const handleGenerateMemo1 = () => {
+    const formEventOutsideProject = methods.getValues();
+    generateMemoOutsideProject1(formEventOutsideProject);
     setShowDownloadSection(false); // Ocultar la sección de descargas
   };
 
+
+  const handleGenerateMemo2 = () => {
+    const formEventOutsideProject = methods.getValues();
+    generateMemoOutsideProject2(formEventOutsideProject);
+    setShowDownloadSection(false); // Ocultar la sección de descargas
+  };
+
+  
   // Función para generar el Anexo A en formato PDF
   const handleGeneratePdf = () => {
-    // const formEventOutsideProject = methods.getValues();
-
+    const formEventOutsideProject = methods.getValues();
+    generateAnexoAOutsideProject(formEventOutsideProject);
     setShowDownloadSection(false); // Ocultar la sección de descargas
   };
 
@@ -80,6 +102,14 @@ function EventParticipationOutsideProjectsForm() {
         <Form onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}>
           {/* Formulario con diferentes secciones */}
           <PersonalDetails /> 
+          <EventDetails />
+          <Transportation />
+          <PaymentDetail />
+          <ExpensesDeclaration />
+          <BankAccount />
+          <InstitutionalServices/>
+          <ExteriorDetail />
+
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
@@ -95,14 +125,25 @@ function EventParticipationOutsideProjectsForm() {
             <div className="mt-4">
               <Row className="justify-content-center">
                 <Col md={4} className="text-center">
-                  <div onClick={handleGenerateDocx} className="download-item">
+                  <div onClick={handleGenerateMemo1} className="download-item">
                     <img
                       src="IconWord.png"
                       alt="Word Icon"
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Memorando</span>
+                    <span>Descargar Memorando del Jefe del Departamento</span>
+                  </div>
+                </Col>
+                <Col md={4} className="text-center">
+                  <div onClick={handleGenerateMemo2} className="download-item">
+                    <img
+                      src="IconWord.png"
+                      alt="Word Icon"
+                      className="download-icon"
+                      style={{ cursor: "pointer" }}
+                    />
+                    <span>Descargar Memorando del Profesor al Jefe </span>
                   </div>
                 </Col>
                 <Col md={4} className="text-center">
