@@ -14,14 +14,14 @@ function PaymentDetail() {
   });
 
   const metodoPago = watch("metodoPago");
-  const fechaInicioEvento = watch("fechaInicioEvento");
+  const fechaFinEvento = watch("fechaFinEvento");
 
   const validateSingleDateSelection = (index) => {    
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
 
     
-    if (limiteFecha && limiteFecha > fechaInicioEvento) {
-      return `La fecha no puede ser mayor que la fecha de inicio del evento (${fechaInicioEvento})`;
+    if (limiteFecha && limiteFecha > fechaFinEvento) {
+      return `La fecha no puede ser mayor que la fecha de fin del evento (${fechaFinEvento})`;
     }
 
     return true;

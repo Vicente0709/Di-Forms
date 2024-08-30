@@ -141,6 +141,312 @@ export function generateMemorandum(data) {
   });
 }
 
+export function generateMemoOutsideProject1(data){
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Formato de memorando para Jefe del Departamento al VIIV",
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje al exterior",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${data.departamento}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, la asignación de viáticos y subsistencias al exterior, compra de pasajes aéreos y pago de inscripción.`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: data.nombreJefeInmediato.toUpperCase(),
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: data.cargoJefeInmediato.toUpperCase(),
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+  });
+}
+
+export function generateMemoOutsideProject2(data){
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Formato de memorando del Profesor al Jefe",
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje al exterior",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente solicito el  aval y permiso para participar en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Adicionalmente solicito se se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, la asignación de viáticos y subsistencias al exterior, compra de pasajes aéreos y pago de inscripción.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text:
+                  data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase(),
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Profesor",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+  });
+}
+
+
 // Nueva función para generar el Anexo A en PDF
 export async function generateAnexoA(data) {
   const template = {
@@ -353,6 +659,110 @@ export async function generateAnexoA2(data) {
       ".pdf"
   );
 }
+
+export async function generateAnexoAOutsideProject(data){
+  const template = {
+    schemas: schemasAnexoA,
+    basePdf: basePdfAnexoA,
+  };
+  const ultimaFechaLlegada =
+    data.transporte.length > 0
+      ? data.transporte[data.transporte.length - 1]?.fechaLlegada
+      : "";
+  const ultimaHoraLlegada =
+    data.transporte.length > 0
+      ? data.transporte[data.transporte.length - 1]?.horaLlegada
+      : "";
+  var ponentciaText = "";
+  if (
+    data.tituloPonencia &&
+    data.tituloPonencia.trim() !== "" &&
+    data.tituloPonencia.trim() !== "No aplica"
+  ) {
+    ponentciaText =
+      "Para la participacion de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
+  } else {
+    ponentciaText = "";
+  }
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const transporteInfo = {};
+  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+  for (let i = 0; i < 8; i++) {
+    transporteInfo[`transporteTipo${i + 1}`] = data.transporte[i]?.tipoTransporte || "";
+    transporteInfo[`transporteNombre${i + 1}`] = data.transporte[i]?.nombreTransporte || "";
+    transporteInfo[`transporteRuta${i + 1}`] = data.transporte[i]?.ruta || "";
+    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(data.transporte[i]?.fechaSalida) || "";
+    transporteInfo[`transporteFechaSH${i + 1}`] = data.transporte[i]?.horaSalida || "";
+    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(data.transporte[i]?.fechaLlegada) || "";
+    transporteInfo[`transporteFechaLH${i + 1}`] = data.transporte[i]?.horaLlegada || "";
+  }
+  const inputs = [
+    {
+      "fechaSolicitud":     formattedDate,
+      "viaticos":           data.viaticosSubsistencias === "SI" ? "X" : "",
+      "movilizacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
+      "subsistencias":      data.viaticosSubsistencias === "SI" ? "X" : "",
+      "alimentacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
+      "nombresCompletos":   data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+      "lugar":              data.ciudadEvento + ", " + data.paisEvento,
+      "puesto":             data.puesto,
+      "unidadPerteneciente":data.departamento,
+
+      "fechaSalida":        formatDate(data.transporte[0]?.fechaSalida),
+      "horaSalida":         data.transporte[0]?.horaSalida,
+
+      "fechaLlegada":       formatDate(ultimaFechaLlegada),
+      "horaLlegada":        ultimaHoraLlegada,
+
+      "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() + data.servidores.toUpperCase(),
+
+      "actividades": "Dentro de las actividades " +
+       " se llevará a cabo la participación en el evento  '" +
+      data.tituloEvento +
+      "', que tendrá lugar del  " +
+      data.fechaInicioEvento +
+      "  al  " +
+      data.fechaFinEvento +
+      " en la ciudad de  " +
+      data.ciudadEvento +
+      ", " +
+      data.paisEvento +
+      ". " +
+      ponentciaText,
+
+      ...transporteInfo,
+
+      "banco": data.nombreBanco,
+      "bancoTipoCuenta": data.tipoCuenta,
+      "numeroCuenta": data.numeroCuenta,
+
+      "nombresCompletos2": data.nombres.toUpperCase() +
+      " "+
+      data.apellidos.toUpperCase() +
+      "\n" +
+      data.puesto.toUpperCase() +
+      "\n" +
+      data.cedula,
+
+      "nombresCompletosJefeInmediato": data.nombreJefeInmediato.toUpperCase() +
+      "\n" +
+      data.cargoJefeInmediato.toUpperCase()
+    }
+  ];
+  
+  
+  
+  
+  const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
+  );
+}
+
+
 //formatear la fecha en formato dd/mm/yyyy
 function formatDate(dateString) {
   if (!dateString) return "";
