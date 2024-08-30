@@ -193,6 +193,17 @@ function EventParticipationWithinProjectsForm() {
                   </div>
                 </Col>
                 <Col md={4} className="text-center">
+                  <div onClick={handleGenerateDocx} className="download-item">
+                    <img
+                      src="IconWord.png"
+                      alt="Word Icon"
+                      className="download-icon"
+                      style={{ cursor: "pointer" }}
+                    />
+                    <span>Descargar Memorando</span>
+                  </div>
+                </Col>
+                <Col md={4} className="text-center">
                   <div onClick={handleGeneratePdf} className="download-item">
                     <img
                       src="IconPdf.png"
