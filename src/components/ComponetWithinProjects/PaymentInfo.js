@@ -17,29 +17,7 @@ function PaymentInfo() {
   const fechaInicioEvento = watch("fechaInicioEvento");
 
   const validateSingleDateSelection = (index) => {
-    const antesDeFecha = watch(`inscripciones[${index}].antesDeFecha`);
-    const despuesDeFecha = watch(`inscripciones[${index}].despuesDeFecha`);
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
-
-    const selectedDates = [antesDeFecha, despuesDeFecha, limiteFecha].filter(
-      Boolean
-    );
-
-    if (selectedDates.length === 0) {
-      return "Debe seleccionar al menos una de las tres fechas";
-    }
-
-    if (selectedDates.length > 1) {
-      return "Solo debe seleccionar una de las tres fechas";
-    }
-
-    if (antesDeFecha && antesDeFecha > fechaInicioEvento) {
-      return `La fecha no puede ser mayor que la fecha de inicio del evento (${fechaInicioEvento})`;
-    }
-
-    if (despuesDeFecha && despuesDeFecha > fechaInicioEvento) {
-      return `La fecha no puede ser mayor que la fecha de inicio del evento (${fechaInicioEvento})`;
-    }
 
     if (limiteFecha && limiteFecha > fechaInicioEvento) {
       return `La fecha no puede ser mayor que la fecha de inicio del evento (${fechaInicioEvento})`;
@@ -65,10 +43,8 @@ function PaymentInfo() {
           <tr>
             <th>Nro.</th>
             <th>Valor de inscripción</th>
-            <th>Antes</th>
-            <th>Después</th>
-            <th>Fecha máxima de pago</th>
-            <th>Acciones</th>
+            <th>Pago a realizarce</th>
+            <th>Fecha</th>
           </tr>
         </thead>
         <tbody>
@@ -101,37 +77,27 @@ function PaymentInfo() {
                   )}
               </td>
               <td>
-                <input
-                  type="date"
-                  id={`antesDeFecha-${index}`}
-                  className="form-input"
-                  {...register(`inscripciones[${index}].antesDeFecha`, {
-                    validate: () => validateSingleDateSelection(index),
+                <select
+                  id="pagoLimite"
+                  {...register(`inscripciones[${index}].pagoLimite`, {
+                    required: "El pago limite es requerido",
                   })}
-                />
-                {errors.inscripciones &&
-                  errors.inscripciones[index]?.antesDeFecha && (
-                    <span className="error-text">
-                      {errors.inscripciones[index].antesDeFecha.message}
-                    </span>
-                  )}
+                  className="form-select"
+                >
+                  <option value="">Seleccione</option>
+                  <option value="Antes">Antes</option>
+                  <option value="Después">Después</option>
+                  <option value="Fecha máxima de pago">
+                    Fecha máxima de pago
+                  </option>
+                </select>
+                {errors.pagoLimite && (
+                  <span className="error-text">
+                    {errors.pagoLimite.message}
+                  </span>
+                )}
               </td>
-              <td>
-                <input
-                  type="date"
-                  id={`despuesDeFecha-${index}`}
-                  className="form-input"
-                  {...register(`inscripciones[${index}].despuesDeFecha`, {
-                    validate: () => validateSingleDateSelection(index),
-                  })}
-                />
-                {errors.inscripciones &&
-                  errors.inscripciones[index]?.despuesDeFecha && (
-                    <span className="error-text">
-                      {errors.inscripciones[index].despuesDeFecha.message}
-                    </span>
-                  )}
-              </td>
+
               <td>
                 <input
                   type="date"
@@ -163,8 +129,7 @@ function PaymentInfo() {
         onClick={() =>
           append({
             valorInscripcion: "",
-            antesDeFecha: "",
-            despuesDeFecha: "",
+            pagoLimite: "",
             limiteFecha: "",
           })
         }
@@ -172,7 +137,7 @@ function PaymentInfo() {
       >
         Agregar Inscripción
       </button>
-     
+
       <p>
         Considere que si el pago de inscripción es una moneda diferente a la
         moneda legal del país se requiere un banco intermediario , por lo que se

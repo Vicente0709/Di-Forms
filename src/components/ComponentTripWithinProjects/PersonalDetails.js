@@ -1,17 +1,66 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 
+const validarCedulaEcuatoriana = (cedula) => {
+  if (cedula.length !== 10) return false;
+
+  const provincia = parseInt(cedula.slice(0, 2), 10);
+  if (provincia < 1 || provincia > 24) return false;
+
+  let suma = 0;
+  for (let i = 0; i < 9; i++) {
+    let digito = parseInt(cedula[i], 10);
+    if (i % 2 === 0) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    suma += digito;
+  }
+
+  const digitoVerificador = (10 - (suma % 10)) % 10;
+  return digitoVerificador === parseInt(cedula[9], 10);
+};
+
 function PersonalDetails() {
   const {
     register,
-    // watch,
+    watch,
     formState: { errors },
   } = useFormContext();
 
+  const cedulaValue = watch("cedula");
 
   return (
     <div className="form-container">
       <h2 className="form-title">• Datos personales</h2>
+      
+      <div className="form-group">
+        <label htmlFor="cedula" className="form-label">
+          Cédula de ciudadanía:
+        </label>
+        <input
+          type="text"
+          id="cedula"
+          {...register("cedula", {
+            required: "La cédula es requerida",
+            pattern: {
+              value: /^\d{10}$/,
+              message: "La cédula debe contener solo 10 dígitos",
+            },
+            validate: (value) =>
+              validarCedulaEcuatoriana(value) || "La cédula no es válida",
+          })}
+          className="form-input"
+        />
+        {errors.cedula && (
+          <span className="error-text">{errors.cedula.message}</span>
+        )}
+        {cedulaValue &&
+          !errors.cedula &&
+          !validarCedulaEcuatoriana(cedulaValue) && (
+            <span className="error-text">La cédula no es válida</span>
+          )}
+      </div>
 
       <div className="form-group">
         <label htmlFor="nombres" className="form-label">
@@ -44,6 +93,27 @@ function PersonalDetails() {
         />
         {errors.apellidos && (
           <span className="error-text">{errors.apellidos.message}</span>
+        )}
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="cargo" className="form-label">
+          Cargo:
+        </label>
+        <label htmlFor="cargo">
+          Tal como consta en su acción de personal. Ejemplos: Profesor
+          Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
+          Profesor Principal a Tiempo Completo.
+        </label>
+        <input
+          type="text"
+          id="cargo"
+          placeholder="Profesor Agregado a Tiempo Completo/ Profesor Auxiliar a Tiempo Completo.. "
+          {...register("cargo", { required: "El cargo es requerido" })}
+          className="form-input"
+        />
+        {errors.cargo && (
+          <span className="error-text">{errors.cargo.message}</span>
         )}
       </div>
 
@@ -146,6 +216,52 @@ function PersonalDetails() {
         </select>
         {errors.departamento && (
           <span className="error-text">{errors.departamento.message}</span>
+        )}
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="nombreJefeInmediato" className="form-label">
+          Nombres y apellidos del Jefe inmediato:
+        </label>
+        <input
+          type="text"
+          id="nombreJefeInmediato"
+          {...register("nombreJefeInmediato", {
+            required: "El nombre del jefe inmediato es requerido",
+          })}
+          className="form-input"
+        />
+        {errors.nombreJefeInmediato && (
+          <span className="error-text">
+            {errors.nombreJefeInmediato.message}
+          </span>
+        )}
+      </div>
+
+      <div className="form-group">
+        <label htmlFor="cargoJefeInmediato" className="form-label">
+          Cargo del Jefe inmediato:
+        </label>
+        <label htmlFor="cargoJefeInmediato">
+          Favor colocar el cargo del Jefe inmediato, puede usar las siglas
+          para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante
+        </label>
+        <input
+          type="text"
+          id="cargoJefeInmediato"
+          {...register("cargoJefeInmediato", {
+            required: "El cargo del jefe inmediato es requerido",
+            minLength: {
+              value: 10,
+              message: "El cargo que escribio es demasiado corto",
+            },
+          })}
+          className="form-input"
+        />
+        {errors.cargoJefeInmediato && (
+          <span className="error-text">
+            {errors.cargoJefeInmediato.message}
+          </span>
         )}
       </div>
     </div>

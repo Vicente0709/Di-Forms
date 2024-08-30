@@ -54,7 +54,7 @@ export function generateMemorandum(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
                 size: 22,
                 bold: true,
                 font: "Aptos (Cuerpo)",
@@ -488,9 +488,10 @@ export async function generateAnexoA(data) {
     {
       "fechaSolicitud":     formattedDate,
       "viaticos":           data.viaticosSubsistencias === "SI" ? "X" : "",
-      "movilizacion":       data.movilizacion === "SI" ? "X" : "",
+      "movilizacion":       data.viaticosSubsistencia === "SI" ? "X" : "",
       "subsistencias":      data.viaticosSubsistencias === "SI" ? "X" : "",
-      "alimentacion":       data.alimentacion === "SI" ? "X" : "",
+      "alimentacion":       data.viaticosSubsistencia === "SI" ? "X" : "",
+      
       "nombresCompletos":   data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
       "lugar":              data.ciudadEvento + ", " + data.paisEvento,
       "puesto":             data.cargo,

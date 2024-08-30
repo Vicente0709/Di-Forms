@@ -244,7 +244,7 @@ function PersonalDetails() {
         </label>
         <label htmlFor="cargoJefeInmediato">
           Favor colocar el cargo del Jefe inmediato, puede usar las siglas
-          para referirse al departamento.
+          para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante
         </label>
         <input
           type="text"
