@@ -13,7 +13,12 @@ function Transportation() {
     name: "transporte",
   });
   
-  const today = new Date().toISOString().split("T")[0]; // Fecha actual en formato YYYY-MM-DD
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+    
+// const today = new Date().toISOString().split("T")[0];  // Fecha actual en formato YYYY-MM-DD
+
 
   return (
     <div className="form-container">
