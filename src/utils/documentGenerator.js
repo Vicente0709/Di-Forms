@@ -17,6 +17,8 @@ const month = String(today.getMonth() + 1).padStart(2, "0"); // Los meses son 0-
 const year = today.getFullYear();
 const formattedDate = `${day}/${month}/${year}`;
 
+
+
 export function generateMemorandum(data) {
   const doc = new Document({
     sections: [
@@ -214,7 +216,7 @@ export function generateMemoOutsideProject1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${data.departamento}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
+                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${data.departamento[0]}${data.departamento.slice(1).toLowerCase}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -293,7 +295,10 @@ export function generateMemoOutsideProject1(data){
 }
 
 export function generateMemoOutsideProject2(data){
-  const doc = new Document({
+  //const pasajesAereosText = data.pasajesAereos === "SI" ? "pasajes aéreos, " : "";
+ // const viaticosSubsistenciasText = data.viaticosSubsistencias === "SI" ? "viáticos y subsistencias, " : "";
+  //const inscripcionText = data.inscripcion === "SI" ? "pago de inscripción." : "";
+   const doc = new Document({
     sections: [
       {
         properties: {},
@@ -319,7 +324,7 @@ export function generateMemoOutsideProject2(data){
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: "Dr. Marco Santorum",
+                text: data.nombreJefeInmediato,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -329,7 +334,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                text: `\t\t${data.cargoJefeInmediato}`,
                 size: 22,
                 bold: true,
                 font: "Aptos (Cuerpo)",
@@ -352,7 +357,8 @@ export function generateMemoOutsideProject2(data){
               }),
             ],
             spacing: { after: 200 },
-          }),new Paragraph({
+          }),
+          new Paragraph({
             children: [
               new TextRun({
                 text: "De mi consideración:",
@@ -375,7 +381,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: "Adicionalmente solicito se se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, la asignación de viáticos y subsistencias al exterior, compra de pasajes aéreos y pago de inscripción.",
+                text: "Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, la asignación de", //${pasajesAereosText}${viaticosSubsistenciasText}${inscripcionText}
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -438,7 +444,7 @@ export function generateMemoOutsideProject2(data){
           }),
         ],
       },
-    ],
+    ],  
   });
 
   Packer.toBlob(doc).then((blob) => {
@@ -697,18 +703,20 @@ export async function generateAnexoAOutsideProject(data){
     transporteInfo[`transporteFechaL${i + 1}`] = formatDate(data.transporte[i]?.fechaLlegada) || "";
     transporteInfo[`transporteFechaLH${i + 1}`] = data.transporte[i]?.horaLlegada || "";
   }
+
+
   const inputs = [
     {
       "fechaSolicitud":     formattedDate,
       "viaticos":           data.viaticosSubsistencias === "SI" ? "X" : "",
-      "movilizacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
+      "movilizacion":       data.viaticosSubsistencias === "SI" ? "X" : "" ,
       "subsistencias":      data.viaticosSubsistencias === "SI" ? "X" : "",
       "alimentacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
       "nombresCompletos":   data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
       "lugar":              data.ciudadEvento + ", " + data.paisEvento,
       "puesto":             data.puesto,
       "unidadPerteneciente":data.departamento,
-
+      
       "fechaSalida":        formatDate(data.transporte[0]?.fechaSalida),
       "horaSalida":         data.transporte[0]?.horaSalida,
 
@@ -717,8 +725,7 @@ export async function generateAnexoAOutsideProject(data){
 
       "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() + data.servidores.toUpperCase(),
 
-      "actividades": "Dentro de las actividades " +
-       " se llevará a cabo la participación en el evento  '" +
+      "actividades": "Participación en el evento  '" +
       data.tituloEvento +
       "', que tendrá lugar del  " +
       data.fechaInicioEvento +
