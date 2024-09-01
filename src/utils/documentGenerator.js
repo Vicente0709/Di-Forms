@@ -453,13 +453,17 @@ export async function generateAnexoA(data) {
     schemas: schemasAnexoA,
     basePdf: basePdfAnexoA,
   };
+
+  // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
+  const transporte = data.transporteIda.concat(data.transporteRegreso);
+  console.log('Transporte Array:', transporte);
   const ultimaFechaLlegada =
-    data.transporte.length > 0
-      ? data.transporte[data.transporte.length - 1]?.fechaLlegada
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.fechaLlegada
       : "";
   const ultimaHoraLlegada =
-    data.transporte.length > 0
-      ? data.transporte[data.transporte.length - 1]?.horaLlegada
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.horaLlegada
       : "";
   var ponentciaText = "";
   if (
@@ -476,13 +480,13 @@ export async function generateAnexoA(data) {
   const transporteInfo = {};
   // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
   for (let i = 0; i < 8; i++) {
-    transporteInfo[`transporteTipo${i + 1}`] = data.transporte[i]?.tipoTransporte || "";
-    transporteInfo[`transporteNombre${i + 1}`] = data.transporte[i]?.nombreTransporte || "";
-    transporteInfo[`transporteRuta${i + 1}`] = data.transporte[i]?.ruta || "";
-    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(data.transporte[i]?.fechaSalida) || "";
-    transporteInfo[`transporteFechaSH${i + 1}`] = data.transporte[i]?.horaSalida || "";
-    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(data.transporte[i]?.fechaLlegada) || "";
-    transporteInfo[`transporteFechaLH${i + 1}`] = data.transporte[i]?.horaLlegada || "";
+    transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
+    transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
+    transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
+    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(transporte[i]?.fechaSalida) || "";
+    transporteInfo[`transporteFechaSH${i + 1}`] = transporte[i]?.horaSalida || "";
+    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(transporte[i]?.fechaLlegada) || "";
+    transporteInfo[`transporteFechaLH${i + 1}`] = transporte[i]?.horaLlegada || "";
   }
   const inputs = [
     {
@@ -497,8 +501,8 @@ export async function generateAnexoA(data) {
       "puesto":             data.cargo,
       "unidadPerteneciente":data.departamento,
 
-      "fechaSalida":        formatDate(data.transporte[0]?.fechaSalida),
-      "horaSalida":         data.transporte[0]?.horaSalida,
+      "fechaSalida":        formatDate(data.transporteIda[0]?.fechaSalida),
+      "horaSalida":         data.transporteIda[0]?.horaSalida,
 
       "fechaLlegada":       formatDate(ultimaFechaLlegada),
       "horaLlegada":        ultimaHoraLlegada,
@@ -575,17 +579,13 @@ export async function generateAnexoA2(data) {
   // Iteramos sobre cada inscripción en el array 'inscripciones'
   data.inscripciones.forEach((inscripcion) => {
     // Concatenamos el valor de inscripción con un '$' y un salto de línea
-    if (inscripcion.valorInscripcion) {
+    if (data.inscripcion === "SI" && inscripcion.valorInscripcion) {
       valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
     }
 
     // Construimos la cadena de la fecha de pago dependiendo de cuál campo tiene valor
-    if (inscripcion.antesDeFecha) {
-      fechaPagoInscripcionStr += `antes de ${formatDate(inscripcion.antesDeFecha)}\n`;
-    } else if (inscripcion.despuesDeFecha) {
-      fechaPagoInscripcionStr += `después de ${formatDate(inscripcion.despuesDeFecha)}\n`;
-    } else if (inscripcion.limiteFecha) {
-      fechaPagoInscripcionStr += `${formatDate(inscripcion.limiteFecha)}\n`;
+    if (data.inscripcion === "SI" && inscripcion.pagoLimite && inscripcion.limiteFecha) {
+      fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
     }
   });
   

@@ -17,8 +17,19 @@ function ActivitySchedule() {
     const updateDatesFromLocalStorage = () => {
       const formData = JSON.parse(localStorage.getItem("formData"));
       if (formData) {
-        setFechaInicioEvento(formData.transporte[0]?.fechaSalida || "");
-        setFechaFinEvento(formData.transporte[formData.transporte.length - 1]?.fechaLlegada || "");
+        // Obtener la primera fecha de salida desde transporteIda
+        const fechaInicioEvento = formData.transporteIda?.length > 0 
+          ? formData.transporteIda[0]?.fechaSalida 
+          : "";
+    
+        // Obtener la última fecha de llegada desde transporteRegreso
+        const fechaFinEvento = formData.transporteRegreso?.length > 0 
+          ? formData.transporteRegreso[formData.transporteRegreso.length - 1]?.fechaLlegada 
+          : "";
+    
+        // Actualizar los estados correspondientes
+        setFechaInicioEvento(fechaInicioEvento || "");
+        setFechaFinEvento(fechaFinEvento || "");
       }
     };
 

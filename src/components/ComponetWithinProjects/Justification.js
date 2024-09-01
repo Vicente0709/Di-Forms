@@ -50,8 +50,8 @@ function Justification() {
       {/* 3.2 Relevancia del evento para su proyecto */}
       <div className="form-group">
         <label htmlFor="relevanciaEvento" className="form-label">
-          • Relevancia del evento para su proyecto relacionado con el
-          objetivo, resultado o producto del punto 3.1.
+          Relevancia del evento para su proyecto relacionado con el
+          objetivo, resultado o producto del punto anterior.
         </label>
         <label htmlFor="relevanciaEvento">
           Describa la relevación del evento y aporte al cumplimiento del
