@@ -14,13 +14,13 @@ function PaymentInfo() {
   });
 
   const metodoPago = watch("metodoPago");
-  const fechaInicioEvento = watch("fechaInicioEvento");
+  const fechaFinEvento = watch("fechaFinEvento");
 
   const validateSingleDateSelection = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
 
-    if (limiteFecha && limiteFecha > fechaInicioEvento) {
-      return `La fecha no puede ser mayor que la fecha de inicio del evento (${fechaInicioEvento})`;
+    if (limiteFecha && limiteFecha > fechaFinEvento) {
+      return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
     }
 
     return true;
@@ -85,9 +85,9 @@ function PaymentInfo() {
                   className="form-select"
                 >
                   <option value="">Seleccione</option>
-                  <option value="Antes">Antes</option>
-                  <option value="Después">Después</option>
-                  <option value="Fecha máxima de pago">
+                  <option value="Antes del ">Antes</option>
+                  <option value="Después del ">Después</option>
+                  <option value="Fecha:">
                     Fecha máxima de pago
                   </option>
                 </select>
