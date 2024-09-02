@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useEffect,useState } from "react";
 import { useFormContext } from "react-hook-form";
 
+  
 const validarCedulaEcuatoriana = (cedula) => {
   if (cedula.length !== 10) return false;
 
@@ -25,10 +26,28 @@ function PersonalDetails() {
   const {
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext();
-
+  /*rol proyecto*/
+  const rolEnProyecto = watch("rolEnProyecto");
   const cedulaValue = watch("cedula");
+  /*Campos adicionales de rol proyectos en caso de no elegir director */
+  const [showInputDirector, setshowInputDirector] = useState(false);
+
+  /*Valida la elección de Codirector o Colaborador para ingresar nombre y cargo del director del proyecto*/
+  useEffect(() => {
+
+    
+    if (rolEnProyecto === "Codirector" || rolEnProyecto ==="Colaborador") {
+      setshowInputDirector(true);
+    } else {
+      setshowInputDirector(false);
+      setValue("nombreDirector","");
+      setValue("cargoDirector","");
+    }
+  }, [rolEnProyecto, setValue]);
+
 
   return (
     <div className="form-container">
@@ -137,6 +156,44 @@ function PersonalDetails() {
           <span className="error-text">{errors.rolEnProyecto.message}</span>
         )}
       </div>
+        {/* Campos de Nombre director y cargo director segun se escoga en el rol de proyectos*/}
+      {showInputDirector && (
+        <div className="form-group">
+          <label htmlFor="nombreDirector" className="form-label">
+            Nombre del Director del proyecto:
+          </label>
+          <input
+            type="text"
+            id="nombreDirector"
+            {...register("nombreDirector", {
+              required: "El nombre del Director es requerido",
+            })}
+            className="form-input"
+          />
+          {errors.nombreDirector && (
+            <span className="error-text">{errors.nombreDirector.message}</span>
+          )}
+        </div>
+      )}
+
+      {showInputDirector && (
+        <div className="form-group">
+          <label htmlFor="cargoDirector" className="form-label">
+            Cargo del Director del proyecto:
+          </label>
+          <input
+            type="text"
+            id="cargoDirector"
+            {...register("cargoDirector", {
+              required: "El cargo del director es requerido",
+            })}
+            className="form-input"
+          />
+          {errors.cargoDirector && (
+            <span className="error-text">{errors.cargoDirector.message}</span>
+          )}
+        </div>
+      )}
 
       <div className="form-group">
         <label htmlFor="departamento" className="form-label">
@@ -267,5 +324,4 @@ function PersonalDetails() {
     </div>
   );
 }
-
 export default PersonalDetails;

@@ -18,6 +18,7 @@ import{
   generateMemoOutsideProject1,
   generateMemoOutsideProject2,
   generateAnexoAOutsideProject,
+  generateAnexo8OutsideProject,
 } from"../utils/documentGenerator.js"
 
 function EventParticipationOutsideProjectsForm() {
@@ -80,6 +81,9 @@ function EventParticipationOutsideProjectsForm() {
 
   const handleGeneratePdf2 = () => {
     // Puedes implementar la lógica para generar el segundo PDF aquí
+    const formEventOutsideProject = methods.getValues();
+    generateAnexo8OutsideProject(formEventOutsideProject);
+    setShowDownloadSection(false);
   };
 
   // Función para descargar todos los documentos

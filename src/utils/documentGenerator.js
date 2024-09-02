@@ -10,6 +10,10 @@ import { schemasAnexoA } from "./schemasAnexoA";
 import { basePdfAnexoA2 } from "./basePdfAnexoA2";
 import { schemasAnexoA2 } from "./schemasAnexoA2";
 
+import { basepdfAnexo8 } from "./basepdfAnexo8";
+import { schemaAnexo8 } from "./schemaAnexo8";
+
+
 //Constantes
 const today = new Date();
 const day = String(today.getDate()).padStart(2, "0");
@@ -17,7 +21,7 @@ const month = String(today.getMonth() + 1).padStart(2, "0"); // Los meses son 0-
 const year = today.getFullYear();
 const formattedDate = `${day}/${month}/${year}`;
 
-
+ 
 
 export function generateMemoWithinProjec1(data) {
   
@@ -326,6 +330,29 @@ export function generateMemoWithinProjec2(data) {
 }
 
 export function generateMemoOutsideProject1(data){
+  let solicitudOracion = "la asignación de ";
+  // Array para almacenar las solicitudes
+  let solicitudes = [];
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push("la compra de pasajes aéreos");
+  }
+  // Verificar si se debe incluir "viáticos y subsistencias"
+  if (data.viaticosSubsistencias === "SI") {
+    solicitudes.push("viáticos y subsistencias");
+  }
+  // Verificar si se debe incluir "pago de inscripción"
+  if (data.inscripcion === "SI") {
+    solicitudes.push("el pago de inscripción");
+  }
+
+  // Construir la oración final
+  if (solicitudes.length > 0) {
+    solicitudOracion += solicitudes.join(", ") + ".";
+  } else {
+    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+  }
+
   const doc = new Document({
     sections: [
       {
@@ -398,7 +425,7 @@ export function generateMemoOutsideProject1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${data.departamento[0]}${data.departamento.slice(1).toLowerCase}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
+                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${data.departamento[0]}${data.departamento.slice(1).toLowerCase()}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -408,7 +435,7 @@ export function generateMemoOutsideProject1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, la asignación de viáticos y subsistencias al exterior, compra de pasajes aéreos y pago de inscripción.`,
+                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, ${solicitudOracion}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -477,9 +504,30 @@ export function generateMemoOutsideProject1(data){
 }
 
 export function generateMemoOutsideProject2(data){
-  //const pasajesAereosText = data.pasajesAereos === "SI" ? "pasajes aéreos, " : "";
- // const viaticosSubsistenciasText = data.viaticosSubsistencias === "SI" ? "viáticos y subsistencias, " : "";
-  //const inscripcionText = data.inscripcion === "SI" ? "pago de inscripción." : "";
+
+  let solicitudOracion = "la asignación de ";
+  // Array para almacenar las solicitudes
+  let solicitudes = [];
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push("la compra de pasajes aéreos");
+  }
+  // Verificar si se debe incluir "viáticos y subsistencias"
+  if (data.viaticosSubsistencias === "SI") {
+    solicitudes.push("viáticos y subsistencias");
+  }
+  // Verificar si se debe incluir "pago de inscripción"
+  if (data.inscripcion === "SI") {
+    solicitudes.push("el pago de inscripción");
+  }
+
+  // Construir la oración final
+  if (solicitudes.length > 0) {
+    solicitudOracion += solicitudes.join(", ") + ".";
+  } else {
+    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+  }
+ 
    const doc = new Document({
     sections: [
       {
@@ -563,7 +611,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: "Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, la asignación de", //${pasajesAereosText}${viaticosSubsistenciasText}${inscripcionText}
+                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, ${solicitudOracion}`, 
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -1249,14 +1297,19 @@ export async function generateAnexoAOutsideProject(data){
     schemas: schemasAnexoA,
     basePdf: basePdfAnexoA,
   };
+
+  // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
+  const transporte = data.transporteIda.concat(data.transporteRegreso);
+
   const ultimaFechaLlegada =
-    data.transporte.length > 0
-      ? data.transporte[data.transporte.length - 1]?.fechaLlegada
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.fechaLlegada
       : "";
   const ultimaHoraLlegada =
-    data.transporte.length > 0
-      ? data.transporte[data.transporte.length - 1]?.horaLlegada
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.horaLlegada
       : "";
+
   var ponentciaText = "";
   if (
     data.tituloPonencia &&
@@ -1271,16 +1324,17 @@ export async function generateAnexoAOutsideProject(data){
   const plugins = { text, image, qrcode: barcodes.qrcode };
   const transporteInfo = {};
   // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+    
+  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
   for (let i = 0; i < 8; i++) {
-    transporteInfo[`transporteTipo${i + 1}`] = data.transporte[i]?.tipoTransporte || "";
-    transporteInfo[`transporteNombre${i + 1}`] = data.transporte[i]?.nombreTransporte || "";
-    transporteInfo[`transporteRuta${i + 1}`] = data.transporte[i]?.ruta || "";
-    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(data.transporte[i]?.fechaSalida) || "";
-    transporteInfo[`transporteFechaSH${i + 1}`] = data.transporte[i]?.horaSalida || "";
-    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(data.transporte[i]?.fechaLlegada) || "";
-    transporteInfo[`transporteFechaLH${i + 1}`] = data.transporte[i]?.horaLlegada || "";
+    transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
+    transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
+    transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
+    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(transporte[i]?.fechaSalida) || "";
+    transporteInfo[`transporteFechaSH${i + 1}`] = transporte[i]?.horaSalida || "";
+    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(transporte[i]?.fechaLlegada) || "";
+    transporteInfo[`transporteFechaLH${i + 1}`] = transporte[i]?.horaLlegada || "";
   }
-
 
   const inputs = [
     {
@@ -1300,7 +1354,7 @@ export async function generateAnexoAOutsideProject(data){
       "fechaLlegada":       formatDate(ultimaFechaLlegada),
       "horaLlegada":        ultimaHoraLlegada,
 
-      "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() + data.servidores.toUpperCase(),
+      "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() + ". " +data.servidores.toUpperCase(),
 
       "actividades": "Participación en el evento  '" +
       data.tituloEvento +
@@ -1346,6 +1400,72 @@ export async function generateAnexoAOutsideProject(data){
     "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
   );
 }
+
+export async function generateAnexo8OutsideProject(data){
+
+const template= {
+schemas: schemaAnexo8,
+basePdf: basepdfAnexo8,
+};
+const plugins = { text, image, qrcode: barcodes.qrcode };
+const inscripcion = data.inscripciones;
+
+const Inscripciones = {};
+  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+    
+  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+  for (let i = 0; i < 8; i++) {
+    Inscripciones[`valorInscripcion${i + 1}`] = inscripcion[i]?.valorInscripcion || "";
+    Inscripciones[`limiteFecha${i + 1}`] = inscripcion[i]?.pagoLimite || "";
+   
+  }
+
+const inputs = [
+  {
+    "nombres":                data.nombres.toUpperCase() +" "+ data.apellidos.toUpperCase(),
+    "departamento":           data.departamento,
+    "tituloEvento":           data.tituloEvento,
+    "lugarEvento":            data.ciudadEvento+", "+data.paisEvento,
+    "fechaInicioEvento":      data.fechaInicioEvento,
+    "fechaFinEvento":         data.fechaFinEvento,
+    "RelevanciaAcademica":    data.RelevanciaAcademica,
+    "tituloPonencia":         data.tituloPonencia,
+    "tipoPonencia":           data.tipoPonencia,
+    "detalleArticuloSI":      data.detalleArticuloSI,
+    "articuloPublicadoSi":    data.articuloPublicado==="SI" ? "X":"",
+    "articuloPublicadoNo":    data.articuloPublicado==="NO"? "X":"",
+    "pasajesAereosSi":        data.pasajesAereos==="SI" ? "X":"",
+    "pasajesAereosNo":        data.pasajesAereos==="NO" ? "X":"",
+    "viaticosSubsistenciasSi": data.viaticosSubsistencias==="SI"? "X": "",
+    "viaticosSubsistenciasNo": data.viaticosSubsistencias==="NO"? "X": "",
+    "inscripsionSi":           data.inscripcion==="SI"?"X":"",
+    "inscripcionNo":           data.inscripcion==="NO"?"X":"",
+    "metodoPagoTransferencia": data.metodoPago==="Transferencia"? "X":"",
+    "metodoPagoOtra":          data.metodoPago==="Otra"? "X":"",
+    "hospedajeSi":            data.hospedaje==="SI"?"X":"",
+    "HospedajeNo":            data.hospedaje==="NO"?"X":"",
+    "alimentacionSi":         data.alimentacion==="SI"?"X":"",
+    "alimentacionNo":         data.alimentacion==="NO"?"X":"",
+    "movilizacionInternaSi":  data.movilizacion==="SI"?"X":"",
+    "movilizacionInternaNo":  data.movilizacion==="NO"?"X":"",
+    "seleccionDeclaracionNo": data.seleccionDeclaracion==="NO"?"X":"",
+    "seleccionDeclaracionSi": data.seleccionDeclaracion==="SI"?"X":"",
+    "nombre":                 data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase(),
+    "puesto":                 data.puesto.toUpperCase()
+  }
+  
+];
+
+const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
+  );
+
+}
+
 
 
 //formatear la fecha en formato dd/mm/yyyy
