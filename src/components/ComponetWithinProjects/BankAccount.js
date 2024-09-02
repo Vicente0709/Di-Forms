@@ -24,7 +24,7 @@ function BankAccount() {
   return (
     <div className="form-container">
       <h3>• CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS</h3>
-      <p>Obligatorio si marcó viáticos en la sección 2.</p>
+      <p>Obligatorio si marcó viáticos</p>
 
       <div className="form-group">
         <label className="form-label" htmlFor="nombreBanco">Nombre del banco:</label>

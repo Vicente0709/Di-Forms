@@ -21,75 +21,80 @@ import{
 } from"../utils/documentGenerator.js"
 
 function EventParticipationOutsideProjectsForm() {
-  // Estado para controlar la visibilidad de la sección de descargas
+  // Estado para manejar la visibilidad de la sección de descargas
   const [showDownloadSection, setShowDownloadSection] = useState(false);
 
+  // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
-    mode: "onChange", // Actualización del formulario en cada cambio
-    reValidateMode: "onChange", // Revalidación del formulario en cada cambio
-    defaultValues:
-      JSON.parse(localStorage.getItem("formEventOutsideProject")) || {}, // Valores predeterminados del formulario
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: JSON.parse(localStorage.getItem("formEventOutsideProject")) || {},
   });
 
   const { watch } = methods;
 
-  // useEffect para observar los cambios en el formulario
+  // Efecto para sincronizar con localStorage y manejar la inicialización
   useEffect(() => {
+    // Función para inicializar el estado desde localStorage
+    const initializeFromLocalStorage = () => {
+      const formData = JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
+      // Aquí puedes agregar cualquier lógica adicional de inicialización
+      
+    };
+
+    // Llamar a la inicialización al montar el componente
+    initializeFromLocalStorage();
+
     const subscription = watch((data) => {
-      // Guardar los datos del formulario en localStorage
       localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
     });
-    // Limpieza del efecto al desmontar el componente
+
+    // Limpieza al desmontar el componente
     return () => subscription.unsubscribe();
   }, [watch]);
 
   // Función que se ejecuta al enviar el formulario
   const onSubmitEventParticipationOutside = (data) => {
     console.log(data);
-    setShowDownloadSection(true); // Mostrar la sección de descargas
+    setShowDownloadSection(true);
   };
 
-  // Función para generar un documento DOCX
+  // Funciones para manejar la generación de documentos
   const handleGenerateMemo1 = () => {
     const formEventOutsideProject = methods.getValues();
     generateMemoOutsideProject1(formEventOutsideProject);
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    setShowDownloadSection(false);
   };
-
 
   const handleGenerateMemo2 = () => {
     const formEventOutsideProject = methods.getValues();
     generateMemoOutsideProject2(formEventOutsideProject);
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    setShowDownloadSection(false);
   };
 
-  
-  // Función para generar el Anexo A en formato PDF
   const handleGeneratePdf = () => {
     const formEventOutsideProject = methods.getValues();
     generateAnexoAOutsideProject(formEventOutsideProject);
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    setShowDownloadSection(false);
   };
 
-  // Función para generar el Anexo A2 en formato PDF
   const handleGeneratePdf2 = () => {
-    // const formEventOutsideProject = methods.getValues();
-
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    // Puedes implementar la lógica para generar el segundo PDF aquí
   };
 
   // Función para descargar todos los documentos
   const handleDownloadAll = () => {
-    // const formEventOutsideProject = methods.getValues();
-
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    handleGenerateMemo1();
+    handleGeneratePdf();
+    handleGeneratePdf2();
+    setShowDownloadSection(false);
   };
 
-  // Función para limpiar el formulario
+  // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formEventOutsideProject"); // Eliminar los datos del formulario de localStorage
-    setShowDownloadSection(false); // Ocultar la sección de descargas
-    window.location.reload(); // Recargar la página para resetear el formulario
+    localStorage.removeItem("formEventOutsideProject");
+    setShowDownloadSection(false);
+    window.location.reload();
   };
 
   return (

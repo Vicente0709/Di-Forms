@@ -50,7 +50,7 @@ function Justification() {
       {/* 3.2 Relevancia del evento para su proyecto */}
       <div className="form-group">
         <label htmlFor="relevanciaViajeTecnico" className="form-label">
-          • Relevancia del viaje técnico para el desarrollo del proyecto:
+          Relevancia del viaje técnico para el desarrollo del proyecto:
         </label>
         <label htmlFor="relevanciaViajeTecnico">
           Describa la relevancia del viaje técnico y aporte al cumplimiento del objetivo, resultado o producto.

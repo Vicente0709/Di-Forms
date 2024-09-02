@@ -17,8 +17,19 @@ function ActivitySchedule() {
     const updateDatesFromLocalStorage = () => {
       const formTechnicalTripWithinProjects = JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects"));
       if (formTechnicalTripWithinProjects) {
-        setFechaInicioEvento(formTechnicalTripWithinProjects.transporte[0]?.fechaSalida || "");
-        setFechaFinEvento(formTechnicalTripWithinProjects.transporte[formTechnicalTripWithinProjects.transporte.length - 1]?.fechaLlegada || "");
+        // Obtener la primera fecha de salida desde transporteIda
+        const fechaInicioEvento = formTechnicalTripWithinProjects.transporteIda?.length > 0 
+          ? formTechnicalTripWithinProjects.transporteIda[0]?.fechaSalida 
+          : "";
+    
+        // Obtener la última fecha de llegada desde transporteRegreso
+        const fechaFinEvento = formTechnicalTripWithinProjects.transporteRegreso?.length > 0 
+          ? formTechnicalTripWithinProjects.transporteRegreso[formTechnicalTripWithinProjects.transporteRegreso.length - 1]?.fechaLlegada 
+          : "";
+    
+        // Actualizar los estados correspondientes
+        setFechaInicioEvento(fechaInicioEvento || "");
+        setFechaFinEvento(fechaFinEvento || "");
       }
     };
 

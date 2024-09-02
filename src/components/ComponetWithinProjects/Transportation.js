@@ -12,11 +12,11 @@ function Transportation() {
  const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({
   control,
   name: "transporteIda",
-});
-const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso } = useFieldArray({
+  });
+  const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso } = useFieldArray({
   control,
   name: "transporteRegreso",
-});
+  });
   
   const today = new Date().toISOString().split("T")[0]; // Fecha actual en formato YYYY-MM-DD
   // Observar los cambios en la fecha fin del evento

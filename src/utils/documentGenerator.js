@@ -19,7 +19,31 @@ const formattedDate = `${day}/${month}/${year}`;
 
 
 
-export function generateMemorandum(data) {
+export function generateMemoWithinProjec1(data) {
+  
+  let solicitudOracion = "Para lo cual solicito ";
+  // Array para almacenar las solicitudes
+  let solicitudes = [];
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push("la compra de pasajes aéreos");
+  }
+  // Verificar si se debe incluir "viáticos y subsistencias"
+  if (data.viaticosSubsistencias === "SI") {
+    solicitudes.push("la asignación de viáticos y subsistencias");
+  }
+  // Verificar si se debe incluir "pago de inscripción"
+  if (data.inscripcion === "SI") {
+    solicitudes.push("el pago de inscripción");
+  }
+
+  // Construir la oración final
+  if (solicitudes.length > 0) {
+    solicitudOracion += solicitudes.join(", ") + ".";
+  } else {
+    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+  }
+
   const doc = new Document({
     sections: [
       {
@@ -28,7 +52,7 @@ export function generateMemorandum(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Formato de memorando",
+                text: "Formato de memorando PARTICIPACION EN EVENTO DENTRO DE PROYECTO ",
                 bold: true,
                 size: 24,
                 font: "Aptos (Cuerpo)",
@@ -128,6 +152,164 @@ export function generateMemorandum(data) {
             children: [
               new TextRun({
                 text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+  });
+}
+export function generateMemoWithinProjec2(data) {
+  const nombresApellidos = capitalizeWords((data.nombres + " " + data.apellidos).toLowerCase());
+  let solicitudOracion = "Para lo cual solicito ";
+
+  // Array para almacenar las solicitudes
+  let solicitudes = [];
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push("la compra de pasajes aéreos");
+  }
+  // Verificar si se debe incluir "viáticos y subsistencias"
+  if (data.viaticosSubsistencias === "SI") {
+    solicitudes.push("la asignación de viáticos y subsistencias");
+  }
+  // Verificar si se debe incluir "pago de inscripción"
+  if (data.inscripcion === "SI") {
+    solicitudes.push("el pago de inscripción");
+  }
+
+  // Construir la oración final
+  if (solicitudes.length > 0) {
+    solicitudOracion += solicitudes.join(", ") + ".";
+  } else {
+    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+  }
+
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Formato de memorando PARTICIPACION EN EVENTO DENTRO DE PROYECTO ",
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Solicitud dentro de proyecto para movilidad al exterior para participar en evento académico/${data.codigoProyecto} `,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr."${nombresApellidos}", ${data.rolEnProyecto} del proyecto pueda participar en el evento titulado "${data.tituloProyecto}", a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta los documentos correspondientes.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text:
+                  data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase(),
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${data.rolEnProyecto.toUpperCase()} DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -452,6 +634,299 @@ export function generateMemoOutsideProject2(data){
   });
 }
 
+export function generateMemoTripWithinProjec1(data) {
+  let solicitudOracion = "Para lo cual solicito ";
+
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI" && data.viaticosSubsistencias === "SI") {
+    solicitudOracion += "se realice la compra de pasajes aéreos y asignación de viáticos y subsistencias.";
+  } else if (data.pasajesAereos === "SI") {
+    solicitudOracion += "se realice la compra de pasajes aéreos.";
+  } else if (data.viaticosSubsistencias === "SI") {
+    solicitudOracion += "la asignación de viáticos y subsistencias.";
+  } else {
+    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+  }
+
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Formato de memorando VIAJE TECNICO DENTRO DE PROYECTO",
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Solicitud dentro de proyecto para movilidad al exterior para viaje técnico/ ${data.codigoProyecto}`,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta los documentos correspondientes.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text:
+                  data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase(),
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+  });
+}
+export function generateMemoTripWithinProjec2(data) {
+  const nombresApellidos = capitalizeWords((data.nombres + " " + data.apellidos).toLowerCase());
+  let solicitudOracion = "Para lo cual solicito ";
+
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI" && data.viaticosSubsistencias === "SI") {
+    solicitudOracion += "se realice la compra de pasajes aéreos y asignación de viáticos y subsistencias.";
+  } else if (data.pasajesAereos === "SI") {
+    solicitudOracion += "se realice la compra de pasajes aéreos.";
+  } else if (data.viaticosSubsistencias === "SI") {
+    solicitudOracion += "la asignación de viáticos y subsistencias.";
+  } else {
+    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+  }
+
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Formato de memorando VIAJE TECNICO DENTRO DE PROYECTO",
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Solicitud dentro de proyecto para movilidad al exterior para viaje técnico/${data.codigoProyecto} `,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr."${nombresApellidos}", ${data.rolEnProyecto} del proyecto pueda realizar un viaje tecnico "${data.nombreInstitucionAcogida}", a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta los documentos correspondientes.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text:
+                  data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase(),
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${data.rolEnProyecto.toUpperCase()} DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+  });
+}
 
 // Nueva función para generar el Anexo A en PDF
 export async function generateAnexoA(data) {
@@ -563,6 +1038,108 @@ export async function generateAnexoA(data) {
     "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
   );
 }
+
+// Nueva función para generar el Anexo A en PDF
+export async function generateAnexoATripWithingProject(data) {
+  const template = {
+    schemas: schemasAnexoA,
+    basePdf: basePdfAnexoA,
+  };
+
+  // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
+  const transporte = data.transporteIda.concat(data.transporteRegreso);
+  
+  const ultimaFechaLlegada =
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.fechaLlegada
+      : "";
+  const ultimaHoraLlegada =
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.horaLlegada
+      : "";
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const transporteInfo = {};
+  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+  for (let i = 0; i < 8; i++) {
+    transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
+    transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
+    transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
+    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(transporte[i]?.fechaSalida) || "";
+    transporteInfo[`transporteFechaSH${i + 1}`] = transporte[i]?.horaSalida || "";
+    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(transporte[i]?.fechaLlegada) || "";
+    transporteInfo[`transporteFechaLH${i + 1}`] = transporte[i]?.horaLlegada || "";
+  }
+
+  const inputs = [
+    {
+      "fechaSolicitud":     formattedDate,
+      "viaticos":           data.viaticosSubsistencias === "SI" ? "X" : "",
+      "movilizacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
+      "subsistencias":      data.viaticosSubsistencias === "SI" ? "X" : "",
+      "alimentacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
+      
+      "nombresCompletos":   data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+      "lugar":              data.ciudadEvento + ", " + data.paisEvento,
+      "puesto":             data.cargo,
+      "unidadPerteneciente":data.departamento,
+
+      "fechaSalida":        formatDate(data.transporteIda[0]?.fechaSalida),
+      "horaSalida":         data.transporteIda[0]?.horaSalida,
+
+      "fechaLlegada":       formatDate(ultimaFechaLlegada),
+      "horaLlegada":        ultimaHoraLlegada,
+
+      "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() +". "+ data.servidores.toUpperCase(),
+
+      "actividades": "Dentro de las actividades del proyecto  " +
+      data.codigoProyecto +
+      " titulado  '" +
+      data.tituloProyecto +
+      "'  se llevará a cabo un viaje técnico a cargo de la intitucion de acogida '" +
+      data.nombreInstitucionAcogida +
+      "', que tendrá lugar del  " +
+      data.fechaInicioEvento +
+      "  al  " +
+      data.fechaFinEvento +
+      " en la ciudad de  " +
+      data.ciudadEvento +
+      "," +
+      data.paisEvento +
+      ". ",
+
+      ...transporteInfo,
+
+      "banco": data.nombreBanco,
+      "bancoTipoCuenta": data.tipoCuenta,
+      "numeroCuenta": data.numeroCuenta,
+
+      "nombresCompletos2": data.nombres.toUpperCase() +
+      " " +
+      data.apellidos.toUpperCase() +
+      "\n" +
+      data.cargo.toUpperCase() +
+      "\n" +
+      data.cedula,
+
+      "nombresCompletosJefeInmediato": data.nombreJefeInmediato.toUpperCase() +
+      "\n" +
+      data.cargoJefeInmediato.toUpperCase()
+    }
+  ];
+  
+  
+  
+  
+  const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
+  );
+}
+
 // Nueva función para generar el Anexo A2 en PDF
 export async function generateAnexoA2(data) {
   const template = {
@@ -776,4 +1353,10 @@ function formatDate(dateString) {
   if (!dateString) return "";
   const [year, month, day] = dateString.split("-");
   return `${day}-${month}-${year}`;
+}
+
+function capitalizeWords(str) {
+  return str.split(' ')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .join(' ');
 }

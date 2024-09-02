@@ -16,7 +16,8 @@ import Transportation from "./ComponetWithinProjects/Transportation";
 
 // Importación de las funciones para generar documentos
 import {
-  generateMemorandum,
+  generateMemoWithinProjec1,
+  generateMemoWithinProjec2,
   generateAnexoA,
   generateAnexoA2,
 } from "../utils/documentGenerator";
@@ -36,61 +37,52 @@ function EventParticipationWithinProjectsForm() {
 
   const { watch } = methods;
 
-  // Efecto para sincronizar con localStorage y manejar cálculos de fechas 
+  // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
+    // Función para calcular y actualizar la diferencia en días
+    const calculateAndSetDiferenciaEnDias = (primeraFechaSalida, ultimaFechaLlegada) => {
+      if (primeraFechaSalida && ultimaFechaLlegada) {
+        const fechaInicio = new Date(primeraFechaSalida);
+        const fechaFinal = new Date(ultimaFechaLlegada);
+        const diferenciaEnDias = Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+  
+        localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: diferenciaEnDias }));
+        setDiferenciaEnDias(diferenciaEnDias);
+      } else {
+        localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: 0 }));
+        setDiferenciaEnDias(0);
+      }
+    };
+  
     // Función para inicializar el estado desde localStorage
     const initializeFromLocalStorage = () => {
-    const formData = JSON.parse(localStorage.getItem("formData")) || {};
-
-    // Actualizar selección de inscripción
-    setSeleccionInscripcion(formData.inscripcion || "");
-
-    // Calcular diferencia en días entre las fechas seleccionadas
-    const primeraFechaSalida = formData.transporteIda?.[0]?.fechaSalida || "";
-    const ultimaFechaLlegada = formData.transporteRegreso?.[formData.transporteRegreso.length - 1]?.fechaLlegada || "";
-
-    if (primeraFechaSalida && ultimaFechaLlegada) {
-      const fechaInicio = new Date(primeraFechaSalida);
-      const fechaFinal = new Date(ultimaFechaLlegada);
-
-      const diferenciaEnDias = Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
-
-      localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: diferenciaEnDias }));
-      setDiferenciaEnDias(diferenciaEnDias);
-    } else {
-      localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: 0 }));
-      setDiferenciaEnDias(0);
-    }
+      const formData = JSON.parse(localStorage.getItem("formData")) || {};
+  
+      // Actualizar selección de inscripción
+      setSeleccionInscripcion(formData.inscripcion || "");
+  
+      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
+      const primeraFechaSalida = formData.transporteIda?.[0]?.fechaSalida || "";
+      const ultimaFechaLlegada = formData.transporteRegreso?.[formData.transporteRegreso.length - 1]?.fechaLlegada || "";
+      calculateAndSetDiferenciaEnDias(primeraFechaSalida, ultimaFechaLlegada);
     };
-
+  
     // Llamar a la inicialización al montar el componente
     initializeFromLocalStorage();
-
+  
     // Suscripción a los cambios en el formulario
     const subscription = watch((data) => {
-    localStorage.setItem("formData", JSON.stringify(data));
-
-    // Actualizar selección de inscripción
-    setSeleccionInscripcion(data.inscripcion);
-
-    // Calcular diferencia en días entre las fechas seleccionadas
-    const primeraFechaSalida = data.transporteIda?.[0]?.fechaSalida || "";
-    const ultimaFechaLlegada = data.transporteRegreso?.[data.transporteRegreso.length - 1]?.fechaLlegada || "";
-
-    if (primeraFechaSalida && ultimaFechaLlegada) {
-      const fechaInicio = new Date(primeraFechaSalida);
-      const fechaFinal = new Date(ultimaFechaLlegada);
-
-      const diferenciaEnDias = Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
-
-      localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: diferenciaEnDias }));
-      setDiferenciaEnDias(diferenciaEnDias);
-    } else {
-      localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: 0 }));
-      setDiferenciaEnDias(0);
-    }
+      localStorage.setItem("formData", JSON.stringify(data));
+  
+      // Actualizar selección de inscripción
+      setSeleccionInscripcion(data.inscripcion);
+  
+      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
+      const primeraFechaSalida = data.transporteIda?.[0]?.fechaSalida || "";
+      const ultimaFechaLlegada = data.transporteRegreso?.[data.transporteRegreso.length - 1]?.fechaLlegada || "";
+      calculateAndSetDiferenciaEnDias(primeraFechaSalida, ultimaFechaLlegada);
     });
-
+  
     // Limpieza al desmontar el componente
     return () => subscription.unsubscribe();
   }, [watch, setSeleccionInscripcion, setDiferenciaEnDias]);
@@ -105,13 +97,14 @@ function EventParticipationWithinProjectsForm() {
   // Función para manejar la generación de documentos
   const handleGenerateDocx = () => {
     const formData = methods.getValues();
-
-    if (formData.rolEnProyecto === "Director") {
-      generateMemorandum(formData);
-    } else {
-      alert("Solo el Director puede generar el memorando.");
+    if (formData.rolEnProyecto==="Director") {
+      generateMemoWithinProjec1(formData);
+      setShowDownloadSection(false);
     }
-    setShowDownloadSection(false);
+    if (formData.rolEnProyecto==="Codirector" || formData.rolEnProyecto==="Colaborador") {
+      generateMemoWithinProjec2(formData);
+      setShowDownloadSection(false);
+    }
   };
 
   const handleGeneratePdf = () => {
@@ -128,24 +121,17 @@ function EventParticipationWithinProjectsForm() {
 
   // Función para descargar todos los documentos
   const handleDownloadAll = () => {
-    const formData = methods.getValues();
-    if (formData.rolEnProyecto === "Director") {
 
-      setTimeout(() => {
-        generateMemorandum(formData);
-      }, 1000);
+    setTimeout(() => {
+      handleGenerateDocx();
+    }, 1000);
 
-      setTimeout(() => {
-        generateAnexoA(formData);
-      }, 2000);
+    setTimeout(() => {
+      handleGeneratePdf();
+    }, 2000);
 
-      generateAnexoA2(formData);
-    } else {
-      generateAnexoA(formData);
-      setTimeout(() => {
-        generateAnexoA2(formData);
-      }, 1000);
-    }
+    handleGeneratePdf2();
+    
     setShowDownloadSection(false);
   };
 
@@ -222,7 +208,7 @@ function EventParticipationWithinProjectsForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Anexo A2</span>
+                    <span>Descargar Anexo 2A</span>
                   </div>
                 </Col>
 

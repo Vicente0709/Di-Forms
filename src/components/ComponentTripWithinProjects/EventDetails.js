@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useFormContext } from "react-hook-form";
 
 function EventDetails() {
   const {
     register,
     watch,
-    setValue,
     formState: { errors },
   } = useFormContext();
   
@@ -32,7 +31,7 @@ function EventDetails() {
         <input
           type="text"
           id="nombreIntitucionAcogida"
-          {...register("nombreIntitucionAcogida", {
+          {...register("nombreInstitucionAcogida", {
             required: "El título del evento es requerido",
           })}
           className="form-input"
