@@ -16,66 +16,77 @@ import Transportation from "./ComponetWithinProjects/Transportation";
 
 // Importación de las funciones para generar documentos
 import {
-  generateMemorandum,
+  generateMemoWithinProjec1,
+  generateMemoWithinProjec2,
   generateAnexoA,
   generateAnexoA2,
 } from "../utils/documentGenerator";
 
 function EventParticipationWithinProjectsForm() {
-  // Estado para controlar la visibilidad de la sección de descargas
+  // Estados para manejar datos y visibilidad de la UI
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-
-  // Estado para almacenar la diferencia en días entre fechas
   const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
+  const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
 
-  // Configuración de react-hook-form con valores predeterminados obtenidos de localStorage
+  // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
-    mode: "onChange", // Actualización del formulario en cada cambio
-    reValidateMode: "onChange", // Revalidación del formulario en cada cambio
-    defaultValues: JSON.parse(localStorage.getItem("formData")) || {}, // Valores predeterminados del formulario
+    mode: "onChange", 
+    reValidateMode: "onChange",
+    defaultValues: JSON.parse(localStorage.getItem("formData")) || {}, 
   });
 
   const { watch } = methods;
 
-  // useEffect para observar los cambios en el formulario y calcular la diferencia en días
+  // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
-    const subscription = watch((data) => {
-      // Guardar los datos del formulario en localStorage
-      localStorage.setItem("formData", JSON.stringify(data));
-
-      // Obtener la última fecha de llegada y la primera fecha de salida del transporte
-      const ultimaFechaLlegada =
-        data.transporte.length > 0
-          ? data.transporte[data.transporte.length - 1]?.fechaLlegada
-          : "";
-      const primeraFechaSalida = data.transporte[0]?.fechaSalida;
-
-      if (ultimaFechaLlegada && primeraFechaSalida) {
-        // Convertir las fechas en objetos Date
+    // Función para calcular y actualizar la diferencia en días
+    const calculateAndSetDiferenciaEnDias = (primeraFechaSalida, ultimaFechaLlegada) => {
+      if (primeraFechaSalida && ultimaFechaLlegada) {
         const fechaInicio = new Date(primeraFechaSalida);
         const fechaFinal = new Date(ultimaFechaLlegada);
-
-        // Calcular la diferencia en milisegundos y convertirla a días
-        const diferenciaEnMilisegundos = fechaFinal - fechaInicio;
-        const diferenciaEnDias =
-          Math.ceil(diferenciaEnMilisegundos / (1000 * 60 * 60 * 24)) + 1;
-
-        // Guardar la diferencia en días en localStorage y actualizar el estado
-        localStorage.setItem(
-          "diferenciaDias",
-          JSON.stringify({ diferencia: diferenciaEnDias })
-        );
+        const diferenciaEnDias = Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+  
+        localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: diferenciaEnDias }));
         setDiferenciaEnDias(diferenciaEnDias);
       } else {
-        // Si no hay fechas válidas, establecer la diferencia en días a 0
         localStorage.setItem("diferenciaDias", JSON.stringify({ diferencia: 0 }));
         setDiferenciaEnDias(0);
       }
+    };
+  
+    // Función para inicializar el estado desde localStorage
+    const initializeFromLocalStorage = () => {
+      const formData = JSON.parse(localStorage.getItem("formData")) || {};
+  
+      // Actualizar selección de inscripción
+      setSeleccionInscripcion(formData.inscripcion || "");
+  
+      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
+      const primeraFechaSalida = formData.transporteIda?.[0]?.fechaSalida || "";
+      const ultimaFechaLlegada = formData.transporteRegreso?.[formData.transporteRegreso.length - 1]?.fechaLlegada || "";
+      calculateAndSetDiferenciaEnDias(primeraFechaSalida, ultimaFechaLlegada);
+    };
+  
+    // Llamar a la inicialización al montar el componente
+    initializeFromLocalStorage();
+  
+    // Suscripción a los cambios en el formulario
+    const subscription = watch((data) => {
+      localStorage.setItem("formData", JSON.stringify(data));
+  
+      // Actualizar selección de inscripción
+      setSeleccionInscripcion(data.inscripcion);
+  
+      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
+      const primeraFechaSalida = data.transporteIda?.[0]?.fechaSalida || "";
+      const ultimaFechaLlegada = data.transporteRegreso?.[data.transporteRegreso.length - 1]?.fechaLlegada || "";
+      calculateAndSetDiferenciaEnDias(primeraFechaSalida, ultimaFechaLlegada);
     });
-
-    // Limpieza del efecto al desmontar el componente
+  
+    // Limpieza al desmontar el componente
     return () => subscription.unsubscribe();
-  }, [watch, setDiferenciaEnDias]);
+  }, [watch, setSeleccionInscripcion, setDiferenciaEnDias]);
+
 
   // Función que se ejecuta al enviar el formulario
   const onSubmit = (data) => {
@@ -83,74 +94,57 @@ function EventParticipationWithinProjectsForm() {
     console.log(methods.getValues()); // Log de los valores del formulario
   };
 
-  // Función para generar un documento DOCX
+  // Función para manejar la generación de documentos
   const handleGenerateDocx = () => {
     const formData = methods.getValues();
-
-    // Verificar si el rol en el proyecto es "Director"
-    if (formData.rolEnProyecto === "Director") {
-      generateMemorandum(formData); // Generar el memorando
-    } else {
-      alert("Solo el Director puede generar el memorando.");
+    if (formData.rolEnProyecto==="Director") {
+      generateMemoWithinProjec1(formData);
+      setShowDownloadSection(false);
     }
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    if (formData.rolEnProyecto==="Codirector" || formData.rolEnProyecto==="Colaborador") {
+      generateMemoWithinProjec2(formData);
+      setShowDownloadSection(false);
+    }
   };
 
-  // Función para generar el Anexo A en formato PDF
   const handleGeneratePdf = () => {
     const formData = methods.getValues();
-    generateAnexoA(formData); // Generar el Anexo A
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    generateAnexoA(formData);
+    setShowDownloadSection(false);
   };
 
-  // Función para generar el Anexo A2 en formato PDF
   const handleGeneratePdf2 = () => {
     const formData = methods.getValues();
-    generateAnexoA2(formData); // Generar el Anexo A2
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    generateAnexoA2(formData); 
+    setShowDownloadSection(false);
   };
 
   // Función para descargar todos los documentos
   const handleDownloadAll = () => {
-    const formData = methods.getValues();
 
-    // Verificar si el rol en el proyecto es "Director"
-    if (formData.rolEnProyecto === "Director") {
-      // Generar el memorando con un retraso de 1 segundo
-      setTimeout(() => {
-        generateMemorandum(formData);
-      }, 1000);
+    setTimeout(() => {
+      handleGenerateDocx();
+    }, 1000);
 
-      // Generar el Anexo A con un retraso de 2 segundos
-      setTimeout(() => {
-        generateAnexoA(formData);
-      }, 2000);
+    setTimeout(() => {
+      handleGeneratePdf();
+    }, 2000);
 
-      // Generar el Anexo A2 sin retraso adicional
-      generateAnexoA2(formData);
-    } else {
-      // Si no es "Director", solo generar los Anexos
-      generateAnexoA(formData);
-
-      // Generar el Anexo A2 con un retraso de 1 segundo
-      setTimeout(() => {
-        generateAnexoA2(formData);
-      }, 1000);
-    }
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    handleGeneratePdf2();
+    
+    setShowDownloadSection(false);
   };
 
-  // Función para limpiar el formulario
+  // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formData"); // Eliminar los datos del formulario de localStorage
-    setShowDownloadSection(false); // Ocultar la sección de descargas
-    window.location.reload(); // Recargar la página para resetear el formulario
+    localStorage.removeItem("formData");
+    setShowDownloadSection(false);
+    window.location.reload();
   };
 
   return (
     <FormProvider {...methods}>
       <Container>
-        {/* Título del formulario */}
         <h1 className="text-center my-4">
           Formulario para participación en eventos dentro de proyectos
         </h1>
@@ -163,7 +157,7 @@ function EventParticipationWithinProjectsForm() {
           <Justification />
           <Transportation />
           {diferenciaEnDias > 15 && <ActivitySchedule />}
-          <PaymentInfo />
+          {seleccionInscripcion === "SI" && <PaymentInfo />}
           <ExpensesDeclaration />
           <BankAccount />
           <InstitutionalServices />
@@ -181,6 +175,7 @@ function EventParticipationWithinProjectsForm() {
           {showDownloadSection && (
             <div className="mt-4">
               <Row className="justify-content-center">
+
                 <Col md={4} className="text-center">
                   <div onClick={handleGenerateDocx} className="download-item">
                     <img
@@ -192,6 +187,7 @@ function EventParticipationWithinProjectsForm() {
                     <span>Descargar Memorando</span>
                   </div>
                 </Col>
+                
                 <Col md={4} className="text-center">
                   <div onClick={handleGeneratePdf} className="download-item">
                     <img
@@ -203,6 +199,7 @@ function EventParticipationWithinProjectsForm() {
                     <span>Descargar Anexo A</span>
                   </div>
                 </Col>
+
                 <Col md={4} className="text-center">
                   <div onClick={handleGeneratePdf2} className="download-item">
                     <img
@@ -211,9 +208,10 @@ function EventParticipationWithinProjectsForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Anexo A2</span>
+                    <span>Descargar Anexo 2A</span>
                   </div>
                 </Col>
+
               </Row>
 
               {/* Botón para descargar todos los documentos */}
@@ -228,6 +226,7 @@ function EventParticipationWithinProjectsForm() {
                   </Button>
                 </Col>
               </Row>
+
             </div>
           )}
 

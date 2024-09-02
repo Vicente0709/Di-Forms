@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
-function PaymentInfo() {
+function PaymentDetail() {
   const {
     register,
     control,
@@ -15,13 +15,23 @@ function PaymentInfo() {
 
   const metodoPago = watch("metodoPago");
   const fechaFinEvento = watch("fechaFinEvento");
+  const now = new Date();
+const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
 
-  const validateSingleDateSelection = (index) => {
+
+  const validateSingleDateSelection = (index) => {    
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
 
+    
     if (limiteFecha && limiteFecha > fechaFinEvento) {
-      return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
+      return `La fecha no puede ser mayor que la fecha de fin del evento (${fechaFinEvento})`;
     }
+//validacion para fechas anteriores a la actual
+    if (limiteFecha && limiteFecha < today) {
+      return `La fecha no puede ser menor que la fecha actual (${today})`;
+    }
+
 
     return true;
   };
@@ -43,8 +53,9 @@ function PaymentInfo() {
           <tr>
             <th>Nro.</th>
             <th>Valor de inscripción</th>
-            <th>Pago a realizarce</th>
+            <th>Pago a realizarse</th>
             <th>Fecha</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -85,10 +96,10 @@ function PaymentInfo() {
                   className="form-select"
                 >
                   <option value="">Seleccione</option>
-                  <option value="Antes del ">Antes</option>
-                  <option value="Después del ">Después</option>
-                  <option value="Fecha:">
-                    Fecha máxima de pago
+                  <option value="Antes">Antes</option>
+                  <option value="Despues">Despues</option>
+                  <option value="Fecha maxima de pago">
+                    Fecha maxima de pago
                   </option>
                 </select>
                 {errors.pagoLimite && (
@@ -204,11 +215,6 @@ function PaymentInfo() {
                 Documento donde se puede verificar el costo y fechas de la
                 inscripción al evento
               </li>
-              <li>
-                Documento en el cual se indique que el pago solo se puede
-                realizar con tarjeta de crédito o efectivo o que no cuenta con
-                banco intermediario.
-              </li>
             </ul>
           </div>
         )}
@@ -220,4 +226,4 @@ function PaymentInfo() {
   );
 }
 
-export default PaymentInfo;
+export default PaymentDetail;

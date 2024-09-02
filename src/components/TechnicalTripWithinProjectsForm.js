@@ -6,85 +6,136 @@ import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import PersonalDetails from "./ComponentTripWithinProjects/PersonalDetails";
 import ProjectDetails from "./ComponentTripWithinProjects/ProjectDetails";
 import EventDetails from "./ComponentTripWithinProjects/EventDetails";
+import Justification from "./ComponentTripWithinProjects/Justification";
+import Transportation from "./ComponentTripWithinProjects/Transportation";
+import ActivitySchedule from "./ComponentTripWithinProjects/ActivitySchedule";
+import BankAccount from "./ComponentTripWithinProjects/BankAccount";
+import InstitutionalServices from "./ComponentTripWithinProjects/InstitutionalServices";
 
 // Importación de las funciones para generar documentos
-function TechnicalTripWithinProjectsForm() {
-  // Estado para controlar la visibilidad de la sección de descargas
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
+import {
+  generateAnexoATripWithingProject,
+  generateMemoTripWithinProjec1,
+  generateMemoTripWithinProjec2
+} from "../utils/documentGenerator";
 
+function TechnicalTripWithinProjectsForm() {
+  // Estados para manejar datos y visibilidad de la UI
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const [diferenciaDiasViajeTecnicoDeProyectos, setDiferenciaDiasViajeTecnicoDeProyectos] = useState(0);
+
+  // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
-    mode: "onChange", // Actualización del formulario en cada cambio
-    reValidateMode: "onChange", // Revalidación del formulario en cada cambio
+    mode: "onChange", // El formulario se valida en cada cambio
+    reValidateMode: "onChange", // Se revalida en cada cambio
     defaultValues:
-      JSON.parse(localStorage.getItem("formTechnicalTripWithinProjectsForm")) || {}, // Valores predeterminados del formulario
+      JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects")) || {},
   });
 
   const { watch } = methods;
 
-  // useEffect para observar los cambios en el formulario
+  // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
+    // Función para calcular y actualizar la diferencia en días
+    const calculateAndSetDiferenciaDiasViajeTecnico = (primeraFechaSalida, ultimaFechaLlegada) => {
+      if (ultimaFechaLlegada && primeraFechaSalida) {
+        const fechaInicio = new Date(primeraFechaSalida);
+        const fechaFinal = new Date(ultimaFechaLlegada);
+        const diferenciaDiasViajeTecnicoDeProyectos = Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+  
+        localStorage.setItem("diferenciaDiasViajeTecnicoDeProyectos", JSON.stringify({ diferencia: diferenciaDiasViajeTecnicoDeProyectos }));
+        setDiferenciaDiasViajeTecnicoDeProyectos(setDiferenciaDiasViajeTecnicoDeProyectos);
+      } else {
+        localStorage.setItem("diferenciaDiasViajeTecnicoDeProyectos", JSON.stringify({ diferencia: 0 }));
+        setDiferenciaDiasViajeTecnicoDeProyectos(0);
+      }
+    };
+  
+    // Función para inicializar el estado desde localStorage
+    const initializeFromLocalStorage = () => {
+      const formTechnicalTripWithinProjects = JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects")) || {};
+  
+      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
+      const primeraFechaSalida = formTechnicalTripWithinProjects.transporteIda?.[0]?.fechaSalida || "";
+      const ultimaFechaLlegada = formTechnicalTripWithinProjects.transporteRegreso?.[formTechnicalTripWithinProjects.transporteRegreso.length - 1]?.fechaLlegada || "";
+      calculateAndSetDiferenciaDiasViajeTecnico(primeraFechaSalida, ultimaFechaLlegada);
+    };
+  
+    // Llamar a la inicialización al montar el componente
+    initializeFromLocalStorage();
+  
+    // Suscripción a los cambios en el formulario
     const subscription = watch((data) => {
-      // Guardar los datos del formulario en localStorage
-      localStorage.setItem("formTechnicalTripWithinProjectsForm", JSON.stringify(data));
+      localStorage.setItem("formTechnicalTripWithinProjects", JSON.stringify(data));
+  
+      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
+      const primeraFechaSalida = data.transporteIda?.[0]?.fechaSalida || "";
+      const ultimaFechaLlegada = data.transporteRegreso?.[data.transporteRegreso.length - 1]?.fechaLlegada || "";
+      calculateAndSetDiferenciaDiasViajeTecnico(primeraFechaSalida, ultimaFechaLlegada);
     });
-    // Limpieza del efecto al desmontar el componente
+  
+    // Limpieza al desmontar el componente
     return () => subscription.unsubscribe();
-  }, [watch]);
+  }, [watch, setDiferenciaDiasViajeTecnicoDeProyectos]);
 
-  // Función que se ejecuta al enviar el formulario
+  // Función que se ejecuta cuando se envía el formulario
   const onSubmitTechnicalTrip = (data) => {
     console.log(data);
-    setShowDownloadSection(true); // Mostrar la sección de descargas
+    setShowDownloadSection(true);
   };
 
-  // Función para generar un documento DOCX
+  
+  
   const handleGenerateDocx = () => {
-    // const formTechnicalTripWithinProjectsForm = methods.getValues();
-    // Lógica para generar el documento DOCX con los datos formTechnicalTripWithinProjectsForm
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    const formTripWothinProject = methods.getValues();  
+    if (formTripWothinProject.rolEnProyecto==="Director") {
+      generateMemoTripWithinProjec1(formTripWothinProject);
+      setShowDownloadSection(false);
+    }
+    if (formTripWothinProject.rolEnProyecto==="Codirector" || formTripWothinProject.rolEnProyecto==="Colaborador") {
+      generateMemoTripWithinProjec2(formTripWothinProject);
+      setShowDownloadSection(false);
+    }
   };
-
-  // Función para generar el Anexo A en formato PDF
+  
   const handleGeneratePdf = () => {
-    // const formTechnicalTripWithinProjectsForm = methods.getValues();
-    // Lógica para generar el Anexo A en PDF con los datos formTechnicalTripWithinProjectsForm
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+  const formTripWothinProject = methods.getValues();  
+  generateAnexoATripWithingProject(formTripWothinProject);
+  setShowDownloadSection(false);  
   };
-
-  // Función para generar el Anexo A2 en formato PDF
+  
   const handleGeneratePdf2 = () => {
-    // const formTechnicalTripWithinProjectsForm = methods.getValues();
-    // Lógica para generar el Anexo A2 en PDF con los datos formTechnicalTripWithinProjectsForm
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    
   };
-
-  // Función para descargar todos los documentos
+  
   const handleDownloadAll = () => {
-    // const formTechnicalTripWithinProjectsForm = methods.getValues();
-    // Lógica para generar y descargar todos los documentos
-    setShowDownloadSection(false); // Ocultar la sección de descargas
+    
   };
-
-  // Función para limpiar el formulario
+  // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formTechnicalTripWithinProjectsForm"); // Eliminar los datos del formulario de localStorage
-    setShowDownloadSection(false); // Ocultar la sección de descargas
-    window.location.reload(); // Recargar la página para resetear el formulario
+    localStorage.removeItem("formTechnicalTripWithinProjects");
+    localStorage.removeItem("diferenciaDiasViajeTecnicoDeProyectos");
+    setDiferenciaDiasViajeTecnicoDeProyectos(0);
+    window.location.reload();
   };
-
+  
   return (
     <FormProvider {...methods}>
       <Container>
-        {/* Título del formulario */}
         <h1 className="text-center my-4">
           Formulario para participación en viajes técnicos dentro de proyectos
         </h1>
+        {/* Formulario con diferentes secciones */}
         <Form onSubmit={methods.handleSubmit(onSubmitTechnicalTrip)}>
-          {/* Componentes específicos del formulario */}
-          <PersonalDetails /> 
           <ProjectDetails />
+          <PersonalDetails />
           <EventDetails />
-          
+          <Justification />
+          <Transportation />
+          <ActivitySchedule />
+          <BankAccount />
+          <InstitutionalServices />
+
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
@@ -94,7 +145,7 @@ function TechnicalTripWithinProjectsForm() {
             </Col>
           </Row>
 
-          {/* Sección de descarga de documentos, visible tras enviar el formulario */}
+          {/* Sección de descargas que aparece después de enviar el formulario */}
           {showDownloadSection && (
             <div className="mt-4">
               <Row className="justify-content-center">
@@ -128,12 +179,12 @@ function TechnicalTripWithinProjectsForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Anexo A2</span>
+                    <span>Descargar Anexo 2B</span>
                   </div>
                 </Col>
               </Row>
 
-              {/* Botón para descargar todos los documentos */}
+              {/* Botón para descargar todos los documentos a la vez */}
               <Row className="mt-3">
                 <Col className="text-center">
                   <Button

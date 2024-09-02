@@ -4,7 +4,7 @@ import { useFormContext } from 'react-hook-form';
 function BankAccount() {
   const { register, watch, setValue, clearErrors, formState: { errors } } = useFormContext();
   
-  // Monitorea el campo viaticosSubsistencias directamente aquí
+  // Monitorea el campo Transferencia directamente aquí
   const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
   const habilitarCampos = seleccionViaticosSubsistencias === "SI";
 
@@ -24,7 +24,7 @@ function BankAccount() {
   return (
     <div className="form-container">
       <h3>• CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS</h3>
-      <p>Obligatorio si marcó viáticos</p>
+      <p>Obligatorio si marcó Transferencia como método de pago.</p>
 
       <div className="form-group">
         <label className="form-label" htmlFor="nombreBanco">Nombre del banco:</label>
@@ -40,17 +40,13 @@ function BankAccount() {
 
       <div className="form-group">
         <label className="form-label" htmlFor="tipoCuenta">Tipo de cuenta:</label>
-        <select
+        <input
+          type="text"
           id="tipoCuenta"
-          className="form-select"
+          className="form-input"
           {...register("tipoCuenta", { required: habilitarCampos ? "Este campo es requerido" : false })}
-          disabled={!habilitarCampos} >
-
-          <option value="">Seleccione</option>
-          <option value="Ahorros">Ahorros</option>
-          <option value="Corriente">Corriente</option>
-
-        </select>
+          disabled={!habilitarCampos}
+        />
         {errors.tipoCuenta && <span className="error-text">{errors.tipoCuenta.message}</span>}
       </div>
 

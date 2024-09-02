@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React,{useEffect} from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
 function Transportation() {
@@ -8,17 +8,18 @@ function Transportation() {
     watch,
     formState: { errors },
   } = useFormContext();
-
- const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({
-  control,
-  name: "transporteIda",
+ 
+  const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({
+    control,
+    name: "transporteIda",
   });
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso } = useFieldArray({
-  control,
-  name: "transporteRegreso",
+    control,
+    name: "transporteRegreso",
   });
-  
+
   const today = new Date().toISOString().split("T")[0]; // Fecha actual en formato YYYY-MM-DD
+
   // Observar los cambios en la fecha fin del evento
   const fechaFinEvento = watch("fechaFinEvento");
   // validacion para que la fecha de retorno sea como maximo un dia mas de la fecha de fin del evento
@@ -57,6 +58,7 @@ function Transportation() {
       appendRegreso(initialTransporte);
     }
   }, [appendIda, appendRegreso, fieldsIda.length, fieldsRegreso.lengt, fieldsRegreso.length]);
+
 
   return (
     <div className="form-container">

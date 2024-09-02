@@ -1,18 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useFormContext } from "react-hook-form";
 
 function EventDetails() {
   const {
     register,
     watch,
-    setValue,
     formState: { errors },
   } = useFormContext();
   
 
-  const participacionEvento = watch("participacionEvento"); // Escucha los cambios en la participación en el evento
-  const tipoEvento = watch("tipoEvento"); // Escucha los cambios en el tipo de evento
-  const [showOtherEvent, setShowOtherEvent] = useState(false);
+  
   const fechaInicioEvento = watch('fechaInicioEvento'); 
 
  // Validación personalizada para la fecha de finalización
@@ -23,42 +20,24 @@ function EventDetails() {
   return fechaFin >= fechaInicioEvento || "La fecha de finalización no puede ser anterior a la fecha de inicio.";
 };
 
-  // Control de campo "Otro evento académico"
-  useEffect(() => {
-    setShowOtherEvent(tipoEvento === "Otro evento académico");
-    if (tipoEvento !== "Otro evento académico") {
-      setValue("otroEventoEspecificar", ""); // Limpiar campo si no es "Otro evento académico"
-    }
-  }, [tipoEvento, setValue]);
-
-  // Control del campo "Título de la Ponencia"
-  const isAsistencia = participacionEvento === "Asistencia";
-  useEffect(() => {
-    if (isAsistencia) {
-      setValue("tituloPonencia", "No aplica");
-    } else if (participacionEvento) {
-      setValue("tituloPonencia", "");
-    }
-  }, [isAsistencia, setValue, participacionEvento]);
 
   return (
     <div className="form-container">
-      <h3>• DETALLES DEL EVENTO</h3>
-
+      <h3>• Detalles del Viaje Tecnico</h3>
       <div className="form-group">
-        <label htmlFor="tituloEvento" className="form-label">
-          Título del evento:
+        <label htmlFor="nombreIntitucionAcogida" className="form-label">
+        Nombre de la institución de acogida:
         </label>
         <input
           type="text"
-          id="tituloEvento"
-          {...register("tituloEvento", {
+          id="nombreIntitucionAcogida"
+          {...register("nombreInstitucionAcogida", {
             required: "El título del evento es requerido",
           })}
           className="form-input"
         />
-        {errors.tituloEvento && (
-          <span className="error-text">{errors.tituloEvento.message}</span>
+        {errors.nombreIntitucionAcogida && (
+          <span className="error-text">{errors.nombreIntitucionAcogida.message}</span>
         )}
       </div>
 
@@ -130,121 +109,7 @@ function EventDetails() {
           {errors.fechaFinEvento && <span className="error-text">{errors.fechaFinEvento.message}</span>}
         </div>
       </div>
-
-      <div className="form-group">
-        <label className="form-label">Tipo de evento:</label>
-        <div>
-          <input
-            type="radio"
-            id="conferencia"
-            value="Conferencia o congreso"
-            {...register("tipoEvento", {
-              required: "El tipo de evento es requerido",
-            })}
-          />
-          <label htmlFor="conferencia">Conferencia o congreso</label>
-        </div>
-        <div>
-          <input
-            type="radio"
-            id="taller"
-            value="Taller"
-            {...register("tipoEvento", {
-              required: "El tipo de evento es requerido",
-            })}
-          />
-          <label htmlFor="taller">    Taller</label>
-        </div>
-        <div>
-          <input
-            type="radio"
-            id="otroEvento"
-            value="Otro evento académico"
-            {...register("tipoEvento", {
-              required: "El tipo de evento es requerido",
-            })}
-          />
-          <label htmlFor="otroEvento">    Otro evento académico</label>
-          {showOtherEvent && (
-            <input
-              type="text"
-              id="otroEventoEspecificar"
-              {...register("otroEventoEspecificar", {
-                required: "Por favor especifique el otro evento académico",
-              })}
-              placeholder="Especifique"
-              className="form-input"
-            />
-          )}
-        </div>
-        {errors.tipoEvento && (
-          <span className="error-text">{errors.tipoEvento.message}</span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label className="form-label">Participación en el evento:</label>
-        <div>
-          <input
-            type="radio"
-            id="presentacionArticulo"
-            value="Presentación de artículo indexado"
-            {...register("participacionEvento", {
-              required: "Seleccione una opción",
-            })}
-          />
-          <label htmlFor="presentacionArticulo">
-            Presentación de artículo indexado
-          </label>
-        </div>
-        <div>
-          <input
-            type="radio"
-            id="presentacionPoster"
-            value="Presentación de póster, abstract, charla magistral u otros"
-            {...register("participacionEvento", {
-              required: "Seleccione una opción",
-            })}
-          />
-          <label htmlFor="presentacionPoster">
-            Presentación de póster, abstract, charla magistral u otros
-          </label>
-        </div>
-        <div>
-          <input
-            type="radio"
-            id="asistencia"
-            value="Asistencia"
-            {...register("participacionEvento", {
-              required: "Seleccione una opción",
-            })}
-          />
-          <label htmlFor="asistencia">Asistencia</label>
-        </div>
-        {errors.participacionEvento && (
-          <span className="error-text">
-            {errors.participacionEvento.message}
-          </span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="tituloPonencia" className="form-label">
-          Título de la Ponencia:
-        </label>
-        <input
-          type="text"
-          id="tituloPonencia"
-          {...register("tituloPonencia", {
-            required: !isAsistencia && "El título de la ponencia es requerido",
-          })}
-          className="form-input"
-          disabled={isAsistencia}
-        />
-        {errors.tituloPonencia && (
-          <span className="error-text">{errors.tituloPonencia.message}</span>
-        )}
-      </div>
+     
       <div className="form-group">
         <label className="form-label">
           Solicita para participar en el evento:
@@ -312,35 +177,7 @@ function EventDetails() {
           )}
         </div>
 
-        {/* Inscripción */}
-        <div className="sub-group">
-          <label>Inscripción:</label>
-          <div>
-            <input
-              type="radio"
-              id="inscripcionSi"
-              value="SI"
-              {...register("inscripcion", {
-                required: "Indique si requiere inscripción",
-              })}
-            />
-            <label htmlFor="inscripcionSi">SI</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              id="inscripcionNo"
-              value="NO"
-              {...register("inscripcion", {
-                required: "Indique si requiere inscripción",
-              })}
-            />
-            <label htmlFor="inscripcionNo">NO</label>
-          </div>
-          {errors.inscripcion && (
-            <span className="error-text">{errors.inscripcion.message}</span>
-          )}
-        </div>
+        
       </div>
     </div>
   );

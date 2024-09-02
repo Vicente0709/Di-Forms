@@ -15,16 +15,16 @@ function ActivitySchedule() {
   // Efecto para cargar y actualizar las fechas desde localStorage
   useEffect(() => {
     const updateDatesFromLocalStorage = () => {
-      const formData = JSON.parse(localStorage.getItem("formData"));
-      if (formData) {
+      const formTechnicalTripWithinProjects = JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects"));
+      if (formTechnicalTripWithinProjects) {
         // Obtener la primera fecha de salida desde transporteIda
-        const fechaInicioEvento = formData.transporteIda?.length > 0 
-          ? formData.transporteIda[0]?.fechaSalida 
+        const fechaInicioEvento = formTechnicalTripWithinProjects.transporteIda?.length > 0 
+          ? formTechnicalTripWithinProjects.transporteIda[0]?.fechaSalida 
           : "";
     
         // Obtener la última fecha de llegada desde transporteRegreso
-        const fechaFinEvento = formData.transporteRegreso?.length > 0 
-          ? formData.transporteRegreso[formData.transporteRegreso.length - 1]?.fechaLlegada 
+        const fechaFinEvento = formTechnicalTripWithinProjects.transporteRegreso?.length > 0 
+          ? formTechnicalTripWithinProjects.transporteRegreso[formTechnicalTripWithinProjects.transporteRegreso.length - 1]?.fechaLlegada 
           : "";
     
         // Actualizar los estados correspondientes

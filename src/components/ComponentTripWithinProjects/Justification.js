@@ -10,7 +10,7 @@ function Justification() {
 
   // Watching the values of both fields
   const objetivoProyectoValue = watch("objetivoProyecto", "");
-  const relevanciaEventoValue = watch("relevanciaEvento", "");
+  const relevanciaEventoValue = watch("relevanciaViajeTecnico", "");
 
   return (
     <div className="form-container">
@@ -49,25 +49,23 @@ function Justification() {
 
       {/* 3.2 Relevancia del evento para su proyecto */}
       <div className="form-group">
-        <label htmlFor="relevanciaEvento" className="form-label">
-          Relevancia del evento para su proyecto relacionado con el
-          objetivo, resultado o producto del punto anterior.
+        <label htmlFor="relevanciaViajeTecnico" className="form-label">
+          Relevancia del viaje técnico para el desarrollo del proyecto:
         </label>
-        <label htmlFor="relevanciaEvento">
-          Describa la relevación del evento y aporte al cumplimiento del
-          objetivo, resultado o producto.
+        <label htmlFor="relevanciaViajeTecnico">
+          Describa la relevancia del viaje técnico y aporte al cumplimiento del objetivo, resultado o producto.
         </label>
         <textarea
-          id="relevanciaEvento"
-          {...register("relevanciaEvento", {
+          id="relevanciaViajeTecnico"
+          {...register("relevanciaViajeTecnico", {
             required: "Este campo es requerido",
             validate: (value) =>
               value.length >= 50 || "La descripción está muy corta. Debe tener al menos 50 caracteres.",
           })}
           className="form-input"
         />
-        {errors.relevanciaEvento && (
-          <span className="error-text">{errors.relevanciaEvento.message}</span>
+        {errors.relevanciaViajeTecnico && (
+          <span className="error-text">{errors.relevanciaViajeTecnico.message}</span>
         )}
         {relevanciaEventoValue.length < 50 && (
           <span className="error-text"></span>
