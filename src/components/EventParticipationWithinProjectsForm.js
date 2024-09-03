@@ -13,6 +13,7 @@ import BankAccount from "./ComponetWithinProjects/BankAccount";
 import InstitutionalServices from "./ComponetWithinProjects/InstitutionalServices";
 import ActivitySchedule from "./ComponetWithinProjects/ActivitySchedule";
 import Transportation from "./ComponetWithinProjects/Transportation";
+import ExteriorDetail from "./ComponetWithinProjects/ExteriorDetail";
 
 // Importación de las funciones para generar documentos
 import {
@@ -161,6 +162,7 @@ function EventParticipationWithinProjectsForm() {
           <ExpensesDeclaration />
           <BankAccount />
           <InstitutionalServices />
+          <ExteriorDetail/>
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">

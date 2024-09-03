@@ -11,6 +11,7 @@ import Transportation from "./ComponentTripWithinProjects/Transportation";
 import ActivitySchedule from "./ComponentTripWithinProjects/ActivitySchedule";
 import BankAccount from "./ComponentTripWithinProjects/BankAccount";
 import InstitutionalServices from "./ComponentTripWithinProjects/InstitutionalServices";
+import ExteriorDetail from "./ComponentTripWithinProjects/ExteriorDetail";
 
 // Importación de las funciones para generar documentos
 import {
@@ -18,6 +19,7 @@ import {
   generateMemoTripWithinProjec1,
   generateMemoTripWithinProjec2
 } from "../utils/documentGenerator";
+import ExpensesDeclaration from "./ComponetWithinProjects/ExpensesDeclaration";
 
 function TechnicalTripWithinProjectsForm() {
   // Estados para manejar datos y visibilidad de la UI
@@ -135,6 +137,7 @@ function TechnicalTripWithinProjectsForm() {
           <ActivitySchedule />
           <BankAccount />
           <InstitutionalServices />
+          <ExteriorDetail/>
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
