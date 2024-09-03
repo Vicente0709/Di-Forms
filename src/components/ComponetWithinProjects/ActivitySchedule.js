@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
 function ActivitySchedule() {
-  const { register, control, formState: { errors } } = useFormContext();
+  const { register, control, watch, setValue, formState: { errors } } = useFormContext();
   const { fields: immutableFields, replace } = useFieldArray({
     control,
     name: "actividadesInmutables",
@@ -11,10 +11,12 @@ function ActivitySchedule() {
   // Estados para almacenar las fechas de inicio y fin del evento
   const [fechaInicioEvento, setFechaInicioEvento] = useState("");
   const [fechaFinEvento, setFechaFinEvento] = useState("");
+  
 
   // Efecto para cargar y actualizar las fechas desde localStorage
   useEffect(() => {
-    const updateDatesFromLocalStorage = () => {
+
+      const updateDatesFromLocalStorage = () => {
       const formData = JSON.parse(localStorage.getItem("formData"));
       if (formData) {
         // Obtener la primera fecha de salida desde transporteIda
@@ -31,8 +33,10 @@ function ActivitySchedule() {
         setFechaInicioEvento(fechaInicioEvento || "");
         setFechaFinEvento(fechaFinEvento || "");
       }
+     
     };
 
+    
     // Llamar la función al montar el componente
     updateDatesFromLocalStorage();
 
@@ -115,6 +119,8 @@ function ActivitySchedule() {
       </table>
 
       {/* Sección para justificar la comisión mayor a 15 días */}
+
+  
       <div className="form-container">
         <h3>Justificar la necesidad de la comisión de servicios mayor a 15 días</h3>
         <p className="instruction-text">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
 function ActivitySchedule() {
-  const { register, control, formState: { errors } } = useFormContext();
+  const { register, control, watch, setValue, formState: { errors } } = useFormContext();
   const { fields: immutableFields, replace } = useFieldArray({
     control,
     name: "actividadesInmutables",
@@ -43,6 +43,27 @@ function ActivitySchedule() {
     return () => clearInterval(intervalId);
   }, []);
 
+  
+  const [showInputJustificacion, setshowInputJustificacion] = useState(false);
+  useEffect(() => {
+
+    if (fechaInicioEvento && fechaFinEvento) {
+      const start = new Date(fechaInicioEvento);
+      const end = new Date(fechaFinEvento);
+      const diferencia = Math.ceil((end - start) / (1000 * 60 * 60 * 24)); // Diferencia en días
+
+      if (diferencia > 15) {
+        setshowInputJustificacion(true);
+      } else {
+        setshowInputJustificacion(false);
+        setValue("justificacionComision", ""); // Limpia el campo si la diferencia es 15 días o menos
+      }
+    }
+  }, [[setValue]]);
+
+
+
+
   // Actualiza las fechas inmutables cuando cambian las fechas de inicio o fin
   useEffect(() => {
     if (fechaInicioEvento && fechaFinEvento) {
@@ -56,6 +77,7 @@ function ActivitySchedule() {
   }, [fechaInicioEvento, fechaFinEvento, replace]);
 
   return (
+    
     <div className="form-container">
       <h3>• CRONOGRAMA DE ACTIVIDADES</h3>
       <p className="instruction-text">
@@ -115,6 +137,7 @@ function ActivitySchedule() {
       </table>
 
       {/* Sección para justificar la comisión mayor a 15 días */}
+      {showInputJustificacion && (
       <div className="form-container">
         <h3>Justificar la necesidad de la comisión de servicios mayor a 15 días</h3>
         <p className="instruction-text">
@@ -132,7 +155,9 @@ function ActivitySchedule() {
           <span className="error-text">{errors.justificacionComision.message}</span>
         )}
       </div>
+       ) }
     </div>
+  
   );
 }
 

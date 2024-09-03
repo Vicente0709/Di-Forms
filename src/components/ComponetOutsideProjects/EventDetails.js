@@ -15,7 +15,8 @@ function EventDetails() {
   const seleccionArticulo = watch ("articuloPublicado");
   const fechaInicioEvento = watch('fechaInicioEvento'); 
 
-
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
  // Validación personalizada para la fecha de finalización
  const validateFechaFin = (fechaFin) => {
   if (!fechaInicioEvento) {
@@ -111,8 +112,8 @@ function EventDetails() {
             {...register("fechaInicioEvento", { 
               required: "La fecha de inicio es requerida",
               validate: (value) => {
-                const today = new Date().toISOString().split('T')[0];
-                return value >= today || "La fecha de inicio no puede ser anterior a la fecha actual.";
+                const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+               return value >= today || "La fecha de inicio no puede ser anterior a la fecha actual.";
               }
             })}
             className="form-input"

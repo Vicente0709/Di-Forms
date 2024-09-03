@@ -96,9 +96,9 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                   className="form-select"
                 >
                   <option value="">Seleccione</option>
-                  <option value="Antes">Antes</option>
-                  <option value="Despues">Despues</option>
-                  <option value="Fecha maxima de pago">
+                  <option value="Antes del ">Antes</option>
+                  <option value="Despues del ">Despues</option>
+                  <option value="Fecha: ">
                     Fecha maxima de pago
                   </option>
                 </select>

@@ -60,7 +60,7 @@ export const schemaAnexo8 =  [
         "rotate": 0,
         "alignment": "left",
         "verticalAlignment": "top",
-        "fontSize": 10,
+        "fontSize": 8,
         "lineHeight": 1,
         "characterSpacing": 0,
         "fontColor": "#2573ca",
