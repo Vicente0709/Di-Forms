@@ -17,9 +17,9 @@ import ExteriorDetail from "./ComponentTripWithinProjects/ExteriorDetail";
 import {
   generateAnexoATripWithingProject,
   generateMemoTripWithinProjec1,
-  generateMemoTripWithinProjec2
+  generateMemoTripWithinProjec2,
+  generateAnexoB2WithinProject
 } from "../utils/documentGenerator";
-import ExpensesDeclaration from "./ComponetWithinProjects/ExpensesDeclaration";
 
 function TechnicalTripWithinProjectsForm() {
   // Estados para manejar datos y visibilidad de la UI
@@ -107,7 +107,9 @@ function TechnicalTripWithinProjectsForm() {
   };
   
   const handleGeneratePdf2 = () => {
-    
+    const formTripWothinProject = methods.getValues();  
+  generateAnexoB2WithinProject(formTripWothinProject);
+  setShowDownloadSection(false); 
   };
   
   const handleDownloadAll = () => {

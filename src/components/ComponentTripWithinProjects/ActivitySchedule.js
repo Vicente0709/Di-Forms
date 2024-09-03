@@ -31,6 +31,7 @@ function ActivitySchedule() {
         setFechaInicioEvento(fechaInicioEvento || "");
         setFechaFinEvento(fechaFinEvento || "");
       }
+      
     };
 
     // Llamar la función al montar el componente
