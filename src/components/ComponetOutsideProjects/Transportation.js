@@ -213,7 +213,7 @@ function Transportation() {
                       validate: {
                         noPastDate: value => value >= today || "La fecha no puede ser menor a la fecha actual",
                         afterSalida: value => value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-                        ...(index === 0 && {validateFechaLlegadaIda}),
+                        ...(index === fieldsIda.length - 1 ? { validateFechaLlegadaIda } : {}),
                       }
                     })}
                   />

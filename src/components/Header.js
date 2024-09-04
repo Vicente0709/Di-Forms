@@ -50,6 +50,11 @@ function Header() {
                 className={({ isActive }) => (isActive ? "active" : "")} >
                 Participación en Viajes Técnicos Dentro de Proyectos
               </NavDropdown.Item>
+
+              <NavDropdown.Item as={NavLink} to="/InscriptionPayment"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Pago de Inscripción dentro o fuera de proyectos
+              </NavDropdown.Item>
               
             </NavDropdown>
           </Nav>
