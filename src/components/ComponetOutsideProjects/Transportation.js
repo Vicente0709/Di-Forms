@@ -48,18 +48,18 @@ function Transportation() {
   return true;
  };
 
- const validateFechaSalidaIda = (value) => {
+ const validateFechaLlegadaIda = (value) => {
   if (fechaInicioEvento) {
     const fechaInicio = new Date(fechaInicioEvento);
-    const fechaSalida = new Date(value);
+    const fechaLlegada = new Date(value);
     
 
     // Sumar un día a la fecha de fin del evento
     fechaInicio.setDate(fechaInicio.getDate() - 1);
 
     // Comparar fechas
-    if (fechaSalida < fechaInicio) {
-      return "La fecha de retorno como máximo un día antes del evento.";
+    if (fechaLlegada < fechaInicio) {
+      return "La fecha de llegada como máximo un día antes del evento.";
     }
   }
   return true;
@@ -179,8 +179,7 @@ function Transportation() {
                         noPastDate: value => value >= today || "La fecha no puede ser menor a la fecha actual",
                         validSequence: value =>
                           !fechaLlegadaAnterior || value >= fechaLlegadaAnterior || "La fecha de salida debe ser posterior a la fecha de llegada anterior",
-                        ...(index === 0 && {validateFechaSalidaIda}),
-                      }
+                        }
                     })}
                   />
                   {errors.transporteIda && errors.transporteIda[index]?.fechaSalida && (
@@ -213,7 +212,8 @@ function Transportation() {
                       required: "Este campo es requerido",
                       validate: {
                         noPastDate: value => value >= today || "La fecha no puede ser menor a la fecha actual",
-                        afterSalida: value => value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida"
+                        afterSalida: value => value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+                        ...(index === 0 && {validateFechaLlegadaIda}),
                       }
                     })}
                   />

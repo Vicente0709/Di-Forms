@@ -9,7 +9,7 @@ import { schemasAnexoA } from "./schemasAnexoA";
 //basepdf and schemas AnexoA2
 import { basePdfAnexoA2 } from "./basePdfAnexoA2";
 import { schemasAnexoA2 } from "./schemasAnexoA2";
-
+//basepdf and schemas Anexo8
 import { basepdfAnexo8 } from "./basepdfAnexo8";
 import { schemaAnexo8 } from "./schemaAnexo8";
 
@@ -501,7 +501,7 @@ export function generateMemoOutsideProject1(data){
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando para Jefe del Departamento al VIIV.docx");
   });
 }
 
@@ -680,7 +680,7 @@ export function generateMemoOutsideProject2(data){
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando del Profesor al Jefe.docx");
   });
 }
 
@@ -1350,8 +1350,8 @@ export async function generateAnexoAOutsideProject(data){
       "puesto":             data.puesto,
       "unidadPerteneciente":data.departamento,
       
-      "fechaSalida":        formatDate(data.transporte[0]?.fechaSalida),
-      "horaSalida":         data.transporte[0]?.horaSalida,
+      "fechaSalida":        formatDate(data.transporteIda[0]?.fechaSalida),
+      "horaSalida":         data.transporteIda[0]?.horaSalida,
 
       "fechaLlegada":       formatDate(ultimaFechaLlegada),
       "horaLlegada":        ultimaHoraLlegada,
@@ -1399,30 +1399,34 @@ export async function generateAnexoAOutsideProject(data){
   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
   saveAs(
     blob,
-    "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
+    "Anexo 1 - Solicitud de viáticos EPN.pdf"
   );
 }
 
 export async function generateAnexo8OutsideProject(data){
 
-const template= {
-schemas: schemaAnexo8,
-basePdf: basepdfAnexo8,
-};
-const plugins = { text, image, qrcode: barcodes.qrcode };
-const inscripcion = data.inscripciones;
+ const template= {
+ schemas: schemaAnexo8,
+ basePdf: basepdfAnexo8,
+ };
+ const plugins = { text, image, qrcode: barcodes.qrcode };
+ //Generacion de la constante
+ 
+  let valorInscripcionStr = "";
+  let fechaPagoInscripcionStr = "";
 
-const Inscripciones = {};
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-    
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-  for (let i = 0; i < 8; i++) {
-    Inscripciones[`valorInscripcion${i + 1}`] = inscripcion[i]?.valorInscripcion || "";
-    Inscripciones[`limiteFecha${i + 1}`] = inscripcion[i]?.pagoLimite || "";
-   
-  }
+  data.inscripciones.forEach((inscripcion)=>{
+    if(data.inscripcion==="SI" && inscripcion.valorInscripcion){
+      valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
+    }
 
-const inputs = [
+    if(data.inscripcion ==="SI" && inscripcion.pagoLimite && inscripcion.limiteFecha){
+      fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
+    }
+
+  });
+
+ const inputs = [
   {
     "nombres":                data.nombres.toUpperCase() +" "+ data.apellidos.toUpperCase(),
     "departamento":           data.departamento,
@@ -1442,6 +1446,8 @@ const inputs = [
     "viaticosSubsistenciasNo": data.viaticosSubsistencias==="NO"? "X": "",
     "inscripsionSi":           data.inscripcion==="SI"?"X":"",
     "inscripcionNo":           data.inscripcion==="NO"?"X":"",
+    "valorInscripcion":       valorInscripcionStr.trim(),
+    "limiteFecha":             fechaPagoInscripcionStr.trim(),
     "metodoPagoTransferencia": data.metodoPago==="Transferencia"? "X":"",
     "metodoPagoOtra":          data.metodoPago==="Otra"? "X":"",
     "hospedajeSi":            data.hospedaje==="SI"?"X":"",
@@ -1450,20 +1456,20 @@ const inputs = [
     "alimentacionNo":         data.alimentacion==="NO"?"X":"",
     "movilizacionInternaSi":  data.movilizacion==="SI"?"X":"",
     "movilizacionInternaNo":  data.movilizacion==="NO"?"X":"",
-    "seleccionDeclaracionNo": data.seleccionDeclaracion==="NO"?"X":"",
-    "seleccionDeclaracionSi": data.seleccionDeclaracion==="SI"?"X":"",
+    "seleccionDeclaracionNo": data.seleccionDeclaracion==="noCubre"?"X":"",
+    "seleccionDeclaracionSi": data.seleccionDeclaracion==="siCubre"?"X":"",
     "nombre":                 data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase(),
-    "puesto":                 data.puesto.toUpperCase()
+    "puesto":                 data.puesto.toUpperCase()   
   }
   
-];
+ ];
 
-const pdf = await generate({ template, plugins, inputs });
+ const pdf = await generate({ template, plugins, inputs });
 
   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
   saveAs(
     blob,
-    "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
+    "Anexo 8 - Formulario fuera de proyecto EPN.pdf"
   );
 
 }

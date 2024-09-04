@@ -80,19 +80,20 @@ function EventParticipationOutsideProjectsForm() {
   };
 
   const handleGeneratePdf2 = () => {
-    // Puedes implementar la lógica para generar el segundo PDF aquí
     const formEventOutsideProject = methods.getValues();
     generateAnexo8OutsideProject(formEventOutsideProject);
     setShowDownloadSection(false);
   };
 
   // Función para descargar todos los documentos
+  
   const handleDownloadAll = () => {
     handleGenerateMemo1();
+    handleGenerateMemo2();
     handleGeneratePdf();
     handleGeneratePdf2();
     setShowDownloadSection(false);
-  };
+    };
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
@@ -174,7 +175,7 @@ function EventParticipationOutsideProjectsForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Anexo A2</span>
+                    <span>Descargar Anexo 8</span>
                   </div>
                 </Col>
               </Row>
