@@ -8,13 +8,19 @@ function ActivitySchedule() {
     name: "actividadesInmutables",
   });
 
-  // Estados para almacenar las fechas de inicio y fin del evento
+  // Estados para almacenar los días de diferencia
   const [fechaInicioEvento, setFechaInicioEvento] = useState("");
   const [fechaFinEvento, setFechaFinEvento] = useState("");
+  const [diferenciaDiasViajeTecnicoDeProyectos, setdiferenciaDiasViajeTecnicoDeProyectos] = useState("");
 
   // Efecto para cargar y actualizar las fechas desde localStorage
   useEffect(() => {
     const updateDatesFromLocalStorage = () => {
+      
+      const diasViajeTecnico = JSON.parse(localStorage.getItem("diferenciaDiasViajeTecnicoDeProyectos"));
+      if (diasViajeTecnico) {
+       setdiferenciaDiasViajeTecnicoDeProyectos(diasViajeTecnico.diferencia);
+      }
       const formTechnicalTripWithinProjects = JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects"));
       if (formTechnicalTripWithinProjects) {
         // Obtener la primera fecha de salida desde transporteIda
@@ -31,6 +37,10 @@ function ActivitySchedule() {
         setFechaInicioEvento(fechaInicioEvento || "");
         setFechaFinEvento(fechaFinEvento || "");
       }
+
+
+
+
       
     };
 
@@ -47,22 +57,14 @@ function ActivitySchedule() {
   
   const [showInputJustificacion, setshowInputJustificacion] = useState(false);
   useEffect(() => {
-
-    if (fechaInicioEvento && fechaFinEvento) {
-      const start = new Date(fechaInicioEvento);
-      const end = new Date(fechaFinEvento);
-      const diferencia = Math.ceil((end - start) / (1000 * 60 * 60 * 24)); // Diferencia en días
-
-      if (diferencia > 15) {
+      if (diferenciaDiasViajeTecnicoDeProyectos > 15) {
         setshowInputJustificacion(true);
+        setValue("justificacionComision", ""); 
       } else {
         setshowInputJustificacion(false);
-        setValue("justificacionComision", ""); // Limpia el campo si la diferencia es 15 días o menos
+        setValue("justificacionComision", "No Aplica"); // Limpia el campo si la diferencia es 15 días o menos
       }
-    }
   }, [[setValue]]);
-
-
 
 
   // Actualiza las fechas inmutables cuando cambian las fechas de inicio o fin

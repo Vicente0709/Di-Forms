@@ -27,6 +27,8 @@ function Transportation() {
   const now = new Date();
   const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
   const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+
+  //observamos cambios en las fechas del evento 
   const fechaFinEvento = watch("fechaFinEvento");
   const fechaInicioEvento = watch("fechaInicioEvento");
  // const today = new Date().toISOString().split("T")[0];  // Fecha actual en formato YYYY-MM-DD
@@ -213,7 +215,7 @@ function Transportation() {
                       validate: {
                         noPastDate: value => value >= today || "La fecha no puede ser menor a la fecha actual",
                         afterSalida: value => value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-                        ...(index === 0 && {validateFechaLlegadaIda}),
+                       ...(index === fieldsIda.length - 1 ? { validateFechaLlegadaIda } : {}),
                       }
                     })}
                   />

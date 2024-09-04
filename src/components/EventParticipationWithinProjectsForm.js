@@ -157,7 +157,7 @@ function EventParticipationWithinProjectsForm() {
           <EventDetails />
           <Justification />
           <Transportation />
-          {diferenciaEnDias > 15 && <ActivitySchedule />}
+          <ActivitySchedule />
           {seleccionInscripcion === "SI" && <PaymentInfo />}
           <ExpensesDeclaration />
           <BankAccount />

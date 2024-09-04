@@ -44,7 +44,7 @@ function PersonalDetails() {
     } else {
       setshowInputDirector(false);
       setValue("nombreDirector","");
-      setValue("cargoDirector","");
+      
     }
   }, [rolEnProyecto, setValue]);
 
@@ -176,24 +176,6 @@ function PersonalDetails() {
         </div>
       )}
 
-      {showInputDirector && (
-        <div className="form-group">
-          <label htmlFor="cargoDirector" className="form-label">
-            Cargo del Director del proyecto:
-          </label>
-          <input
-            type="text"
-            id="cargoDirector"
-            {...register("cargoDirector", {
-              required: "El cargo del director es requerido",
-            })}
-            className="form-input"
-          />
-          {errors.cargoDirector && (
-            <span className="error-text">{errors.cargoDirector.message}</span>
-          )}
-        </div>
-      )}
 
       <div className="form-group">
         <label htmlFor="departamento" className="form-label">
