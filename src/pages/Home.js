@@ -113,6 +113,35 @@ function Home() {
           </Card>
         </Col>
         {/* Repite el bloque Col para otros formularios */}
+
+        <Col md={4}>
+          <Card border="primary" style={{ width: "100%" }}>
+            <Card.Body>
+              <Card.Title>
+                Formulario : Pago de Inscripción dentro o fuera de proyectos{" "}
+               </Card.Title>
+              <Card.Img
+                variant="top"
+                src="form.png"
+                alt="Formulario"
+                style={{ width: "100%", height: "150px", objectFit: "contain" }}
+              />
+              <Card.Text>
+                Este formulario está diseñado para el pago de inscripcón dentro o fuera 
+                de proyectos con el fin de generar los anexos requeridos
+                para el procedimiento correspondiente a la solicitud.
+              </Card.Text>
+              <Button
+                variant="primary"
+                onClick={() => handleCardClick("/InscriptionPayment")}
+                aria-label="Ir al formulario de pago de inscripción dentro o fuera de proyectos"
+              >
+                Ir al formulario
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+
       </Row>
     </Container>
   );

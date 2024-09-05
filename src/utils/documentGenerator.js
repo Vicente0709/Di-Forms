@@ -9,6 +9,12 @@ import { schemasAnexoA } from "./schemasAnexoA";
 //basepdf and schemas AnexoA2
 import { basePdfAnexoA2 } from "./basePdfAnexoA2";
 import { schemasAnexoA2 } from "./schemasAnexoA2";
+//basepdf and schemas Anexo8
+import { basepdfAnexo8 } from "./basepdfAnexo8";
+import { schemaAnexo8 } from "./schemaAnexo8";
+
+import { basePdfAnexoB2 } from "./basePdfAnexoB2";
+import { schemasAnexoB2 } from "./schemasAnexoB2";
 
 //Constantes
 const today = new Date();
@@ -17,7 +23,7 @@ const month = String(today.getMonth() + 1).padStart(2, "0"); // Los meses son 0-
 const year = today.getFullYear();
 const formattedDate = `${day}/${month}/${year}`;
 
-
+ 
 
 export function generateMemoWithinProjec1(data) {
   
@@ -97,7 +103,7 @@ export function generateMemoWithinProjec1(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: "Solicitud dentro de proyecto, de auspicio para movilidad al exterior para participar en evento académico",
+                text: `Solicitud para participar en evento académico/${data.codigoProyecto}`,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -113,6 +119,16 @@ export function generateMemoWithinProjec1(data) {
               }),
             ],
             spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
           }),
           new Paragraph({
             children: [
@@ -163,7 +179,7 @@ export function generateMemoWithinProjec1(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para participar en evento académico " + data.codigoProyecto + ".docx");
   });
 }
 export function generateMemoWithinProjec2(data) {
@@ -245,7 +261,7 @@ export function generateMemoWithinProjec2(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: `Solicitud dentro de proyecto para movilidad al exterior para participar en evento académico/${data.codigoProyecto} `,
+                text: `Solicitud para participar en evento académico/${data.codigoProyecto} `,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -265,9 +281,9 @@ export function generateMemoWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Se adjunta los documentos correspondientes.",
-                size: 20,
-                font: "Times New Roman",
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
               }),
             ],
             spacing: { after: 200 },
@@ -296,9 +312,7 @@ export function generateMemoWithinProjec2(data) {
             children: [
               new TextRun({
                 text:
-                  data.nombres.toUpperCase() +
-                  " " +
-                  data.apellidos.toUpperCase(),
+                 data.nombreDirector.toUpperCase(),
                 size: 20,
                 bold: true,
                 font: "Times New Roman",
@@ -309,7 +323,7 @@ export function generateMemoWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `${data.rolEnProyecto.toUpperCase()} DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
+                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -321,11 +335,34 @@ export function generateMemoWithinProjec2(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para participar en evento académico " + data.codigoProyecto + ".docx");
   });
 }
 
 export function generateMemoOutsideProject1(data){
+  let solicitudOracion = "la asignación de ";
+  // Array para almacenar las solicitudes
+  let solicitudes = [];
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push("la compra de pasajes aéreos");
+  }
+  // Verificar si se debe incluir "viáticos y subsistencias"
+  if (data.viaticosSubsistencias === "SI") {
+    solicitudes.push("viáticos y subsistencias");
+  }
+  // Verificar si se debe incluir "pago de inscripción"
+  if (data.inscripcion === "SI") {
+    solicitudes.push("el pago de inscripción");
+  }
+
+  // Construir la oración final
+  if (solicitudes.length > 0) {
+    solicitudOracion += solicitudes.join(", ") + ".";
+  } else {
+    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+  }
+
   const doc = new Document({
     sections: [
       {
@@ -398,7 +435,7 @@ export function generateMemoOutsideProject1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${data.departamento[0]}${data.departamento.slice(1).toLowerCase}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
+                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${data.departamento[0]}${data.departamento.slice(1).toLowerCase()}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -408,7 +445,7 @@ export function generateMemoOutsideProject1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, la asignación de viáticos y subsistencias al exterior, compra de pasajes aéreos y pago de inscripción.`,
+                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, ${solicitudOracion}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -472,14 +509,35 @@ export function generateMemoOutsideProject1(data){
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando para Jefe del Departamento al VIIV.docx");
   });
 }
 
 export function generateMemoOutsideProject2(data){
-  //const pasajesAereosText = data.pasajesAereos === "SI" ? "pasajes aéreos, " : "";
- // const viaticosSubsistenciasText = data.viaticosSubsistencias === "SI" ? "viáticos y subsistencias, " : "";
-  //const inscripcionText = data.inscripcion === "SI" ? "pago de inscripción." : "";
+
+  let solicitudOracion = "la asignación de ";
+  // Array para almacenar las solicitudes
+  let solicitudes = [];
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push("la compra de pasajes aéreos");
+  }
+  // Verificar si se debe incluir "viáticos y subsistencias"
+  if (data.viaticosSubsistencias === "SI") {
+    solicitudes.push("viáticos y subsistencias");
+  }
+  // Verificar si se debe incluir "pago de inscripción"
+  if (data.inscripcion === "SI") {
+    solicitudes.push("el pago de inscripción");
+  }
+
+  // Construir la oración final
+  if (solicitudes.length > 0) {
+    solicitudOracion += solicitudes.join(", ") + ".";
+  } else {
+    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+  }
+ 
    const doc = new Document({
     sections: [
       {
@@ -563,7 +621,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: "Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, la asignación de", //${pasajesAereosText}${viaticosSubsistenciasText}${inscripcionText}
+                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, ${solicitudOracion}`, 
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -630,7 +688,7 @@ export function generateMemoOutsideProject2(data){
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando del Profesor al Jefe.docx");
   });
 }
 
@@ -701,7 +759,7 @@ export function generateMemoTripWithinProjec1(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: `Solicitud dentro de proyecto para movilidad al exterior para viaje técnico/ ${data.codigoProyecto}`,
+                text: `Solicitud para viaje técnico/ ${data.codigoProyecto}`,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -711,7 +769,7 @@ export function generateMemoTripWithinProjec1(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.nombreInstitucionAcogida}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -721,9 +779,9 @@ export function generateMemoTripWithinProjec1(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Se adjunta los documentos correspondientes.",
-                size: 20,
-                font: "Times New Roman",
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
               }),
             ],
             spacing: { after: 200 },
@@ -777,7 +835,7 @@ export function generateMemoTripWithinProjec1(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para viaje técnico " + data.codigoProyecto + ".docx");
   });
 }
 export function generateMemoTripWithinProjec2(data) {
@@ -848,7 +906,7 @@ export function generateMemoTripWithinProjec2(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: `Solicitud dentro de proyecto para movilidad al exterior para viaje técnico/${data.codigoProyecto} `,
+                text: `Solicitud para viaje técnico/${data.codigoProyecto} `,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -868,9 +926,9 @@ export function generateMemoTripWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Se adjunta los documentos correspondientes.",
-                size: 20,
-                font: "Times New Roman",
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
               }),
             ],
             spacing: { after: 200 },
@@ -899,9 +957,7 @@ export function generateMemoTripWithinProjec2(data) {
             children: [
               new TextRun({
                 text:
-                  data.nombres.toUpperCase() +
-                  " " +
-                  data.apellidos.toUpperCase(),
+                  data.nombreDirector.toUpperCase(),
                 size: 20,
                 bold: true,
                 font: "Times New Roman",
@@ -912,7 +968,7 @@ export function generateMemoTripWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `${data.rolEnProyecto.toUpperCase()} DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
+                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -924,9 +980,200 @@ export function generateMemoTripWithinProjec2(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para viaje técnico" + data.codigoProyecto + ".docx");
   });
 }
+
+export function generateMemoInscriptionPaymentOutProyect1(data){
+
+    
+    
+    // Array para almacenar las solicitudes
+    let ponencias = [];
+    // Verificar si se debe incluir "pasajes aéreos"
+    if (data.tituloPonencia === "") {
+      ponencias.push();
+    }else{
+      ponencias.push(`, para la presentación de la ponencia:" ${data.tituloPonencia} "`);
+    }
+     
+    
+    let codigo  = [];
+    if (data.codigoProyecto === "") {
+      codigo.push();
+    }else{
+      codigo.push(`/ ${data.codigoProyecto} `);
+    }
+
+    let director = [];
+    if (data.nombreDirector===""){
+      director.push(`${data.nombres.toUpperCase()} ${data.apellidos.toUpperCase()}`);
+    } else{
+      director.push(`${data.nombreDirector.toUpperCase()}`);
+    }
+    
+    let dirCargo = [];
+    if (data.cargoDirector===""){
+      dirCargo.push("Profesor");
+    } else{
+      dirCargo.push(`${data.cargoDirector}`);
+    }
+
+    let formulario = [];
+    if (data.participacionProyecto==="fueraProyecto"){
+      formulario.push("Fuera de Proyecto");
+    } else{
+      formulario.push("Dentro de Proyecto");
+    }
+
+    let codigoP  = [];
+    if (data.codigoProyecto === "") {
+      codigoP.push();
+    }else{
+      codigoP.push(`${data.codigoProyecto} `);
+    }
+
+
+   const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Formato de memorando para pago de inscripción ${formulario}`,
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Solicitud para pago de inscripción ${codigo}`,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento} ${ponencias}. `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${director}`,
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${dirCargo}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, `Memorando para pago de inscripción ${formulario} ${codigoP}.docx`);
+  });
+}
+
+
 
 // Nueva función para generar el Anexo A en PDF
 export async function generateAnexoA(data) {
@@ -1249,14 +1496,19 @@ export async function generateAnexoAOutsideProject(data){
     schemas: schemasAnexoA,
     basePdf: basePdfAnexoA,
   };
+
+  // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
+  const transporte = data.transporteIda.concat(data.transporteRegreso);
+
   const ultimaFechaLlegada =
-    data.transporte.length > 0
-      ? data.transporte[data.transporte.length - 1]?.fechaLlegada
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.fechaLlegada
       : "";
   const ultimaHoraLlegada =
-    data.transporte.length > 0
-      ? data.transporte[data.transporte.length - 1]?.horaLlegada
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.horaLlegada
       : "";
+
   var ponentciaText = "";
   if (
     data.tituloPonencia &&
@@ -1271,16 +1523,17 @@ export async function generateAnexoAOutsideProject(data){
   const plugins = { text, image, qrcode: barcodes.qrcode };
   const transporteInfo = {};
   // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+    
+  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
   for (let i = 0; i < 8; i++) {
-    transporteInfo[`transporteTipo${i + 1}`] = data.transporte[i]?.tipoTransporte || "";
-    transporteInfo[`transporteNombre${i + 1}`] = data.transporte[i]?.nombreTransporte || "";
-    transporteInfo[`transporteRuta${i + 1}`] = data.transporte[i]?.ruta || "";
-    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(data.transporte[i]?.fechaSalida) || "";
-    transporteInfo[`transporteFechaSH${i + 1}`] = data.transporte[i]?.horaSalida || "";
-    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(data.transporte[i]?.fechaLlegada) || "";
-    transporteInfo[`transporteFechaLH${i + 1}`] = data.transporte[i]?.horaLlegada || "";
+    transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
+    transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
+    transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
+    transporteInfo[`transporteFechaS${i + 1}`] = formatDate(transporte[i]?.fechaSalida) || "";
+    transporteInfo[`transporteFechaSH${i + 1}`] = transporte[i]?.horaSalida || "";
+    transporteInfo[`transporteFechaL${i + 1}`] = formatDate(transporte[i]?.fechaLlegada) || "";
+    transporteInfo[`transporteFechaLH${i + 1}`] = transporte[i]?.horaLlegada || "";
   }
-
 
   const inputs = [
     {
@@ -1294,13 +1547,13 @@ export async function generateAnexoAOutsideProject(data){
       "puesto":             data.puesto,
       "unidadPerteneciente":data.departamento,
       
-      "fechaSalida":        formatDate(data.transporte[0]?.fechaSalida),
-      "horaSalida":         data.transporte[0]?.horaSalida,
+      "fechaSalida":        formatDate(data.transporteIda[0]?.fechaSalida),
+      "horaSalida":         data.transporteIda[0]?.horaSalida,
 
       "fechaLlegada":       formatDate(ultimaFechaLlegada),
       "horaLlegada":        ultimaHoraLlegada,
 
-      "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() + data.servidores.toUpperCase(),
+      "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() + ". " +data.servidores.toUpperCase(),
 
       "actividades": "Participación en el evento  '" +
       data.tituloEvento +
@@ -1343,10 +1596,141 @@ export async function generateAnexoAOutsideProject(data){
   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
   saveAs(
     blob,
-    "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
+    "Anexo 1 - Solicitud de viáticos EPN.pdf"
   );
 }
 
+export async function generateAnexo8OutsideProject(data){
+
+ const template= {
+ schemas: schemaAnexo8,
+ basePdf: basepdfAnexo8,
+ };
+ const plugins = { text, image, qrcode: barcodes.qrcode };
+ //Generacion de la constante
+ 
+  let valorInscripcionStr = "";
+  let fechaPagoInscripcionStr = "";
+
+  data.inscripciones.forEach((inscripcion)=>{
+    if(data.inscripcion==="SI" && inscripcion.valorInscripcion){
+      valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
+    }
+
+    if(data.inscripcion ==="SI" && inscripcion.pagoLimite && inscripcion.limiteFecha){
+      fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
+    }
+
+  });
+
+ const inputs = [
+  {
+    "nombres":                data.nombres.toUpperCase() +" "+ data.apellidos.toUpperCase(),
+    "departamento":           data.departamento,
+    "tituloEvento":           data.tituloEvento,
+    "lugarEvento":            data.ciudadEvento+", "+data.paisEvento,
+    "fechaInicioEvento":      data.fechaInicioEvento,
+    "fechaFinEvento":         data.fechaFinEvento,
+    "RelevanciaAcademica":    data.RelevanciaAcademica,
+    "tituloPonencia":         data.tituloPonencia,
+    "tipoPonencia":           data.tipoPonencia,
+    "detalleArticuloSI":      data.detalleArticuloSI,
+    "articuloPublicadoSi":    data.articuloPublicado==="SI" ? "X":"",
+    "articuloPublicadoNo":    data.articuloPublicado==="NO"? "X":"",
+    "pasajesAereosSi":        data.pasajesAereos==="SI" ? "X":"",
+    "pasajesAereosNo":        data.pasajesAereos==="NO" ? "X":"",
+    "viaticosSubsistenciasSi": data.viaticosSubsistencias==="SI"? "X": "",
+    "viaticosSubsistenciasNo": data.viaticosSubsistencias==="NO"? "X": "",
+    "inscripsionSi":           data.inscripcion==="SI"?"X":"",
+    "inscripcionNo":           data.inscripcion==="NO"?"X":"",
+    "valorInscripcion":       valorInscripcionStr.trim(),
+    "limiteFecha":             fechaPagoInscripcionStr.trim(),
+    "metodoPagoTransferencia": data.metodoPago==="Transferencia"? "X":"",
+    "metodoPagoOtra":          data.metodoPago==="Otra"? "X":"",
+    "hospedajeSi":            data.hospedaje==="SI"?"X":"",
+    "HospedajeNo":            data.hospedaje==="NO"?"X":"",
+    "alimentacionSi":         data.alimentacion==="SI"?"X":"",
+    "alimentacionNo":         data.alimentacion==="NO"?"X":"",
+    "movilizacionInternaSi":  data.movilizacion==="SI"?"X":"",
+    "movilizacionInternaNo":  data.movilizacion==="NO"?"X":"",
+    "seleccionDeclaracionNo": data.seleccionDeclaracion==="noCubre"?"X":"",
+    "seleccionDeclaracionSi": data.seleccionDeclaracion==="siCubre"?"X":"",
+    "nombre":                 data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase(),
+    "puesto":                 data.puesto.toUpperCase()   
+  }
+  
+ ];
+
+ const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    "Anexo 8 - Formulario fuera de proyecto EPN.pdf"
+  );
+
+}
+
+export async function generateAnexoB2WithinProject(data) {
+  const template = {
+    schemas: schemasAnexoB2,
+    basePdf: basePdfAnexoB2,
+  };
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const diferencia = JSON.parse(localStorage.getItem("diferenciaDiasViajeTecnicoDeProyectos"))?.diferencia || 0;
+  
+  const actividades = {};
+  // Genera dinámicamente las propiedades para activN, activFecha, y activDescripcion
+  for (let i = 0; i < 22; i++) {
+    actividades[`activN${i + 1}`] = data.actividadesInmutables[i] ? (i + 1).toString() : "";
+    actividades[`activFecha${i + 1}`] = data.actividadesInmutables[i]?.fecha || "";
+    actividades[`activDescripcion${i + 1}`] = data.actividadesInmutables[i]?.descripcion || "";
+  }
+
+  const inputs = [
+    {
+      "fechaPag1": formattedDate,
+      "codigoProyecto": data.codigoProyecto,
+      "tituloProyecto": data.tituloProyecto,
+      "nombresParticipante": data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+      "rolProyecto": data.rolEnProyecto,
+      "departamento": data.departamento,
+      "nombreInstitucionAcogida": data.nombreInstitucionAcogida,
+      "ciudad": data.ciudadEvento,
+      "pais": data.paisEvento,
+      "fechasEvento":  "Desde el " + data.fechaInicioEvento + " hasta el " + data.fechaFinEvento,
+
+      "pasajesS": data.pasajesAereos === "SI" ? "X" : "",
+      "viaticosS": data.viaticosSubsistencias === "SI" ? "X" : "",
+      "pasajesN": data.pasajesAereos === "NO" ? "X" : "",
+      "viaticosN": data.viaticosSubsistencias === "NO" ? "X" : "",
+
+      "objetivoEvento": data.objetivoProyecto,
+      "relevanciaEvento": data.relevanciaViajeTecnico,
+
+      "fechaPag2": formattedDate,
+
+      ...actividades,
+
+      "justificacionMas15": diferencia < 16 ? "No aplica" : data.justificacionComision,
+      "nombreDirector": data.nombreDirector? data.nombreDirector : data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
+      "codigoProyecto2": data.codigoProyecto,
+      
+      "fechaPag3" : formattedDate,
+      "calculo": "Calculo dias de comision entre las fechas de salida y de regreso al pais: " + diferencia
+    }
+  ];
+  const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    "Anexo 2b-Participación en VIAJE TECNICO dentro de Proyect/ " +
+      data.codigoProyecto +
+      ".pdf"
+  );
+}
 
 //formatear la fecha en formato dd/mm/yyyy
 function formatDate(dateString) {

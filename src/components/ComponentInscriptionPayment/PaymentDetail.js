@@ -208,8 +208,8 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
             <p>Incluir la siguiente información y documentos:</p>
             <ul>
               <li>
-                Solicitud de REEMBOLSO. Incluir en el texto del memorando la
-                justificación de por qué se solicita este método de pago.
+                Solicitud de REEMBOLSO. Incluir texto con justificación en 
+                el mismo memorando del requerimiento.
               </li>
               <li>
                 Documento donde se puede verificar el costo y fechas de la
