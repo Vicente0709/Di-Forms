@@ -11,8 +11,6 @@ import DocumentationDetail from "./ComponentInscriptionPayment/DocumentationDeta
 
 import{
   generateMemoInscriptionPaymentOutProyect1,
-  generateMemoInscriptionPaymentt2,
-  generateAnexoAOutsideProject,
   generateAnexo5InscriptionPayment,
 } from"../utils/documentGenerator.js"
 
@@ -67,31 +65,18 @@ function InscriptionPaymentForm() {
     setShowDownloadSection(false);
   };
 
-  const handleGenerateMemo2 = () => {
-    /*const formInscriptionPayment = methods.getValues();
-    generateMemoInscriptionPayment2(formInscriptionPayment);
-    setShowDownloadSection(false);*/
-  };
-
   const handleGeneratePdf = () => {
-   /* const formEventOutsideProject = methods.getValues();
-    generateAnexoAOutsideProject(formEventOutsideProject);
-    setShowDownloadSection(false);*/
+   const formInscriptionPayment = methods.getValues();
+   generateAnexo5InscriptionPayment(formInscriptionPayment);
+    setShowDownloadSection(false);
   };
 
-  const handleGeneratePdf2 = () => {
-   /* const formInscriptionPayment = methods.getValues();
-    generateAnexo5InscriptionPayment(formInscriptionPayment);
-    setShowDownloadSection(false);*/
-  };
 
   // Función para descargar todos los documentos
   
   const handleDownloadAll = () => {
     handleGenerateMemo1();
-    handleGenerateMemo2();
     handleGeneratePdf();
-    handleGeneratePdf2();
     setShowDownloadSection(false);
     };
 
@@ -107,7 +92,7 @@ function InscriptionPaymentForm() {
       <Container>
         {/* Título del formulario */}
         <h1 className="text-center my-4">
-          Formulario para participacion en eventos fuera de proyectos
+          Formulario para pago de inscripción dentro o fuera de proyectos
         </h1>
         <Form onSubmit={methods.handleSubmit(onSubmitInscriptionPayment)}>
           {/* Formulario con diferentes secciones */}
@@ -140,23 +125,10 @@ function InscriptionPaymentForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Memorando Pago de Inscripcion</span>
+                    <span>Descargar Memorando Pago de Inscripción</span>
                   </div>
                 </Col>
                 
-                <Col md={4} className="text-center">
-                  <div onClick={handleGenerateMemo2} className="download-item">
-                    <img
-                      src="IconWord.png"
-                      alt="Word Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Memorando del Profesor al Jefe </span>
-                  </div>
-                </Col>  
-                                          
-            
                 <Col md={4} className="text-center">
                   <div onClick={handleGeneratePdf} className="download-item">
                     <img
@@ -165,18 +137,7 @@ function InscriptionPaymentForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Anexo A</span>
-                  </div>
-                </Col>
-                <Col md={4} className="text-center">
-                  <div onClick={handleGeneratePdf2} className="download-item">
-                    <img
-                      src="IconPdf.png"
-                      alt="PDF Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Anexo 8</span>
+                    <span>Descargar Anexo 5</span>
                   </div>
                 </Col>
               </Row>

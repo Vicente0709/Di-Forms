@@ -16,6 +16,10 @@ import { schemaAnexo8 } from "./schemaAnexo8";
 import { basePdfAnexoB2 } from "./basePdfAnexoB2";
 import { schemasAnexoB2 } from "./schemasAnexoB2";
 
+import { basePdfAnexo5 } from "./basePdfAnexo5";
+import { schemasAnexo5 } from "./schemasAnexo5";
+
+
 //Constantes
 const today = new Date();
 const day = String(today.getDate()).padStart(2, "0");
@@ -986,15 +990,13 @@ export function generateMemoTripWithinProjec2(data) {
 
 export function generateMemoInscriptionPaymentOutProyect1(data){
 
-    
-    
-    // Array para almacenar las solicitudes
+    // Array para almacenar titulo ponencia
     let ponencias = [];
-    // Verificar si se debe incluir "pasajes aéreos"
+    // Verificar si se debe incluir "titulo ponencia"
     if (data.tituloPonencia === "") {
       ponencias.push();
     }else{
-      ponencias.push(`, para la presentación de la ponencia:" ${data.tituloPonencia} "`);
+      ponencias.push(`, para la presentación de la ponencia: " ${data.tituloPonencia} "`);
     }
      
     
@@ -1002,7 +1004,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
     if (data.codigoProyecto === "") {
       codigo.push();
     }else{
-      codigo.push(`/ ${data.codigoProyecto} `);
+      codigo.push(` / ${data.codigoProyecto} `);
     }
 
     let director = [];
@@ -1013,10 +1015,10 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
     }
     
     let dirCargo = [];
-    if (data.cargoDirector===""){
+    if (data.nombreDirector===""){
       dirCargo.push("Profesor");
     } else{
-      dirCargo.push(`${data.cargoDirector}`);
+      dirCargo.push(`Director de Proyecto ${data.codigoProyecto}`);
     }
 
     let formulario = [];
@@ -1106,7 +1108,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento} ${ponencias}. `,
+                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -1169,7 +1171,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, `Memorando para pago de inscripción ${formulario} ${codigoP}.docx`);
+    saveAs(blob, `Memorando para Pago de Inscripción ${formulario} ${codigoP}.docx`);
   });
 }
 
@@ -1731,6 +1733,79 @@ export async function generateAnexoB2WithinProject(data) {
       ".pdf"
   );
 }
+
+export async function generateAnexo5InscriptionPayment (data) {
+
+  const template ={
+    schemas: schemasAnexo5,
+    basePdf: basePdfAnexo5,
+  };
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+       
+    let formulario = [];
+    if (data.participacionProyecto==="fueraProyecto"){
+      formulario.push("Fuera de Proyecto");
+    } else{
+      formulario.push("Dentro de Proyecto");
+    }
+
+    let codigoP  = [];
+    if (data.codigoProyecto === "") {
+      codigoP.push();
+    }else{
+      codigoP.push(`${data.codigoProyecto} `);
+    }
+
+  let valorInscripcionStr = "";
+  let fechaPagoInscripcionStr = "";
+
+  data.inscripciones.forEach((inscripciones)=>{
+    if(inscripciones.valorInscripcion){
+      valorInscripcionStr += `$${inscripciones.valorInscripcion}\n`;
+    }
+
+    if(inscripciones.pagoLimite && inscripciones.limiteFecha){
+      fechaPagoInscripcionStr += `${inscripciones.pagoLimite} ${inscripciones.limiteFecha}\n`;
+    }
+
+  });
+
+  const inputs = [
+  {
+    "nombresApellidos":                 data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
+    "departamento":                     data.departamento,
+    "participacionProyectoFuera":       data.participacionProyecto==="fueraProyecto" ? "X":"",
+    "participacionProyectoDentro":      data.participacionProyecto==="dentroProyecto" ? "X":"",
+    "codigoProyecto":                   data.codigoProyecto,
+    "tituloEvento":                     data.tituloEvento,
+    "ciudadPaisEvento":                 data.ciudadEvento + ", " + data.paisEvento,
+    "fechaInicioEvento":                data.fechaInicioEvento,
+    "fechaFinEvento":                   data.fechaFinEvento,
+    "RelevanciaAcademica":              data.RelevanciaAcademica,
+    "tituloArticulo":                   data.tituloArticulo,
+    "articuloPublicadoSi":              data.articuloPublicado==="SI" ? "X":"",
+    "articuloPublicadoNo":              data.articuloPublicado==="NO" ? "X":"",
+    "detalleArticuloSI":                data.detalleArticuloSI,
+    "valorInscripcion":                 valorInscripcionStr.trim(),
+    "pagoLimiteFecha":                  fechaPagoInscripcionStr.trim(),
+    "metodoPagoTransferencia":          data.metodoPago==="Transferencia" ? "X":"",
+    "metodoPagoOtra":                   data.metodoPago==="Otra" ? "X":"",
+    "departament":                      data.departamento,
+    "nombresAp":                        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()
+  }
+];
+
+  const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    `Anexo 5 - Formulario Pago Inscripción ${formulario} ${codigoP} EPN.pdf`
+  );
+
+}
+
 
 //formatear la fecha en formato dd/mm/yyyy
 function formatDate(dateString) {
