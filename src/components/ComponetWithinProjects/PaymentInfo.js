@@ -15,12 +15,20 @@ function PaymentInfo() {
 
   const metodoPago = watch("metodoPago");
   const fechaFinEvento = watch("fechaFinEvento");
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+
 
   const validateSingleDateSelection = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
 
     if (limiteFecha && limiteFecha > fechaFinEvento) {
       return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
+    }
+
+    if (limiteFecha && limiteFecha < today) {
+      return `La fecha no puede ser menor que la fecha actual (${today})`;
     }
 
     return true;

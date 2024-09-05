@@ -37,6 +37,13 @@ function PersonalDetail() {
   const [showInputParticipacion, setshowInputParticipacion] = useState(false);
   const [showInputDirector, setshowInputDirector] = useState(false);
   /*Valida la elección de Codirector o Colaborador para ingresar nombre y cargo del director del proyecto*/
+  const codigoProyectoPattern = /^[A-Za-z]+(-[A-Za-z0-9]+)+$/;
+  const codigoProyectoValue = watch("codigoProyecto");
+  const codigoProyectoError =
+    codigoProyectoValue && !codigoProyectoPattern.test(codigoProyectoValue)
+      ? "Error en el formato del código del proyecto: "
+      : null;
+  
   useEffect(() => {
 
     if (participacionProyecto === "dentroProyecto") {
@@ -241,9 +248,15 @@ function PersonalDetail() {
             id="codigoProyecto"
             {...register("codigoProyecto", {
               required: "El código del Proyecto requerido",
+              validate: (value) =>
+                codigoProyectoPattern.test(value) ||
+                "El código del proyecto debe estar conformado por una combinación de letras y números separados por guiones",
             })}
             className="form-input"
           />
+          {codigoProyectoError && (
+            <span className="error-text">{codigoProyectoError}</span>
+          )}
           {errors.codigoProyecto && (
             <span className="error-text">{errors.codigoProyecto.message}</span>
           )}

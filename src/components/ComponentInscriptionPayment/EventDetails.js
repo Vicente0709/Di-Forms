@@ -210,15 +210,20 @@ const validatePonencia = (tituloPonencia) => {
             <label htmlFor="articuloSi">SI</label>
             
             {showInputArticulo && (
+              <>
                  <input
                  type="text"
                  id="detalleArticuloSI"
                  {...register("detalleArticuloSI", {
-                   required: "Por favor detalle del articulo es requerida",
+                   required:!isAsistencia && "Por favor el detalle del articulo es requerida",
                  })}
                  placeholder="Especifique"
                  className="form-input"
                />
+               {errors.detalleArticuloSI && (
+                <span className="error-text">{errors.detalleArticuloSI.message}</span>
+              )}
+              </>
             )}
           </div>
           <div>
