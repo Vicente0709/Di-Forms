@@ -984,6 +984,197 @@ export function generateMemoTripWithinProjec2(data) {
   });
 }
 
+export function generateMemoInscriptionPaymentOutProyect1(data){
+
+    
+    
+    // Array para almacenar las solicitudes
+    let ponencias = [];
+    // Verificar si se debe incluir "pasajes aéreos"
+    if (data.tituloPonencia === "") {
+      ponencias.push();
+    }else{
+      ponencias.push(`, para la presentación de la ponencia:" ${data.tituloPonencia} "`);
+    }
+     
+    
+    let codigo  = [];
+    if (data.codigoProyecto === "") {
+      codigo.push();
+    }else{
+      codigo.push(`/ ${data.codigoProyecto} `);
+    }
+
+    let director = [];
+    if (data.nombreDirector===""){
+      director.push(`${data.nombres.toUpperCase()} ${data.apellidos.toUpperCase()}`);
+    } else{
+      director.push(`${data.nombreDirector.toUpperCase()}`);
+    }
+    
+    let dirCargo = [];
+    if (data.cargoDirector===""){
+      dirCargo.push("Profesor");
+    } else{
+      dirCargo.push(`${data.cargoDirector}`);
+    }
+
+    let formulario = [];
+    if (data.participacionProyecto==="fueraProyecto"){
+      formulario.push("Fuera de Proyecto");
+    } else{
+      formulario.push("Dentro de Proyecto");
+    }
+
+    let codigoP  = [];
+    if (data.codigoProyecto === "") {
+      codigoP.push();
+    }else{
+      codigoP.push(`${data.codigoProyecto} `);
+    }
+
+
+   const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Formato de memorando para pago de inscripción ${formulario}`,
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Solicitud para pago de inscripción ${codigo}`,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento} ${ponencias}. `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${director}`,
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${dirCargo}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, `Memorando para pago de inscripción ${formulario} ${codigoP}.docx`);
+  });
+}
+
+
+
 // Nueva función para generar el Anexo A en PDF
 export async function generateAnexoA(data) {
   const template = {

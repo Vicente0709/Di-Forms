@@ -66,8 +66,6 @@ function Transportation() {
     }
     return true;
    };
-  
-
 
   
   useEffect(() => {

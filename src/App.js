@@ -11,6 +11,7 @@ import About from "./pages/About";
 import EventParticipationWithinProjects from "./pages/EventParticipationWithinProjects";
 import EventParticipationOutsideProjects from "./pages/EventParticipationOutsideProjects";
 import TechnicalTripWithinProjects from "./pages/TechnicalTripWithinProjects";
+import InscriptionPayment from "./pages/InscriptionPayment";
 
 // Importación del archivo CSS para los estilos de la aplicación
 import "./App.css";
@@ -29,6 +30,7 @@ function App() {
             <Route path="/EventParticipationWithinProjects" element={<EventParticipationWithinProjects />} />
             <Route path="/EventParticipationOutsideProjects" element={<EventParticipationOutsideProjects />} />
             <Route path="/TechnicalTripWithinProjects" element={<TechnicalTripWithinProjects />} />
+            <Route path="/InscriptionPayment" element={<InscriptionPayment />} />
           </Routes>
         </div>
         {/* Componente de pie de página que se muestra en todas las páginas */}
