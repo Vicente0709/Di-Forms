@@ -3,86 +3,86 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
-import PersonalDetails from "./ComponetOutsideProjects/PersonalDetails.js";
-import EventDetails from "./ComponetOutsideProjects/EventDetails.js";
-import PaymentDetail from "./ComponetOutsideProjects/PaymentDetail.js"
-import ExpensesDeclaration from "./ComponetOutsideProjects/ExpensesDeclaration.js";
-import BankAccount from "./ComponetOutsideProjects/BankAccount.js";
-import Transportation from "./ComponetOutsideProjects/Transportation.js";
-import InstitutionalServices from "./ComponetOutsideProjects/InstitutionalServices.js";
-import ExteriorDetail from "./ComponetOutsideProjects/ExteriorDetail.js";
-
+import PersonalDetail from "./ComponentInscriptionPayment/PersonalDetail.js";
+import EventDetails from "./ComponentInscriptionPayment/EventDetails.js";
+import PaymentDetail from "./ComponentInscriptionPayment/PaymentDetail.js";
+import DocumentationDetail from "./ComponentInscriptionPayment/DocumentationDetail.js";
 // Importación de las funciones para generar documentos
 
 import{
-  generateMemoOutsideProject1,
-  generateMemoOutsideProject2,
+  generateMemoInscriptionPaymentOutProyect1,
+  generateMemoInscriptionPaymentt2,
   generateAnexoAOutsideProject,
-  generateAnexo8OutsideProject,
+  generateAnexo5InscriptionPayment,
 } from"../utils/documentGenerator.js"
 
-function EventParticipationOutsideProjectsForm() {
+
+function InscriptionPaymentForm() {
   // Estado para manejar la visibilidad de la sección de descargas
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-
+ 
   // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues: JSON.parse(localStorage.getItem("formEventOutsideProject")) || {},
+    defaultValues: JSON.parse(localStorage.getItem("formInscriptionPayment")) || {},
   });
 
-  const { watch } = methods;
+  const { watch, setValue } = methods;
 
+  
   // Efecto para sincronizar con localStorage y manejar la inicialización
   useEffect(() => {
     // Función para inicializar el estado desde localStorage
     const initializeFromLocalStorage = () => {
-      const formData = JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
+      const formData = JSON.parse(localStorage.getItem("formInscriptionPayment")) || {};
       // Aquí puedes agregar cualquier lógica adicional de inicialización
       
     };
-
+    
     // Llamar a la inicialización al montar el componente
     initializeFromLocalStorage();
 
     const subscription = watch((data) => {
-      localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
+      localStorage.setItem("formInscriptionPayment", JSON.stringify(data));
     });
 
     // Limpieza al desmontar el componente
     return () => subscription.unsubscribe();
   }, [watch]);
 
+  
   // Función que se ejecuta al enviar el formulario
-  const onSubmitEventParticipationOutside = (data) => {
+  const onSubmitInscriptionPayment = (data) => {
     console.log(data);
     setShowDownloadSection(true);
   };
 
   // Funciones para manejar la generación de documentos
+
+
   const handleGenerateMemo1 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateMemoOutsideProject1(formEventOutsideProject);
+    const formInscriptionPayment = methods.getValues();
+    generateMemoInscriptionPaymentOutProyect1(formInscriptionPayment);
     setShowDownloadSection(false);
   };
 
   const handleGenerateMemo2 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateMemoOutsideProject2(formEventOutsideProject);
-    setShowDownloadSection(false);
+    /*const formInscriptionPayment = methods.getValues();
+    generateMemoInscriptionPayment2(formInscriptionPayment);
+    setShowDownloadSection(false);*/
   };
 
   const handleGeneratePdf = () => {
-    const formEventOutsideProject = methods.getValues();
+   /* const formEventOutsideProject = methods.getValues();
     generateAnexoAOutsideProject(formEventOutsideProject);
-    setShowDownloadSection(false);
+    setShowDownloadSection(false);*/
   };
 
   const handleGeneratePdf2 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateAnexo8OutsideProject(formEventOutsideProject);
-    setShowDownloadSection(false);
+   /* const formInscriptionPayment = methods.getValues();
+    generateAnexo5InscriptionPayment(formInscriptionPayment);
+    setShowDownloadSection(false);*/
   };
 
   // Función para descargar todos los documentos
@@ -97,7 +97,7 @@ function EventParticipationOutsideProjectsForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formEventOutsideProject");
+    localStorage.removeItem("formInscriptionPayment");
     setShowDownloadSection(false);
     window.location.reload();
   };
@@ -109,18 +109,13 @@ function EventParticipationOutsideProjectsForm() {
         <h1 className="text-center my-4">
           Formulario para participacion en eventos fuera de proyectos
         </h1>
-        <Form onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}>
+        <Form onSubmit={methods.handleSubmit(onSubmitInscriptionPayment)}>
           {/* Formulario con diferentes secciones */}
-          <PersonalDetails /> 
-          <EventDetails />
-          <Transportation />
+          <PersonalDetail /> 
+          <EventDetails /> 
           <PaymentDetail />
-          <ExpensesDeclaration />
-          <BankAccount />
-          <InstitutionalServices/>
-          <ExteriorDetail />
-
-
+          <DocumentationDetail />
+         
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
@@ -132,8 +127,11 @@ function EventParticipationOutsideProjectsForm() {
 
           {/* Sección de descarga de documentos, visible tras enviar el formulario */}
           {showDownloadSection && (
-            <div className="mt-4">
+            
+            
+                <div className="mt-4">
               <Row className="justify-content-center">
+              
                 <Col md={4} className="text-center">
                   <div onClick={handleGenerateMemo1} className="download-item">
                     <img
@@ -142,9 +140,10 @@ function EventParticipationOutsideProjectsForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Memorando del Jefe del Departamento</span>
+                    <span>Descargar Memorando Pago de Inscripcion</span>
                   </div>
                 </Col>
+                
                 <Col md={4} className="text-center">
                   <div onClick={handleGenerateMemo2} className="download-item">
                     <img
@@ -155,7 +154,9 @@ function EventParticipationOutsideProjectsForm() {
                     />
                     <span>Descargar Memorando del Profesor al Jefe </span>
                   </div>
-                </Col>
+                </Col>  
+                                          
+            
                 <Col md={4} className="text-center">
                   <div onClick={handleGeneratePdf} className="download-item">
                     <img
@@ -193,6 +194,7 @@ function EventParticipationOutsideProjectsForm() {
                 </Col>
               </Row>
             </div>
+            
           )}
 
           {/* Botón para limpiar el formulario */}
@@ -208,4 +210,4 @@ function EventParticipationOutsideProjectsForm() {
     </FormProvider>
   );
 }
-export default EventParticipationOutsideProjectsForm;
+export default InscriptionPaymentForm;

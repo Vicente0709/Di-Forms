@@ -26,7 +26,14 @@ function EventDetails() {
 };
 
 
-
+const validatePonencia = (tituloPonencia) => {
+    if (!tituloPonencia) {
+      return "";
+    }else{
+        return tituloPonencia;
+    }
+   
+  };
  
   // Control del campo "Título de la Ponencia"
   const isAsistencia = participacionEvento === "Asistencia";
@@ -37,12 +44,7 @@ function EventDetails() {
         setValue ("detalleArticuloSI","");
     }
    
-    if (isAsistencia) {
-      setValue("tituloPonencia", "No aplica");
-    } else if (participacionEvento) {
-      setValue("tituloPonencia", "");
-    }
-  }, [isAsistencia, setValue, participacionEvento, seleccionArticulo]);
+  }, [setValue, seleccionArticulo]);
 
   
   return (
@@ -155,7 +157,6 @@ function EventDetails() {
         )}
       </div>
 
-
       <div className="form-group">
         <label htmlFor="tituloPonencia" className="form-label">
           Título de la Ponencia:
@@ -163,37 +164,30 @@ function EventDetails() {
         <input
           type="text"
           id="tituloPonencia"
-          {...register("tituloPonencia", {
-            required: !isAsistencia && "El título de la ponencia es requerido",
-          })}
+          {...register("tituloPonencia")}
           className="form-input"
           disabled={isAsistencia}
         />
-        {errors.tituloPonencia && (
-          <span className="error-text">{errors.tituloPonencia.message}</span>
-        )}
       </div>
-        
+
       <div className="form-group">
-        <label htmlFor="tipoPonencia" className="form-label">
-          Tipo de Ponencia:
+        <label htmlFor="tituloArticulo" className="form-label">
+          Título del Artículo:
         </label>
         <input
           type="text"
-          id="tipoPonencia"
-          placeholder="Plenaria, poster, otros"
-          {...register("tipoPonencia", {
-            required: !isAsistencia && "El tipo de ponencia es requerido",
+          id="tituloArticulo"
+          {...register("tituloArticulo", {
+            required: !isAsistencia && "El título del artículo es requerido",
           })}
           className="form-input"
           disabled={isAsistencia}
         />
-        {errors.tipoPonencia && (
-          <span className="error-text">{errors.tipoPonencia.message}</span>
+        {errors.tituloArticulo && (
+          <span className="error-text">{errors.tituloArticulo.message}</span>
         )}
       </div>
-       
-
+    
       <div className="form-group">
             
           <label htmlFor="articuloPublicado" className="form-label">¿El Artículo será publicado?</label>
@@ -242,106 +236,6 @@ function EventDetails() {
             <span className="error-text">{errors.articuloPublicado.message}</span>
           )}
         </div>
-        
-    
-
-      <div className="form-group">
-        <label className="form-label">
-          Solicita para participar en el evento:
-        </label>
-
-        {/* Pasajes aéreos */}
-        <div className="sub-group">
-          <label>Pasajes aéreos:</label>
-          <div>
-            <input
-              type="radio"
-              id="pasajesSi"
-              value="SI"
-              {...register("pasajesAereos", {
-                required: "Indique si requiere pasajes aéreos",
-              })}
-            />
-            <label htmlFor="pasajesSi">SI</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              id="pasajesNo"
-              value="NO"
-              {...register("pasajesAereos", {
-                required: "Indique si requiere pasajes aéreos",
-              })}
-            />
-            <label htmlFor="pasajesNo">NO</label>
-          </div>
-          {errors.pasajesAereos && (
-            <span className="error-text">{errors.pasajesAereos.message}</span>
-          )}
-        </div>
-
-        {/* Viáticos y Subsistencias */}
-        <div className="sub-group">
-          <label>Viáticos y subsistencias:</label>
-          <div>
-            <input
-              type="radio"
-              id="viaticosSi"
-              value="SI"
-              {...register("viaticosSubsistencias", {
-                required: "Indique si requiere viáticos y subsistencias",
-              })}
-            />
-            <label htmlFor="viaticosSi">SI</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              id="viaticosNo"
-              value="NO"
-              {...register("viaticosSubsistencias", {
-                required: "Indique si requiere viáticos y subsistencias",
-              })}
-            />
-            <label htmlFor="viaticosNo">NO</label>
-          </div>
-          {errors.viaticosSubsistencias && (
-            <span className="error-text">
-              {errors.viaticosSubsistencias.message}
-            </span>
-          )}
-        </div>
-
-        {/* Inscripción */}
-        <div className="sub-group">
-          <label>Inscripción:</label>
-          <div>
-            <input
-              type="radio"
-              id="inscripcionSi"
-              value="SI"
-              {...register("inscripcion", {
-                required: "Indique si requiere inscripción",
-              })}
-            />
-            <label htmlFor="inscripcionSi">SI</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              id="inscripcionNo"
-              value="NO"
-              {...register("inscripcion", {
-                required: "Indique si requiere inscripción",
-              })}
-            />
-            <label htmlFor="inscripcionNo">NO</label>
-          </div>
-          {errors.inscripcion && (
-            <span className="error-text">{errors.inscripcion.message}</span>
-          )}
-        </div>
-      </div>
     </div>
   );
 }

@@ -2,19 +2,25 @@ import React, { useState, useEffect } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
 function ActivitySchedule() {
-  const { register, control, formState: { errors } } = useFormContext();
+  const { register, control, watch, setValue, formState: { errors } } = useFormContext();
   const { fields: immutableFields, replace } = useFieldArray({
     control,
     name: "actividadesInmutables",
   });
 
-  // Estados para almacenar las fechas de inicio y fin del evento
+  // Estados para almacenar los días de diferencia
   const [fechaInicioEvento, setFechaInicioEvento] = useState("");
   const [fechaFinEvento, setFechaFinEvento] = useState("");
+  const [diferenciaDiasViajeTecnicoDeProyectos, setdiferenciaDiasViajeTecnicoDeProyectos] = useState("");
 
   // Efecto para cargar y actualizar las fechas desde localStorage
   useEffect(() => {
     const updateDatesFromLocalStorage = () => {
+      
+      const diasViajeTecnico = JSON.parse(localStorage.getItem("diferenciaDiasViajeTecnicoDeProyectos"));
+      if (diasViajeTecnico) {
+       setdiferenciaDiasViajeTecnicoDeProyectos(diasViajeTecnico.diferencia);
+      }
       const formTechnicalTripWithinProjects = JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects"));
       if (formTechnicalTripWithinProjects) {
         // Obtener la primera fecha de salida desde transporteIda
@@ -31,6 +37,11 @@ function ActivitySchedule() {
         setFechaInicioEvento(fechaInicioEvento || "");
         setFechaFinEvento(fechaFinEvento || "");
       }
+
+
+
+
+      
     };
 
     // Llamar la función al montar el componente
@@ -42,6 +53,19 @@ function ActivitySchedule() {
     // Limpiar el intervalo al desmontar el componente
     return () => clearInterval(intervalId);
   }, []);
+
+  
+  const [showInputJustificacion, setshowInputJustificacion] = useState(false);
+  useEffect(() => {
+      if (diferenciaDiasViajeTecnicoDeProyectos > 15) {
+        setshowInputJustificacion(true);
+        setValue("justificacionComision", ""); 
+      } else {
+        setshowInputJustificacion(false);
+        setValue("justificacionComision", "No Aplica"); // Limpia el campo si la diferencia es 15 días o menos
+      }
+  }, [[setValue]]);
+
 
   // Actualiza las fechas inmutables cuando cambian las fechas de inicio o fin
   useEffect(() => {
@@ -56,6 +80,7 @@ function ActivitySchedule() {
   }, [fechaInicioEvento, fechaFinEvento, replace]);
 
   return (
+    
     <div className="form-container">
       <h3>• CRONOGRAMA DE ACTIVIDADES</h3>
       <p className="instruction-text">
@@ -115,6 +140,7 @@ function ActivitySchedule() {
       </table>
 
       {/* Sección para justificar la comisión mayor a 15 días */}
+      {showInputJustificacion && (
       <div className="form-container">
         <h3>Justificar la necesidad de la comisión de servicios mayor a 15 días</h3>
         <p className="instruction-text">
@@ -132,7 +158,9 @@ function ActivitySchedule() {
           <span className="error-text">{errors.justificacionComision.message}</span>
         )}
       </div>
+       ) }
     </div>
+  
   );
 }
 
