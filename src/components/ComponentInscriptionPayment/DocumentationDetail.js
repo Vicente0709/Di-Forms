@@ -28,9 +28,6 @@ function DocumentationDetail() {
             • Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda.
             </label>
             <label htmlFor="documentosRequisito">
-            • Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda.
-            </label>
-            <label htmlFor="documentosRequisito">
             • Quipux del Director del Proyecto o Profesor solicitante dirigido al Vicerrectorado de Investigación,
              Innovación y Vinculación en el cual deberá solicitar el pago de la inscripción.
             </label>
