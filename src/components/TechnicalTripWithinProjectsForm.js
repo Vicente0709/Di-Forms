@@ -11,12 +11,14 @@ import Transportation from "./ComponentTripWithinProjects/Transportation";
 import ActivitySchedule from "./ComponentTripWithinProjects/ActivitySchedule";
 import BankAccount from "./ComponentTripWithinProjects/BankAccount";
 import InstitutionalServices from "./ComponentTripWithinProjects/InstitutionalServices";
+import ExteriorDetail from "./ComponentTripWithinProjects/ExteriorDetail";
 
 // Importación de las funciones para generar documentos
 import {
   generateAnexoATripWithingProject,
   generateMemoTripWithinProjec1,
-  generateMemoTripWithinProjec2
+  generateMemoTripWithinProjec2,
+  generateAnexoB2WithinProject
 } from "../utils/documentGenerator";
 
 function TechnicalTripWithinProjectsForm() {
@@ -105,7 +107,9 @@ function TechnicalTripWithinProjectsForm() {
   };
   
   const handleGeneratePdf2 = () => {
-    
+    const formTripWothinProject = methods.getValues();  
+  generateAnexoB2WithinProject(formTripWothinProject);
+  setShowDownloadSection(false); 
   };
   
   const handleDownloadAll = () => {
@@ -135,6 +139,7 @@ function TechnicalTripWithinProjectsForm() {
           <ActivitySchedule />
           <BankAccount />
           <InstitutionalServices />
+          <ExteriorDetail/>
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">

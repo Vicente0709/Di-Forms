@@ -13,6 +13,8 @@ import { schemasAnexoA2 } from "./schemasAnexoA2";
 import { basepdfAnexo8 } from "./basepdfAnexo8";
 import { schemaAnexo8 } from "./schemaAnexo8";
 
+import { basePdfAnexoB2 } from "./basePdfAnexoB2";
+import { schemasAnexoB2 } from "./schemasAnexoB2";
 
 //Constantes
 const today = new Date();
@@ -101,7 +103,7 @@ export function generateMemoWithinProjec1(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: "Solicitud dentro de proyecto, de auspicio para movilidad al exterior para participar en evento académico",
+                text: `Solicitud para participar en evento académico/${data.codigoProyecto}`,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -117,6 +119,16 @@ export function generateMemoWithinProjec1(data) {
               }),
             ],
             spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
           }),
           new Paragraph({
             children: [
@@ -167,7 +179,7 @@ export function generateMemoWithinProjec1(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para participar en evento académico " + data.codigoProyecto + ".docx");
   });
 }
 export function generateMemoWithinProjec2(data) {
@@ -249,7 +261,7 @@ export function generateMemoWithinProjec2(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: `Solicitud dentro de proyecto para movilidad al exterior para participar en evento académico/${data.codigoProyecto} `,
+                text: `Solicitud para participar en evento académico/${data.codigoProyecto} `,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -269,9 +281,9 @@ export function generateMemoWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Se adjunta los documentos correspondientes.",
-                size: 20,
-                font: "Times New Roman",
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
               }),
             ],
             spacing: { after: 200 },
@@ -300,9 +312,7 @@ export function generateMemoWithinProjec2(data) {
             children: [
               new TextRun({
                 text:
-                  data.nombres.toUpperCase() +
-                  " " +
-                  data.apellidos.toUpperCase(),
+                 data.nombreDirector.toUpperCase(),
                 size: 20,
                 bold: true,
                 font: "Times New Roman",
@@ -313,7 +323,7 @@ export function generateMemoWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `${data.rolEnProyecto.toUpperCase()} DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
+                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -325,7 +335,7 @@ export function generateMemoWithinProjec2(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para participar en evento académico " + data.codigoProyecto + ".docx");
   });
 }
 
@@ -749,7 +759,7 @@ export function generateMemoTripWithinProjec1(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: `Solicitud dentro de proyecto para movilidad al exterior para viaje técnico/ ${data.codigoProyecto}`,
+                text: `Solicitud para viaje técnico/ ${data.codigoProyecto}`,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -759,7 +769,7 @@ export function generateMemoTripWithinProjec1(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.nombreInstitucionAcogida}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -769,9 +779,9 @@ export function generateMemoTripWithinProjec1(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Se adjunta los documentos correspondientes.",
-                size: 20,
-                font: "Times New Roman",
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
               }),
             ],
             spacing: { after: 200 },
@@ -825,7 +835,7 @@ export function generateMemoTripWithinProjec1(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para viaje técnico " + data.codigoProyecto + ".docx");
   });
 }
 export function generateMemoTripWithinProjec2(data) {
@@ -896,7 +906,7 @@ export function generateMemoTripWithinProjec2(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: `Solicitud dentro de proyecto para movilidad al exterior para viaje técnico/${data.codigoProyecto} `,
+                text: `Solicitud para viaje técnico/${data.codigoProyecto} `,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -916,9 +926,9 @@ export function generateMemoTripWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Se adjunta los documentos correspondientes.",
-                size: 20,
-                font: "Times New Roman",
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
               }),
             ],
             spacing: { after: 200 },
@@ -947,9 +957,7 @@ export function generateMemoTripWithinProjec2(data) {
             children: [
               new TextRun({
                 text:
-                  data.nombres.toUpperCase() +
-                  " " +
-                  data.apellidos.toUpperCase(),
+                  data.nombreDirector.toUpperCase(),
                 size: 20,
                 bold: true,
                 font: "Times New Roman",
@@ -960,7 +968,7 @@ export function generateMemoTripWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `${data.rolEnProyecto.toUpperCase()} DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
+                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -972,7 +980,7 @@ export function generateMemoTripWithinProjec2(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para viaje técnico" + data.codigoProyecto + ".docx");
   });
 }
 
@@ -1663,7 +1671,66 @@ export async function generateAnexo8OutsideProject(data){
 
 }
 
+export async function generateAnexoB2WithinProject(data) {
+  const template = {
+    schemas: schemasAnexoB2,
+    basePdf: basePdfAnexoB2,
+  };
 
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const diferencia = JSON.parse(localStorage.getItem("diferenciaDiasViajeTecnicoDeProyectos"))?.diferencia || 0;
+  
+  const actividades = {};
+  // Genera dinámicamente las propiedades para activN, activFecha, y activDescripcion
+  for (let i = 0; i < 22; i++) {
+    actividades[`activN${i + 1}`] = data.actividadesInmutables[i] ? (i + 1).toString() : "";
+    actividades[`activFecha${i + 1}`] = data.actividadesInmutables[i]?.fecha || "";
+    actividades[`activDescripcion${i + 1}`] = data.actividadesInmutables[i]?.descripcion || "";
+  }
+
+  const inputs = [
+    {
+      "fechaPag1": formattedDate,
+      "codigoProyecto": data.codigoProyecto,
+      "tituloProyecto": data.tituloProyecto,
+      "nombresParticipante": data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+      "rolProyecto": data.rolEnProyecto,
+      "departamento": data.departamento,
+      "nombreInstitucionAcogida": data.nombreInstitucionAcogida,
+      "ciudad": data.ciudadEvento,
+      "pais": data.paisEvento,
+      "fechasEvento":  "Desde el " + data.fechaInicioEvento + " hasta el " + data.fechaFinEvento,
+
+      "pasajesS": data.pasajesAereos === "SI" ? "X" : "",
+      "viaticosS": data.viaticosSubsistencias === "SI" ? "X" : "",
+      "pasajesN": data.pasajesAereos === "NO" ? "X" : "",
+      "viaticosN": data.viaticosSubsistencias === "NO" ? "X" : "",
+
+      "objetivoEvento": data.objetivoProyecto,
+      "relevanciaEvento": data.relevanciaViajeTecnico,
+
+      "fechaPag2": formattedDate,
+
+      ...actividades,
+
+      "justificacionMas15": diferencia < 16 ? "No aplica" : data.justificacionComision,
+      "nombreDirector": data.nombreDirector? data.nombreDirector : data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
+      "codigoProyecto2": data.codigoProyecto,
+      
+      "fechaPag3" : formattedDate,
+      "calculo": "Calculo dias de comision entre las fechas de salida y de regreso al pais: " + diferencia
+    }
+  ];
+  const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    "Anexo 2b-Participación en VIAJE TECNICO dentro de Proyect/ " +
+      data.codigoProyecto +
+      ".pdf"
+  );
+}
 
 //formatear la fecha en formato dd/mm/yyyy
 function formatDate(dateString) {

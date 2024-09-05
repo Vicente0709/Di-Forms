@@ -8,6 +8,12 @@ function Transportation() {
     watch,
     formState: { errors },
   } = useFormContext();
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "transporte",
+  });
+
  
   const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({
     control,
@@ -18,16 +24,20 @@ function Transportation() {
     name: "transporteRegreso",
   });
 
-  const today = new Date().toISOString().split("T")[0]; // Fecha actual en formato YYYY-MM-DD
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
 
   // Observar los cambios en la fecha fin del evento
   const fechaFinEvento = watch("fechaFinEvento");
   const fechaInicioEvento = watch("fechaInicioEvento");
+
   // validacion para que la fecha de retorno sea como maximo un dia mas de la fecha de fin del evento
   const validateFechaSalidaRegreso = (value) => {
     if (fechaFinEvento) {
       const fechaFin = new Date(fechaFinEvento);
       const fechaSalida = new Date(value);
+
 
       // Sumar un día a la fecha de fin del evento
       fechaFin.setDate(fechaFin.getDate() + 1);
@@ -41,24 +51,25 @@ function Transportation() {
   };
 
   const validateFechaLlegadaIda = (value) => {
-    if (fechaInicioEvento) {
-      const fechaInicio = new Date(fechaInicioEvento);
-      const fechaLlegada = new Date(value);
-      
-  
-      // Sumar un día a la fecha de fin del evento
-      fechaInicio.setDate(fechaInicio.getDate() - 1);
-  
-      // Comparar fechas
-      if (fechaLlegada < fechaInicio) {
-        return "La fecha de llegada como máximo un día antes del evento.";
-      }
-    }
-    return true;
-   };
+  if (fechaInicioEvento) {
+    const fechaInicio = new Date(fechaInicioEvento);
+    const fechaLlegada = new Date(value);
+    
 
-  // Agregar una fila vacía al cargar el componente
+    // Sumar un día a la fecha de fin del evento
+    fechaInicio.setDate(fechaInicio.getDate() - 1);
+
+    // Comparar fechas
+    if (fechaLlegada < fechaInicio) {
+      return "La fecha de llegada como máximo un día antes del evento.";
+    }
+  }
+  return true;
+ };
   
+
+
+
   useEffect(() => {
     const initialTransporte = {
       tipoTransporte: "Aéreo",
@@ -204,7 +215,7 @@ function Transportation() {
                       validate: {
                         noPastDate: value => value >= today || "La fecha no puede ser menor a la fecha actual",
                         afterSalida: value => value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-                        ...(index === fieldsIda.length - 1 ? { validateFechaLlegadaIda } : {}),  
+                       ...(index === fieldsIda.length - 1 ? { validateFechaLlegadaIda } : {}),
                       }
                     })}
                   />
