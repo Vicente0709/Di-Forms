@@ -460,7 +460,6 @@ export function generateMemoOutsideProject1(data){
             children: [
               new TextRun({
                 text: "Se adjunta la documentación correspondiente",
-                bold: true,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -636,7 +635,6 @@ export function generateMemoOutsideProject2(data){
             children: [
               new TextRun({
                 text: "Se adjunta la documentación correspondiente",
-                bold: true,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -984,7 +982,7 @@ export function generateMemoTripWithinProjec2(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando solicitud para viaje técnico" + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para viaje técnico " + data.codigoProyecto + ".docx");
   });
 }
 
@@ -1222,10 +1220,10 @@ export async function generateAnexoA(data) {
     {
       "fechaSolicitud":     formattedDate,
       "viaticos":           data.viaticosSubsistencias === "SI" ? "X" : "",
-      "movilizacion":       data.viaticosSubsistencia === "SI" ? "X" : "",
+      "movilizacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
       "subsistencias":      data.viaticosSubsistencias === "SI" ? "X" : "",
-      "alimentacion":       data.viaticosSubsistencia === "SI" ? "X" : "",
-      
+      "alimentacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
+
       "nombresCompletos":   data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
       "lugar":              data.ciudadEvento + ", " + data.paisEvento,
       "puesto":             data.cargo,
@@ -1472,7 +1470,7 @@ export async function generateAnexoA2(data) {
 
       ...actividades,
 
-      "justificacionMas15":diferencia < 16 ? "No aplica" :data.justificacionComision,
+      "justificacionMas15":diferencia < 16 ? "No aplica" : `${data.justificacionComision}`,
       "fechaSolicitud": formattedDate,
       "nombreDirector":  data.nombres.toUpperCase()+ " "+data.apellidos.toUpperCase(),
       "codigoProyecto2": data.codigoProyecto,

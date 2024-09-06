@@ -115,7 +115,7 @@ const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
      
       <div className="form-group">
         <label className="form-label">
-          Solicita para participar en el evento:
+          Solicita para participar en el viaje técnico:
         </label>
 
         {/* Pasajes aéreos */}

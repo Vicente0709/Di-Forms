@@ -113,6 +113,17 @@ function TechnicalTripWithinProjectsForm() {
   };
   
   const handleDownloadAll = () => {
+    setTimeout(() => {
+    handleGenerateDocx();
+    }, 1000);
+
+    setTimeout(() => {
+      handleGeneratePdf();
+    }, 2000);
+
+    handleGeneratePdf2();
+    
+    setShowDownloadSection(false);
     
   };
   // Función para limpiar el formulario y resetear datos

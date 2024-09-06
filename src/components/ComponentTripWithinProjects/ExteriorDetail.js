@@ -17,7 +17,7 @@ function ExteriorDetail() {
         <label htmlFor="documentosRequisito">
           • Formulario para salida al exterior dentro de proyectos – viajes
           técnicos
-        </label>
+        </label><br />
         <label htmlFor="documentosRequisito">
           • Copia de la carta de invitación
         </label>
