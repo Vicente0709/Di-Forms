@@ -308,12 +308,13 @@ function TechnicalTripWithinProjectsForm() {
         <Form onSubmit={methods.handleSubmit(onSubmitTechnicalTrip)}>
           <div className="form-container">
             {/* Datos del proyecto */}
-
             <LabelTitle text="Detalles del proyecto" disabled={false} />
+
             <InputText
               name="codigoProyecto"
               label="Código del proyecto:"
               placeholder={"Ejemplo: PIGR-24-01"}
+              infoText="Ingrese el código del proyecto en formato alfanumérico separado por guiones."
               rules={{
                 required: "El código del proyecto es requerido",
                 pattern: {
@@ -372,6 +373,7 @@ function TechnicalTripWithinProjectsForm() {
               name="cargo"
               label="Cargo:"
               placeholder="Profesor Agregado a Tiempo Completo..."
+              infoText="Especifique el cargo como aparece en su acción de personal."
               rules={{ required: "El cargo es requerido" }}
               disabled={false}
             />
@@ -381,6 +383,7 @@ function TechnicalTripWithinProjectsForm() {
               name="rolEnProyecto"
               label="Rol en el proyecto:"
               options={rolesOptions}
+              infoText="Seleccione su rol dentro del proyecto."
               rules={{ required: "El rol en el proyecto es requerido" }}
               disabled={false}
             />
@@ -390,6 +393,7 @@ function TechnicalTripWithinProjectsForm() {
               <InputText
                 name="nombreDirector"
                 label="Nombre del Director del proyecto:"
+                infoText="Ingrese el nombre del Director del proyecto."
                 rules={{ required: "El nombre del Director es requerido" }}
                 disabled={false}
               />
@@ -400,6 +404,7 @@ function TechnicalTripWithinProjectsForm() {
               name="departamento"
               label="Departamento / Instituto:"
               options={departamentoOptions}
+              infoText="Seleccione el departamento al que pertenece."
               rules={{ required: "El departamento es requerido" }}
               disabled={false}
             />

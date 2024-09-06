@@ -1,15 +1,15 @@
 import { useFormContext } from "react-hook-form";
 import { useEffect } from "react";
 import Label from "../Labels/Label";
+import LabelText from "../Labels/LabelText"; // Nuevo componente
 
-const InputText = ({ name, label, placeholder, rules, disabled, defaultValue }) => {
+const InputText = ({ name, label, placeholder, rules, disabled, defaultValue, infoText }) => {
   const {
     register,
     setValue,
     formState: { errors },
   } = useFormContext();
 
-  // Establece un valor predeterminado cuando el campo está deshabilitado
   useEffect(() => {
     if (disabled && defaultValue) {
       setValue(name, defaultValue);
@@ -21,6 +21,7 @@ const InputText = ({ name, label, placeholder, rules, disabled, defaultValue }) 
   return (
     <div className="form-group">
       <Label text={label} htmlFor={name} disabled={disabled} />
+      {infoText && <LabelText text={infoText} />} {/* Nuevo texto informativo */}
       <input
         id={name}
         name={name}

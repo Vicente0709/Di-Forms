@@ -1,7 +1,8 @@
 import { useFormContext } from "react-hook-form";
 import Label from "../Labels/Label";
+import LabelText from "../Labels/LabelText"; // Nuevo componente
 
-const RadioGroup = ({ label, name, options, rules, disabled }) => {
+const RadioGroup = ({ label, name, options, rules, disabled, infoText }) => {
   const {
     register,
     formState: { errors },
@@ -10,6 +11,7 @@ const RadioGroup = ({ label, name, options, rules, disabled }) => {
   return (
     <div className={`form-group ${disabled ? "disabled" : ""}`}>
       <Label text={label} htmlFor={name} disabled={disabled} />
+      {infoText && <LabelText text={infoText} />} {/* Nuevo texto informativo */}
       <div className="radio-options">
         {options.map((option) => (
           <div key={option.value} className="radio-option">
