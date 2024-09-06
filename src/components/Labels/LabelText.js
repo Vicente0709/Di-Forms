@@ -1,5 +1,5 @@
 const LabelText = ({ text }) => {
-    return <p className="form-info-text">{text}</p>; // Puedes añadir la clase CSS que quieras
-  };
-  
-  export default LabelText;
+  return <p className="form-info-text" dangerouslySetInnerHTML={{ __html: text }} />;
+};
+
+export default LabelText;

@@ -3,22 +3,20 @@ import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes Forma nueva como vamsos a crear el formulario
-import InputText from "./Inputs/InputText";
-import InputSelect from "./Inputs/InputSelect";
+import Label from "./Labels/Label";
 import LabelTitle from "./Labels/LabelTitle";
-import DownloadButton from "./Buttons/DownloadButton";
+import LabelText from "./Labels/LabelText";
+import InputSelect from "./Inputs/InputSelect";
+import InputText from "./Inputs/InputText";
+import InputTextArea from "./Inputs/InputTextArea";
+import InputDate from "./Inputs/InputDate";
+import RadioGroup from "./Inputs/RadioGroup";
 import ActionButton from "./Buttons/ActionButton";
+import DownloadButton from "./Buttons/DownloadButton";
 
 // Importación de los componentes del formulario
-import PersonalDetails from "./ComponentTripWithinProjects/PersonalDetails";
-import ProjectDetails from "./ComponentTripWithinProjects/ProjectDetails";
-import EventDetails from "./ComponentTripWithinProjects/EventDetails";
-import Justification from "./ComponentTripWithinProjects/Justification";
 import Transportation from "./ComponentTripWithinProjects/Transportation";
 import ActivitySchedule from "./ComponentTripWithinProjects/ActivitySchedule";
-import BankAccount from "./ComponentTripWithinProjects/BankAccount";
-import InstitutionalServices from "./ComponentTripWithinProjects/InstitutionalServices";
-import ExteriorDetail from "./ComponentTripWithinProjects/ExteriorDetail";
 
 // Importación de las funciones para generar documentos
 import {
@@ -49,13 +47,6 @@ const validarCedulaEcuatoriana = (cedula) => {
 };
 
 function TechnicalTripWithinProjectsForm() {
-  // Estados para manejar datos y visibilidad de la UI
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [
-    diferenciaDiasViajeTecnicoDeProyectos,
-    setDiferenciaDiasViajeTecnicoDeProyectos,
-  ] = useState(0);
-
   // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange", // El formulario se valida en cada cambio
@@ -63,10 +54,18 @@ function TechnicalTripWithinProjectsForm() {
     defaultValues:
       JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects")) || {},
   });
+  // Estados para manejar datos y visibilidad de la UI
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const [
+    diferenciaDiasViajeTecnicoDeProyectos,
+    setDiferenciaDiasViajeTecnicoDeProyectos,
+  ] = useState(0);
+
 
   const {
     watch,
     setValue,
+    clearErrors,
     formState: { errors },
   } = methods;
 
@@ -188,17 +187,28 @@ function TechnicalTripWithinProjectsForm() {
 
   //Prueba de conceptro como vamso a manejar el formualrio
   const rolEnProyecto = watch("rolEnProyecto");
+  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
+  const habilitarCampos = seleccionViaticosSubsistencias === "SI";
 
   const [showInputDirector, setShowInputDirector] = useState(false);
 
-  useEffect(() => {
-    if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
+  useEffect(() => {    if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
       setShowInputDirector(true);
     } else {
       setShowInputDirector(false);
       setValue("nombreDirector", "");
     }
-  }, [rolEnProyecto, setValue]);
+
+    if (!habilitarCampos) {
+      // Limpiar valores de los campos cuando se selecciona "NO"
+      setValue("nombreBanco", "");
+      setValue("tipoCuenta", "");
+      setValue("numeroCuenta", "");
+
+      // Limpiar errores asociados a estos campos
+      clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
+    }
+  }, [rolEnProyecto, setValue, habilitarCampos, clearErrors]);
 
   const rolesOptions = [
     { value: "Director", label: "Director" },
@@ -314,7 +324,6 @@ function TechnicalTripWithinProjectsForm() {
               name="codigoProyecto"
               label="Código del proyecto:"
               placeholder={"Ejemplo: PIGR-24-01"}
-              infoText="Ingrese el código del proyecto en formato alfanumérico separado por guiones."
               rules={{
                 required: "El código del proyecto es requerido",
                 pattern: {
@@ -354,7 +363,7 @@ function TechnicalTripWithinProjectsForm() {
             <InputText
               name="nombres"
               label="Nombres del participante:"
-              placeholder="JUAN SEBASTIAN"
+              placeholder="Juan Sebastian"
               rules={{ required: "Los nombres son requeridos" }}
               disabled={false}
             />
@@ -363,7 +372,7 @@ function TechnicalTripWithinProjectsForm() {
             <InputText
               name="apellidos"
               label="Apellidos del participante:"
-              placeholder="PEREZ RAMIREZ"
+              placeholder="Perez Ramirez"
               rules={{ required: "Los apellidos son requeridos" }}
               disabled={false}
             />
@@ -373,7 +382,7 @@ function TechnicalTripWithinProjectsForm() {
               name="cargo"
               label="Cargo:"
               placeholder="Profesor Agregado a Tiempo Completo..."
-              infoText="Especifique el cargo como aparece en su acción de personal."
+              infoText="Tal como consta en su acción de personal. Ejemplos: Profesor Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo; Profesor Principal a Tiempo Completo."
               rules={{ required: "El cargo es requerido" }}
               disabled={false}
             />
@@ -383,7 +392,6 @@ function TechnicalTripWithinProjectsForm() {
               name="rolEnProyecto"
               label="Rol en el proyecto:"
               options={rolesOptions}
-              infoText="Seleccione su rol dentro del proyecto."
               rules={{ required: "El rol en el proyecto es requerido" }}
               disabled={false}
             />
@@ -393,7 +401,6 @@ function TechnicalTripWithinProjectsForm() {
               <InputText
                 name="nombreDirector"
                 label="Nombre del Director del proyecto:"
-                infoText="Ingrese el nombre del Director del proyecto."
                 rules={{ required: "El nombre del Director es requerido" }}
                 disabled={false}
               />
@@ -404,7 +411,6 @@ function TechnicalTripWithinProjectsForm() {
               name="departamento"
               label="Departamento / Instituto:"
               options={departamentoOptions}
-              infoText="Seleccione el departamento al que pertenece."
               rules={{ required: "El departamento es requerido" }}
               disabled={false}
             />
@@ -422,6 +428,7 @@ function TechnicalTripWithinProjectsForm() {
               name="cargoJefeInmediato"
               label="Cargo del Jefe inmediato:"
               placeholder="Jefe del DACI, subrogante"
+              infoText="Favor colocar el cargo del Jefe inmediato, puede usar las siglas para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante"
               rules={{
                 required: "El cargo del jefe inmediato es requerido",
                 minLength: {
@@ -431,6 +438,136 @@ function TechnicalTripWithinProjectsForm() {
               }}
               disabled={false}
             />
+            <LabelTitle text="Detalles del viaje técnico" disabled={false} />
+            <InputText
+              name="nombreIntitucionAcogida"
+              label="Nombre de la institución de acogida:"
+              rules={{
+                required: "El nombre de la institución de acogida es requerido",
+              }}
+              disabled={false}
+            />
+            <Label text="Lugar del evento" />
+            <InputText
+              name="ciudadEvento"
+              label="Ciudad:"
+              rules={{ required: "La ciudad del evento es requerida" }}
+              disabled={false}
+            />
+            <InputText
+              name="paisEvento"
+              label="País:"
+              rules={{ required: "El país del evento es requerido" }}
+              disabled={false}
+            />
+            <Label text="Fechas del evento" />
+            <InputDate
+              name="fechaInicioEvento"
+              label="Desde:"
+              rules={{ required: "La fecha de inicio del evento es requerida" }}
+              disabled={false}
+            />
+            <InputDate
+              name="fechaFinEvento"
+              label="Hasta:"
+              rules={{ required: "La fecha de fin del evento es requerida" }}
+              disabled={false}
+            />
+            <Label text="Solicita para viaje tecnico" />
+            <RadioGroup
+              name="pasajesAereos"
+              label="Pasajes aéreos:"
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{ required: "Indique si requiere pasajes aéreos" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              name="viaticosSubsistencias"
+              label="Viáticos y subsistencias:"
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{
+                required: "Indique si requiere viáticos y subsistencias",
+              }}
+              disabled={false}
+            />
+            <Label text="Justificación del viaje técnico" />
+            <InputTextArea
+              name="objetivoProyecto"
+              label="Objetivo, resultado o producto del proyecto al que aporta el viaje técnico."
+              infoText="Escriba textualmente el objetivo, resultado o producto del proyecto.<br /> Esta información debe ser tomada de la propuesta aprobada."
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+            <InputTextArea
+              name="relevanciaViajeTecnico"
+              label="Relevancia del viaje técnico para el desarrollo del proyecto:"
+              infoText="Describa la relevancia del viaje técnico y aporte al cumplimiento del objetivo, resultado o producto."
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+            <Transportation />
+            <ActivitySchedule />
+            <LabelTitle text="CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS" />
+            <LabelText text="Obligatorio si marcó viáticos" />
+
+            {/* Nombre del banco */}
+            <InputText
+              name="nombreBanco"
+              label="Nombre del banco:"
+              rules={{
+                required: habilitarCampos ? "Este campo es requerido" : false,
+              }}
+              disabled={!habilitarCampos}
+            />
+
+            {/* Tipo de cuenta */}
+            <InputSelect
+              name="tipoCuenta"
+              label="Tipo de cuenta:"
+              options={[
+                { value: "Ahorros", label: "Ahorros" },
+                { value: "Corriente", label: "Corriente" },
+              ]}
+              rules={{
+                required: habilitarCampos ? "Este campo es requerido" : false,
+              }}
+              disabled={!habilitarCampos}
+            />
+
+            {/* Número de cuenta */}
+            <InputText
+              name="numeroCuenta"
+              label="No. De cuenta:"
+              rules={{
+                required: habilitarCampos ? "Este campo es requerido" : false,
+              }}
+              disabled={!habilitarCampos}
+            />
+            <LabelTitle text="SERVIDORES QUE INTEGRAN LOS SERVICIOS INSTITUCIONALES (opcional)" />
+            <LabelText text="Completar esta sección solo en caso de que usted asista al mismo evento junto con otros funcionarios." />
+            <InputTextArea
+              name="servidores"
+              label="Nombre de los funcionarios:"
+              placeholder="Escriba aquí los nombres de los funcionarios, separados por comas"
+              rules={{ required: false }}
+              disabled={false}
+            />
+            <LabelTitle text="DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS AL EXTERIOR" />
+            <Label text="REQUISITOS:" />
+            <LabelText text="• Formulario de solicitud de autorización para cumplimiento de servicios institucionales" />
+            <LabelText text="• Formulario para salida al exterior dentro de proyectos – viajes técnicos" />
+            <LabelText text="• Copia de la carta de invitación" />
+            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avalada por el represente del curso y el Jefe o Director de la Unidad Académica. O en el caso de que esta actividad se realice fuera del periodo de clases aval del Jefe o Director de la Unidad Académica indicando este particular." />
+            <LabelText text="• Quipux por parte del Director del Proyecto al Vicerrectorado de Investigación, Innovación y Vinculación, detallando el requerimiento de la salida al exterior." />
+
+            {/* Fin del fomrulario */}
           </div>
 
           {/* Botón para enviar el formulario */}
