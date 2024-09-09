@@ -89,6 +89,9 @@ function Transportation() {
   return (
     <div className="form-container">
       <h3>• TRANSPORTE</h3>
+      <p>
+      Por favor, considere que el itinerario es tentativo. Consulte el itinerario del medio de transporte elegido en su página oficial o sitios web de confianza. Seleccione la opción que ofrezca el menor tiempo de viaje y el menor número de escalas de ser el caso.
+      </p>
       <h5>TRANSPORTE DE IDA
       </h5>
       <p>
