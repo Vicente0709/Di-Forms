@@ -344,27 +344,20 @@ export function generateMemoWithinProjec2(data) {
 }
 
 export function generateMemoOutsideProject1(data){
-  let solicitudOracion = "la asignación de ";
+  const departament = capitalizeWords((data.departamento).toLowerCase());
   // Array para almacenar las solicitudes
   let solicitudes = [];
   // Verificar si se debe incluir "pasajes aéreos"
   if (data.pasajesAereos === "SI") {
-    solicitudes.push("la compra de pasajes aéreos");
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push("viáticos y subsistencias");
+    solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
-    solicitudes.push("el pago de inscripción");
-  }
-
-  // Construir la oración final
-  if (solicitudes.length > 0) {
-    solicitudOracion += solicitudes.join(", ") + ".";
-  } else {
-    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
+    solicitudes.push(" el pago de inscripción");
   }
 
   const doc = new Document({
@@ -403,7 +396,7 @@ export function generateMemoOutsideProject1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
                 size: 22,
                 bold: true,
                 font: "Aptos (Cuerpo)",
@@ -439,7 +432,7 @@ export function generateMemoOutsideProject1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${data.departamento[0]}${data.departamento.slice(1).toLowerCase()}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
+                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${departament}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -449,7 +442,7 @@ export function generateMemoOutsideProject1(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, ${solicitudOracion}`,
+                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}.`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -518,29 +511,20 @@ export function generateMemoOutsideProject1(data){
 
 export function generateMemoOutsideProject2(data){
 
-  let solicitudOracion = "la asignación de ";
-  // Array para almacenar las solicitudes
   let solicitudes = [];
-  // Verificar si se debe incluir "pasajes aéreos"
   if (data.pasajesAereos === "SI") {
-    solicitudes.push("la compra de pasajes aéreos");
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push("viáticos y subsistencias");
+    solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
-    solicitudes.push("el pago de inscripción");
+    solicitudes.push(" el pago de inscripción");
   }
+  
 
-  // Construir la oración final
-  if (solicitudes.length > 0) {
-    solicitudOracion += solicitudes.join(", ") + ".";
-  } else {
-    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
-  }
- 
    const doc = new Document({
     sections: [
       {
@@ -614,7 +598,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Por medio del presente solicito el  aval y permiso para participar en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
+                text: `Por medio del presente solicito el aval y permiso para participar en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -624,7 +608,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, ${solicitudOracion}`, 
+                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}`, 
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -1607,56 +1591,63 @@ export async function generateAnexo8OutsideProject(data){
  basePdf: basepdfAnexo8,
  };
  const plugins = { text, image, qrcode: barcodes.qrcode };
+
  //Generacion de la constante
- 
   let valorInscripcionStr = "";
   let fechaPagoInscripcionStr = "";
-
-  data.inscripciones.forEach((inscripcion)=>{
-    if(data.inscripcion==="SI" && inscripcion.valorInscripcion){
-      valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
-    }
-
-    if(data.inscripcion ==="SI" && inscripcion.pagoLimite && inscripcion.limiteFecha){
-      fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
-    }
-
-  });
+    
+  if (data && data.inscripciones && Array.isArray(data.inscripciones)) {
+    data.inscripciones.forEach((inscripcion) => {
+      if (data.inscripcion === "SI") {
+        if (inscripcion.valorInscripcion) {
+          valorInscripcionStr += `${inscripcion.monedaPago} ${inscripcion.valorInscripcion}\n`;
+        }
+  
+        if (inscripcion.pagoLimite && inscripcion.limiteFecha) {
+          fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
+        }
+      } else if (data.inscripcion === "NO") {
+        // Manejo del caso en que data.inscripcion es "NO"
+        valorInscripcionStr += '\n';
+        fechaPagoInscripcionStr += '\n';
+      }
+    });
+  }
 
  const inputs = [
   {
-    "nombres":                data.nombres.toUpperCase() +" "+ data.apellidos.toUpperCase(),
-    "departamento":           data.departamento,
-    "tituloEvento":           data.tituloEvento,
-    "lugarEvento":            data.ciudadEvento+", "+data.paisEvento,
-    "fechaInicioEvento":      data.fechaInicioEvento,
-    "fechaFinEvento":         data.fechaFinEvento,
-    "RelevanciaAcademica":    data.RelevanciaAcademica,
-    "tituloPonencia":         data.tituloPonencia,
-    "tipoPonencia":           data.tipoPonencia,
-    "detalleArticuloSI":      data.detalleArticuloSI,
-    "articuloPublicadoSi":    data.articuloPublicado==="SI" ? "X":"",
-    "articuloPublicadoNo":    data.articuloPublicado==="NO"? "X":"",
-    "pasajesAereosSi":        data.pasajesAereos==="SI" ? "X":"",
-    "pasajesAereosNo":        data.pasajesAereos==="NO" ? "X":"",
-    "viaticosSubsistenciasSi": data.viaticosSubsistencias==="SI"? "X": "",
-    "viaticosSubsistenciasNo": data.viaticosSubsistencias==="NO"? "X": "",
-    "inscripsionSi":           data.inscripcion==="SI"?"X":"",
-    "inscripcionNo":           data.inscripcion==="NO"?"X":"",
-    "valorInscripcion":       valorInscripcionStr.trim(),
-    "limiteFecha":             fechaPagoInscripcionStr.trim(),
-    "metodoPagoTransferencia": data.metodoPago==="Transferencia"? "X":"",
-    "metodoPagoOtra":          data.metodoPago==="Otra"? "X":"",
-    "hospedajeSi":            data.hospedaje==="SI"?"X":"",
-    "HospedajeNo":            data.hospedaje==="NO"?"X":"",
-    "alimentacionSi":         data.alimentacion==="SI"?"X":"",
-    "alimentacionNo":         data.alimentacion==="NO"?"X":"",
-    "movilizacionInternaSi":  data.movilizacion==="SI"?"X":"",
-    "movilizacionInternaNo":  data.movilizacion==="NO"?"X":"",
-    "seleccionDeclaracionNo": data.seleccionDeclaracion==="noCubre"?"X":"",
-    "seleccionDeclaracionSi": data.seleccionDeclaracion==="siCubre"?"X":"",
-    "nombre":                 data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase(),
-    "puesto":                 data.puesto.toUpperCase()   
+    "nombres":                  data.nombres.toUpperCase() +" "+ data.apellidos.toUpperCase(),
+    "departamento":             data.departamento,
+    "tituloEvento":             data.tituloEvento,
+    "lugarEvento":              data.ciudadEvento+", "+data.paisEvento,
+    "fechaInicioEvento":        data.fechaInicioEvento,
+    "fechaFinEvento":           data.fechaFinEvento,
+    "RelevanciaAcademica":      data.RelevanciaAcademica,
+    "tituloPonencia":           data.tituloPonencia,
+    "tipoPonencia":             data.tipoPonencia,
+    "detalleArticuloSI":        data.detalleArticuloSI,
+    "articuloPublicadoSi":      data.articuloPublicado==="SI" ? "X":"",
+    "articuloPublicadoNo":      data.articuloPublicado==="NO"? "X":"",
+    "pasajesAereosSi":          data.pasajesAereos==="SI" ? "X":"",
+    "pasajesAereosNo":          data.pasajesAereos==="NO" ? "X":"",
+    "viaticosSubsistenciasSi":  data.viaticosSubsistencias==="SI"? "X": "",
+    "viaticosSubsistenciasNo":  data.viaticosSubsistencias==="NO"? "X": "",
+    "inscripsionSi":            data.inscripcion==="SI"?"X":"",
+    "inscripcionNo":            data.inscripcion==="NO"?"X":"",
+    "valorInscripcion":         valorInscripcionStr.trim(),
+    "limiteFecha":              fechaPagoInscripcionStr.trim(),
+    "metodoPagoTransferencia":  data.metodoPago==="Transferencia"? "X":"",
+    "metodoPagoOtra":           data.metodoPago==="Otra"? "X":"",
+    "hospedajeSi":              data.hospedaje==="SI"?"X":"",
+    "HospedajeNo":              data.hospedaje==="NO"?"X":"",
+    "alimentacionSi":           data.alimentacion==="SI"?"X":"",
+    "alimentacionNo":           data.alimentacion==="NO"?"X":"",
+    "movilizacionInternaSi":    data.movilizacion==="SI"?"X":"",
+    "movilizacionInternaNo":    data.movilizacion==="NO"?"X":"",
+    "seleccionDeclaracionNo":   data.seleccionDeclaracion==="noCubre"?"X":"",
+    "seleccionDeclaracionSi":   data.seleccionDeclaracion==="siCubre"?"X":"",
+    "nombre":                   data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase(),
+    "puesto":                   data.puesto.toUpperCase()   
   }
   
  ];
@@ -1817,3 +1808,4 @@ function capitalizeWords(str) {
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join(' ');
 }
+
