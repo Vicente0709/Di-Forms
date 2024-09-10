@@ -16,22 +16,21 @@ function PaymentDetail() {
   const metodoPago = watch("metodoPago");
   const fechaFinEvento = watch("fechaFinEvento");
   const now = new Date();
-const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const today = new Date(now.getTime() - localOffset)
+    .toISOString()
+    .split("T")[0];
 
-
-  const validateSingleDateSelection = (index) => {    
+  const validateSingleDateSelection = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
 
-    
     if (limiteFecha && limiteFecha > fechaFinEvento) {
       return `La fecha no puede ser mayor que la fecha de fin del evento (${fechaFinEvento})`;
     }
-//validacion para fechas anteriores a la actual
+    //validacion para fechas anteriores a la actual
     if (limiteFecha && limiteFecha < today) {
       return `La fecha no puede ser menor que la fecha actual (${today})`;
     }
-
 
     return true;
   };
@@ -50,8 +49,9 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
       {/* Tabla Dinámica */}
       <table className="payment-table">
         <thead>
-          <tr>
+        <tr>
             <th>Nro.</th>
+            <th>Moneda</th>
             <th>Valor de inscripción</th>
             <th>Pago a realizarse</th>
             <th>Fecha</th>
@@ -69,6 +69,28 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                   className="form-input"
                 />
               </td>
+              <td>
+                <select
+                  id="monedaPago"
+                  {...register(`inscripciones[${index}].monedaPago`, {
+                    required: "La moneda es requerida",
+                  })}
+                  className="form-select"
+                >
+                  <option value="">Seleccione</option>
+                  <option value="$ ">Dólares</option>
+                  <option value="€ ">Euros</option>
+                  <option value="CHF ">
+                    Francos Suizos
+                  </option>
+                </select>
+                {errors.monedaPago && (
+                  <span className="error-text">
+                    {errors.monedaPago.message}
+                  </span>
+                )}
+              </td>
+
               <td>
                 <input
                   type="number"
@@ -98,7 +120,7 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                   <option value="">Seleccione</option>
                   <option value="Antes del ">Antes</option>
                   <option value="Despues del ">Despues</option>
-                  <option value="Fecha: ">
+                  <option value="Hasta el ">
                     Fecha maxima de pago
                   </option>
                 </select>
@@ -208,8 +230,8 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
             <p>Incluir la siguiente información y documentos:</p>
             <ul>
               <li>
-                Solicitud de REEMBOLSO. Incluir texto con justificación en 
-                el mismo memorando del requerimiento.
+                Solicitud de REEMBOLSO. Incluir texto con justificación en el
+                mismo memorando del requerimiento.
               </li>
               <li>
                 Documento donde se puede verificar el costo y fechas de la

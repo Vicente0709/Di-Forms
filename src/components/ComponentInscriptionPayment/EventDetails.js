@@ -14,7 +14,6 @@ function EventDetails() {
   const [showInputArticulo, setshowInputArticulo] = useState(false);
   const seleccionArticulo = watch ("articuloPublicado");
   const fechaInicioEvento = watch('fechaInicioEvento'); 
-
   const now = new Date();
   const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
  // Validación personalizada para la fecha de finalización
