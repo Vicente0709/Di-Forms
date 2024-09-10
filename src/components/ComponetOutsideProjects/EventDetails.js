@@ -141,7 +141,7 @@ function EventDetails() {
         <label htmlFor="RelevanciaAcademica" className="form-label">
           Relevancia Académica del evento:
         </label>
-        <input
+        <textarea
           type="text"
           id="RelevanciaAcademica"
           {...register("RelevanciaAcademica", {
