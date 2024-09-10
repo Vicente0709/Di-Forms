@@ -37,6 +37,13 @@ function PersonalDetail() {
   const [showInputParticipacion, setshowInputParticipacion] = useState(false);
   const [showInputDirector, setshowInputDirector] = useState(false);
   /*Valida la elección de Codirector o Colaborador para ingresar nombre y cargo del director del proyecto*/
+  const codigoProyectoPattern = /^[A-Za-z]+(-[A-Za-z0-9]+)+$/;
+  const codigoProyectoValue = watch("codigoProyecto");
+  const codigoProyectoError =
+    codigoProyectoValue && !codigoProyectoPattern.test(codigoProyectoValue)
+      ? "Error en el formato del código del proyecto: "
+      : null;
+  
   useEffect(() => {
 
     if (participacionProyecto === "dentroProyecto") {
@@ -45,7 +52,6 @@ function PersonalDetail() {
       setshowInputParticipacion(false);
       setValue("codigoProyecto","");
       setValue("nombreDirector","");
-      setValue("cargoDirector","");
     }
     
   }, [participacionProyecto, setValue]);
@@ -58,7 +64,6 @@ function PersonalDetail() {
     } else {
       setshowInputDirector(false);
       setValue("nombreDirector","");
-      setValue("cargoDirector","");
     }
   }, [rolEnProyecto, setValue]);
 
@@ -212,52 +217,6 @@ function PersonalDetail() {
       </div>
 
       <div className="form-group">
-        <label htmlFor="nombreJefeInmediato" className="form-label">
-          Nombres y apellidos del Jefe inmediato:
-        </label>
-        <input
-          type="text"
-          id="nombreJefeInmediato"
-          {...register("nombreJefeInmediato", {
-            required: "El nombre del jefe inmediato es requerido",
-          })}
-          className="form-input"
-        />
-        {errors.nombreJefeInmediato && (
-          <span className="error-text">
-            {errors.nombreJefeInmediato.message}
-          </span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="cargoJefeInmediato" className="form-label">
-          Cargo del Jefe inmediato:
-        </label>
-        <label htmlFor="cargoJefeInmediato">
-          Favor colocar el cargo del Jefe inmediato, puede usar las siglas
-          para referirse al departamento. Para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante
-        </label>
-        <input
-          type="text"
-          id="cargoJefeInmediato"
-          {...register("cargoJefeInmediato", {
-            required: "El cargo del jefe inmediato es requerido",
-            minLength: {
-              value: 10,
-              message: "El cargo que escribio es demasiado corto",
-            },
-          })}
-          className="form-input"
-        />
-        {errors.cargoJefeInmediato && (
-          <span className="error-text">
-            {errors.cargoJefeInmediato.message}
-          </span>
-        )}
-      </div>
-
-      <div className="form-group">
         <label htmlFor="participacionProyecto" className="form-label">
           Participación en el proyecto:
         </label>
@@ -289,9 +248,15 @@ function PersonalDetail() {
             id="codigoProyecto"
             {...register("codigoProyecto", {
               required: "El código del Proyecto requerido",
+              validate: (value) =>
+                codigoProyectoPattern.test(value) ||
+                "El código del proyecto debe estar conformado por una combinación de letras y números separados por guiones",
             })}
             className="form-input"
           />
+          {codigoProyectoError && (
+            <span className="error-text">{codigoProyectoError}</span>
+          )}
           {errors.codigoProyecto && (
             <span className="error-text">{errors.codigoProyecto.message}</span>
           )}
@@ -338,26 +303,7 @@ function PersonalDetail() {
   )}
 </div>
 )}
-
-{showInputDirector && (
-<div className="form-group">
-  <label htmlFor="cargoDirector" className="form-label">
-    Cargo del Director del proyecto:
-  </label>
-  <input
-    type="text"
-    id="cargoDirector"
-    {...register("cargoDirector", {
-      required: "El cargo del director es requerido",
-    })}
-    className="form-input"
-  />
-  {errors.cargoDirector && (
-    <span className="error-text">{errors.cargoDirector.message}</span>
-  )}
-</div>
-)}
-     </> )}
+   </> )}
 
     </div>
     

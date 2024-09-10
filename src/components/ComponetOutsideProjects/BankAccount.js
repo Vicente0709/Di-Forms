@@ -24,7 +24,7 @@ function BankAccount() {
   return (
     <div className="form-container">
       <h3>• CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS</h3>
-      <p>Obligatorio si marcó Transferencia como método de pago.</p>
+      <p>Obligatorio si marcó viáticos.</p>
 
       <div className="form-group">
         <label className="form-label" htmlFor="nombreBanco">Nombre del banco:</label>
@@ -40,13 +40,17 @@ function BankAccount() {
 
       <div className="form-group">
         <label className="form-label" htmlFor="tipoCuenta">Tipo de cuenta:</label>
-        <input
-          type="text"
+        <select
           id="tipoCuenta"
-          className="form-input"
+          className="form-select"
           {...register("tipoCuenta", { required: habilitarCampos ? "Este campo es requerido" : false })}
-          disabled={!habilitarCampos}
-        />
+          disabled={!habilitarCampos} >
+
+          <option value="">Seleccione</option>
+          <option value="Ahorros">Ahorros</option>
+          <option value="Corriente">Corriente</option>
+
+        </select>
         {errors.tipoCuenta && <span className="error-text">{errors.tipoCuenta.message}</span>}
       </div>
 

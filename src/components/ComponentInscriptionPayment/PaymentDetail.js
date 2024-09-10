@@ -16,8 +16,8 @@ function PaymentDetail() {
   const metodoPago = watch("metodoPago");
   const fechaFinEvento = watch("fechaFinEvento");
   const now = new Date();
-const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
 
 
   const validateSingleDateSelection = (index) => {    

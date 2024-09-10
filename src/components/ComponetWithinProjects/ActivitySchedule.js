@@ -64,11 +64,11 @@ function ActivitySchedule() {
     if (diferenciaDias > 15) {
       setShowActivity(true);
       setshowInputJustificacion(true);
-      setValue("justificacionComision", "");
     }
     if (diferenciaDias <= 15) {
 
       setValue("justificacionComision", "No Aplica"); // Limpia el campo si la diferencia es 15 días o menos
+      setValue("justificacionComision", "");
       setshowInputJustificacion(false);
       setShowActivity(false);
     }

@@ -141,7 +141,7 @@ function EventDetails() {
         <label htmlFor="RelevanciaAcademica" className="form-label">
           Relevancia Académica del evento:
         </label>
-        <input
+        <textarea
           type="text"
           id="RelevanciaAcademica"
           {...register("RelevanciaAcademica", {
@@ -216,6 +216,7 @@ function EventDetails() {
             <label htmlFor="articuloSi">SI</label>
             
             {showInputArticulo && (
+              <>
                  <input
                  type="text"
                  id="detalleArticuloSI"
@@ -225,6 +226,10 @@ function EventDetails() {
                  placeholder="Especifique"
                  className="form-input"
                />
+               {errors.detalleArticuloSI && (
+                <span className="error-text">{errors.detalleArticuloSI.message}</span>
+              )}
+              </>
             )}
           </div>
           <div>

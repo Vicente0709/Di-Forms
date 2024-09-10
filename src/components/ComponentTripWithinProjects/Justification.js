@@ -19,8 +19,7 @@ function Justification() {
       {/* 3.1 Objetivo, resultado o producto del proyecto */}
       <div className="form-group">
         <label htmlFor="objetivoProyecto" className="form-label">
-          Objetivo, resultado o producto del proyecto al que aporta la
-          participación en el evento.
+          Objetivo, resultado o producto del proyecto al que aporta el viaje técnico.
         </label>
         <label htmlFor="objetivoProyecto">
           Escriba textualmente el objetivo, resultado o producto del proyecto.

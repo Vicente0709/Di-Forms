@@ -14,7 +14,9 @@ function EventDetails() {
   const tipoEvento = watch("tipoEvento"); // Escucha los cambios en el tipo de evento
   const [showOtherEvent, setShowOtherEvent] = useState(false);
   const fechaInicioEvento = watch('fechaInicioEvento'); 
-
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  
 
  // Validación personalizada para la fecha de finalización
  const validateFechaFin = (fechaFin) => {
@@ -108,7 +110,7 @@ function EventDetails() {
             {...register("fechaInicioEvento", { 
               required: "La fecha de inicio es requerida",
               validate: (value) => {
-                const today = new Date().toISOString().split('T')[0];
+                const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                 return value >= today || "La fecha de inicio no puede ser anterior a la fecha actual.";
               }
             })}
