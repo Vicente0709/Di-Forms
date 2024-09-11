@@ -63,7 +63,7 @@ function EventParticipationOutsideProjectsForm() {
       JSON.parse(localStorage.getItem("formEventOutsideProject")) || {},
   });
 
-  const { watch, setValue, reset } = methods;
+  const { watch, setValue, reset, clearErrors } = methods;
 
   // Estados para manejar la visibilidad de la sección de descargas y el input condicional
   const [showDownloadSection, setShowDownloadSection] = useState(false);
@@ -80,8 +80,14 @@ function EventParticipationOutsideProjectsForm() {
   const adjustedNow = new Date(now.getTime() - localOffset)
     .toISOString()
     .split("T")[0]; // Fecha ajustada para la zona horaria local
-
-  // Efecto para sincronizar con localStorage y manejar la inicialización
+    const hospedaje = watch("hospedaje");
+    const movilizacion = watch("movilizacion");
+    const alimentacion = watch("alimentacion");
+    const seleccionDeclaracion = watch("seleccionDeclaracion");
+    const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
+    const habilitarCampos = seleccionViaticosSubsistencias === "SI";
+  
+    // Efecto para sincronizar con localStorage y manejar la inicialización
   useEffect(() => {
     // Función para inicializar el formulario con datos de localStorage
     const initializeFromLocalStorage = () => {
@@ -106,9 +112,28 @@ function EventParticipationOutsideProjectsForm() {
       setShowInputArticulo(true);
     }
 
+    if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
+      // Si cualquiera de los rubros está marcado como SI, la declaración debe ser "siCubre"
+      setValue("seleccionDeclaracion", "siCubre");
+    } else if (
+      hospedaje === "NO" &&
+      movilizacion === "NO" &&
+      alimentacion === "NO"
+    ) {
+      // Si todos los rubros están marcados como NO, la declaración debe ser "noCubre"
+      setValue("seleccionDeclaracion", "noCubre");
+    }
+
+    if (!habilitarCampos) {
+      // Limpiar valores de los campos cuando se selecciona "NO"
+      setValue("nombreBanco", "");
+      setValue("tipoCuenta", "");
+      setValue("numeroCuenta", "");
+      clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
+    }
     // Limpiar la suscripción al desmontar el componente
     return () => subscription.unsubscribe();
-  }, [watch, reset, seleccionArticulo, setValue]);
+  }, [watch, reset, seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos, setValue, clearErrors]);
 
   const validateFechaFin = (fechaFin) => {
     if (!fechaInicioEvento) {
@@ -281,6 +306,30 @@ function EventParticipationOutsideProjectsForm() {
       label: "NO",
     },
   ];
+
+  const declaracionOptions = [
+    {
+      value: "noCubre",
+      label: "Declaración si la organización NO cubre ningún rubro",
+    },
+    {
+      value: "siCubre",
+      label: "Declaración si la organización SI cubre algún rubro",
+    },
+  ];
+
+  const tipoCuentaOptions =[
+    {
+      value:"Ahorros", 
+      label:"Ahorros",
+    },
+    {
+      value: "Corriente",
+      label: "Corriente",
+    },
+  ]
+
+
   return (
     <FormProvider {...methods}>
       <Container>
@@ -291,16 +340,7 @@ function EventParticipationOutsideProjectsForm() {
         <Form
           onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}
         >
-          {/* Formulario con diferentes secciones 
-          <EventDetails />
-          <Transportation />
-          <PaymentDetail />
-          <ExpensesDeclaration />
-          <BankAccount />
-          <InstitutionalServices/>
-          <ExteriorDetail />
-          */}
-
+        
           <div className="form-container">
             <LabelTitle text="Datos Personales" />
             <InputText
@@ -331,7 +371,7 @@ function EventParticipationOutsideProjectsForm() {
                 validate: (value) =>
                   validarCedulaEcuatoriana(value) || "la cédula no es válida",
               }}
-              disable={false}
+              disabled={false}
             />
 
             <InputText
@@ -341,14 +381,14 @@ function EventParticipationOutsideProjectsForm() {
           Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
           Profesor Principal a Tiempo Completo."
               rules={{ required: "El puesta que ocupa es requerido" }}
-              disable={false}
+              disabled={false}
             />
 
             <InputSelect
               name="departamento"
               label="Departamento / Instituto"
               rules={{ required: "El departamento es requerido" }}
-              disable={false}
+              disabled={false}
               options={departamentoOptions}
             />
 
@@ -356,7 +396,7 @@ function EventParticipationOutsideProjectsForm() {
               name="nombreJefeInmediato"
               label="Nombres y Apellidos del Jefe Inmediato"
               rules={{ required: "El nombre del jefe inmediato es requerido" }}
-              disable={false}
+              disabled={false}
             />
 
             <InputText
@@ -366,10 +406,10 @@ function EventParticipationOutsideProjectsForm() {
               para referirse al departamento. Para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante"
               rules={{
                 required: "El cargo del jefe inmediato es requerido",
-                minLenght: {
-                  value: 10,
-                  message: "El cargo que escribio es demasiado corto",
-                },
+            minLength: {
+              value: 10,
+              message: "El cargo que escribio es demasiado corto",
+            },
               }}
             />
 
@@ -378,21 +418,21 @@ function EventParticipationOutsideProjectsForm() {
               name="tituloEvento"
               label="Título del Evento"
               rules={{ required: "El título del evento es requerido" }}
-              disable={false}
+              disabled={false}
             />
 
             <InputText
               name="ciudadEvento"
               label="Ciudad"
               rules={{ required: "La ciudad del evento es requerida" }}
-              disable={false}
+              disabled={false}
             />
 
             <InputText
               name="paisEvento"
               label="País"
               rules={{ required: "El país del evento es requerido" }}
-              disable={false}
+              disabled={false}
             />
             <Label text="Fechas del evento" />
             <InputDate
@@ -410,7 +450,7 @@ function EventParticipationOutsideProjectsForm() {
                   );
                 },
               }}
-              disable={false}
+              disabled={false}
             />
 
             <InputDate
@@ -420,7 +460,7 @@ function EventParticipationOutsideProjectsForm() {
                 required: "La fecha de finalización es requerida",
                 validate: validateFechaFin,
               }}
-              disable={false}
+              disabled={false}
             />
 
             <InputTextArea
@@ -429,14 +469,14 @@ function EventParticipationOutsideProjectsForm() {
               rules={{
                 required: "La relevancia académica del evento es requerida",
               }}
-              disable={false}
+              disabled={false}
             />
 
             <InputText
               name="tituloPonencia"
               label="Título de la Ponencia"
               rules={{ required: "El título de la ponencia es requerido" }}
-              disable={false}
+              disabled={false}
             />
 
             <InputText
@@ -444,7 +484,7 @@ function EventParticipationOutsideProjectsForm() {
               label="Tipo de Ponencia"
               placeholder="Plenaria, poster, otros"
               rules={{ required: "El tipo de ponencia es requerido" }}
-              disable={false}
+              disabled={false}
             />
 
             <RadioGroup
@@ -452,7 +492,7 @@ function EventParticipationOutsideProjectsForm() {
               name="articuloPublicado"
               options={articuloOptions}
               rules={{ required: "Indique si el artículo será publicado" }}
-              disable={false}
+              disabled={false}
             />
 
             {showInputArticulo && (
@@ -466,7 +506,7 @@ function EventParticipationOutsideProjectsForm() {
                 rules={{
                   required: "Por favor el detalle del artículo es requerido",
                 }}
-                disable={false}
+                disabled={false}
               />
             )}
 
@@ -485,15 +525,120 @@ function EventParticipationOutsideProjectsForm() {
               rules={{
                 required: "Indique si requiere viáticos y subsistencias",
               }}
-              disable={false}
+              disabled={false}
             />
             <RadioGroup
               label="Inscripción"
               name="inscripcion"
               options={participarElementosOptions}
               rules={{ required: "Indique si requiere inscripción" }}
-              disable={false}
+              disabled={false}
             />
+
+              <Transportation />
+              <PaymentDetail />
+
+              <LabelTitle text="Declaración de gastos, conforme reglamento de viáticos al exterior" />
+              <LabelText text=" Selecciona según corresponda. Responda SI aunque la organización del
+              evento cubra el rubro parcialmente. "/>
+              <LabelText text= "La organización del evento cubre los siguientes rubros:"/>
+              
+            <RadioGroup
+              label="a) Hospedaje"
+              name="hospedaje"
+              options={participarElementosOptions}
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              label="b) Movilización interna"
+              name="movilizacion"
+              options={participarElementosOptions}
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              label="c) Alimentación"
+              name="alimentacion"
+              options={participarElementosOptions}
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              label="Selección de declaración"
+              name="seleccionDeclaracion"
+              options={declaracionOptions}
+              disabled
+            />
+            {seleccionDeclaracion === "siCubre" && (
+            <>
+            <LabelText text="En mi calidad de profesor-investigador de la EPN, declaro que la
+            Organización del evento SI cubre gastos, por lo que solicito se
+            gestione la asignación viáticos conforme se establece en el artículo
+            13 del Reglamento de Viáticos al Exterior."/>
+
+            <LabelText text= "**A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, o de los establecidos en el artículo 9 del Reglamento de Viáticos al Exterior, que no hayan sido cubiertos por estas instituciones u organismos, para el reconocimiento de estos rubros y su correspondiente liquidación."/>
+            </>
+              )}
+
+            {seleccionDeclaracion === "noCubre" && (
+            <LabelText text= "En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento NO cubre ningún gasto, por lo que solicito se gestione la asignación de viáticos conforme se establece en el artículo 7 del Reglamento de Viáticos al Exterior."/>
+          )}
+
+            <LabelTitle text="Cuenta bancaria del servidor para recibir los viáticos"/>
+            <LabelText text="Obligatorio si marcó viáticos."/>
+
+            <InputText
+            name="nombreBanco"
+            label="Nombre del banco"
+            rules={{required: habilitarCampos? "Este campo es requerido": false}}
+            disabled={!habilitarCampos}
+            />
+
+            <InputSelect
+              name="tipoCuenta"
+              label="Tipo de Cuenta"
+              rules={{ required: habilitarCampos? "Este campo es requerido":false }}
+              disabled={!habilitarCampos}
+              options={tipoCuentaOptions}
+            />
+
+            <InputText
+            name="numeroCuenta"
+            label="No. de Cuenta"
+            rules={{required: habilitarCampos? "Este campo es requerido": false}}
+            disabled={!habilitarCampos}
+            />
+
+            <LabelTitle text= "Serviores que integran los servicios institucionales (opcional)"/>
+
+            <InputTextArea
+            name="servidores"
+            infoText="Completar esta sección solo en caso de que usted asista al mismo evento junto con otros funcionarios."
+            label="Nombre de los funcionarios"
+            placeholder="Escriba aquí los nombres de los funcionarios, separados por comas"
+            disabled={false}
+            />
+
+            <LabelTitle text= "DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS AL EXTERIOR"/>
+            <Label text= "REQUISITOS:"/>
+            <LabelText text="• Formulario de solicitud de autorización para cumplimiento de servicios institucionales."/>
+            <LabelText text="• Formulario para salida al exterior fuera de proyectos."/>
+            <LabelText text="• Copia de la carta o correo de aceptación de la ponencia y/o poster a ser presentada por el profesor solicitante."/>
+            <LabelText text="• Copia de artículo, ponencia o poster aceptado para verificación de autores y afiliación de la EPN."/>
+            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avalada por el represente del curso y el jefe inmediato."/>
+            <LabelText text="• Documento donde se puede verificar el costo, fechas de la inscripción al evento y fechas de participación en el evento. (NO factura/ NO invoice)"/>
+            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda."/>
+            <LabelText text="• Quipux del profesor al Jefe  o Director de la Unidad Académica solicitando el permiso y aval correspondiente para 
+              participar en el evento, deberá detallar todo el requerimiento, viáticos, pasajes, inscripción, de ser el caso."/>
+            <LabelText text="• Quipux por parte del Jefe o Director de la Unidad Académica, al Vicerrectorado de Investigación, Innovación y Vinculación, 
+              detallando el requerimiento de la salida al exterior y auspicio solicitado."/>
+
+
+
           </div>
 
           {/* Botón para enviar el formulario */}

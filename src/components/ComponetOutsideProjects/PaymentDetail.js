@@ -50,8 +50,9 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
       {/* Tabla Dinámica */}
       <table className="payment-table">
         <thead>
-          <tr>
+        <tr>
             <th>Nro.</th>
+            <th>Moneda</th>
             <th>Valor de inscripción</th>
             <th>Pago a realizarse</th>
             <th>Fecha</th>
@@ -69,6 +70,28 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                   className="form-input"
                 />
               </td>
+              <td>
+                <select
+                  id="monedaPago"
+                  {...register(`inscripciones[${index}].monedaPago`, {
+                    required: "La moneda es requerida",
+                  })}
+                  className="form-select"
+                >
+                  <option value="">Seleccione</option>
+                  <option value="$ ">Dólares</option>
+                  <option value=" € ">Euros</option>
+                  <option value="CHF ">
+                    Francos Suizos
+                  </option>
+                </select>
+                {errors.monedaPago && (
+                  <span className="error-text">
+                    {errors.monedaPago.message}
+                  </span>
+                )}
+              </td>
+
               <td>
                 <input
                   type="number"
@@ -98,7 +121,7 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                   <option value="">Seleccione</option>
                   <option value="Antes del ">Antes</option>
                   <option value="Despues del ">Despues</option>
-                  <option value="Fecha: ">
+                  <option value="Hasta el ">
                     Fecha maxima de pago
                   </option>
                 </select>
