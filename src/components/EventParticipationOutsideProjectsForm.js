@@ -3,15 +3,8 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
-import PersonalDetails from "./ComponetOutsideProjects/PersonalDetails.js";
-import EventDetails from "./ComponetOutsideProjects/EventDetails.js";
 import PaymentDetail from "./ComponetOutsideProjects/PaymentDetail.js";
-import ExpensesDeclaration from "./ComponetOutsideProjects/ExpensesDeclaration.js";
-import BankAccount from "./ComponetOutsideProjects/BankAccount.js";
 import Transportation from "./ComponetOutsideProjects/Transportation.js";
-import InstitutionalServices from "./ComponetOutsideProjects/InstitutionalServices.js";
-import ExteriorDetail from "./ComponetOutsideProjects/ExteriorDetail.js";
-
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
 import LabelText from "./Labels/LabelText.js";

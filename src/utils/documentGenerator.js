@@ -1158,8 +1158,6 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
   });
 }
 
-
-
 // Nueva función para generar el Anexo A en PDF
 export async function generateAnexoA(data) {
   const template = {
