@@ -1395,7 +1395,7 @@ export async function generateAnexoA2(data) {
   data.inscripciones.forEach((inscripcion) => {
     // Concatenamos el valor de inscripción con un '$' y un salto de línea
     if (data.inscripcion === "SI" && inscripcion.valorInscripcion) {
-      valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
+      valorInscripcionStr += `${inscripcion.monedaPago}${inscripcion.valorInscripcion}\n`;
     }
 
     // Construimos la cadena de la fecha de pago dependiendo de cuál campo tiene valor

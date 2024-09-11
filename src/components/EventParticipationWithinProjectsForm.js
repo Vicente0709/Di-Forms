@@ -3,17 +3,11 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
-import PersonalDetails from "./ComponetWithinProjects/PersonalDetails";
-import ProjectDetails from "./ComponetWithinProjects/ProjectDetails";
-import EventDetails from "./ComponetWithinProjects/EventDetails";
-import Justification from "./ComponetWithinProjects/Justification";
+
 import PaymentInfo from "./ComponetWithinProjects/PaymentInfo";
-import ExpensesDeclaration from "./ComponetWithinProjects/ExpensesDeclaration";
-import BankAccount from "./ComponetWithinProjects/BankAccount";
-import InstitutionalServices from "./ComponetWithinProjects/InstitutionalServices";
 import ActivitySchedule from "./ComponetWithinProjects/ActivitySchedule";
 import Transportation from "./ComponetWithinProjects/Transportation";
-import ExteriorDetail from "./ComponetWithinProjects/ExteriorDetail";
+
 import Label from "./Labels/Label";
 import LabelTitle from "./Labels/LabelTitle";
 import LabelText from "./Labels/LabelText";
@@ -95,6 +89,13 @@ function EventParticipationWithinProjectsForm() {
     formState: { errors },
   } = methods;
 
+  // Obtener la fecha actual ajustada por zona horaria
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000;
+  const adjustedNow = new Date(now.getTime() - localOffset)
+    .toISOString()
+    .split("T")[0];
+
   // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
     const calculateAndSetDiferenciaEnDias = (
@@ -157,6 +158,7 @@ function EventParticipationWithinProjectsForm() {
 
   // Manejadores de los botones y el metodo onSubmit
   const onSubmit = (data) => {
+    console.log("asdasddasfasd");
     setShowDownloadSection(true);
     console.log(methods.getValues());
   };
@@ -417,7 +419,7 @@ function EventParticipationWithinProjectsForm() {
     <FormProvider {...methods}>
       <Container>
         <h1 className="text-center my-4">
-          Formulario para participación en eventos dentro de proyectos {today()}
+          Formulario para participación en eventos dentro de proyectos
         </h1>
 
         {/* Formulario con diferentes secciones */}
@@ -578,7 +580,12 @@ function EventParticipationWithinProjectsForm() {
               label="Desde:"
               rules={{
                 required: "La fecha de inicio del evento es requerida",
-                validate: (value) => todayValidate(value, today), // Usamos el valor de today desde utils
+                validate: (value) => {
+                  return (
+                    value >= adjustedNow ||
+                    "La fecha de inicio no puede ser anterior a la fecha actual."
+                  );
+                },
               }}
               disabled={false}
             />
@@ -848,12 +855,15 @@ function EventParticipationWithinProjectsForm() {
 
             {/* Fin del formulario */}
           </div>
+
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button id="btn_enviar" type="submit" variant="primary">
-                Enviar
-              </Button>
+              <ActionButton
+                onClick={onSubmit}
+                label="Enviar"
+                variant="primary" // Estilo de Bootstrap
+              />
             </Col>
           </Row>
 
@@ -901,13 +911,11 @@ function EventParticipationWithinProjectsForm() {
               {/* Botón para descargar todos los documentos */}
               <Row className="mt-3">
                 <Col className="text-center">
-                  <Button
-                    type="button"
+                  <ActionButton
                     onClick={handleDownloadAll}
+                    label="Descargar Todo"
                     variant="success"
-                  >
-                    Descargar Todo
-                  </Button>
+                  />
                 </Col>
               </Row>
             </div>
@@ -916,9 +924,11 @@ function EventParticipationWithinProjectsForm() {
           {/* Botón para limpiar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button type="button" onClick={handleClearForm} variant="danger">
-                Limpiar Formulario
-              </Button>
+              <ActionButton
+                onClick={handleClearForm}
+                label="Limpiar Formulario"
+                variant="danger"
+              />
             </Col>
           </Row>
         </Form>
