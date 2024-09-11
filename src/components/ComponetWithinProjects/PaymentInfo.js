@@ -15,6 +15,11 @@ function PaymentInfo() {
 
   const metodoPago = watch("metodoPago");
   const fechaFinEvento = watch("fechaFinEvento");
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const today = new Date(now.getTime() - localOffset)
+    .toISOString()
+    .split("T")[0];
 
   const validateSingleDateSelection = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
@@ -40,11 +45,13 @@ function PaymentInfo() {
       {/* Tabla Dinámica */}
       <table className="payment-table">
         <thead>
-          <tr>
+        <tr>
             <th>Nro.</th>
+            <th>Moneda</th>
             <th>Valor de inscripción</th>
-            <th>Pago a realizarce</th>
+            <th>Pago a realizarse</th>
             <th>Fecha</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -58,6 +65,28 @@ function PaymentInfo() {
                   className="form-input"
                 />
               </td>
+              <td>
+                <select
+                  id="monedaPago"
+                  {...register(`inscripciones[${index}].monedaPago`, {
+                    required: "La moneda es requerida",
+                  })}
+                  className="form-select"
+                >
+                  <option value="">Seleccione</option>
+                  <option value="$ ">Dólares</option>
+                  <option value="€ ">Euros</option>
+                  <option value="CHF ">
+                    Francos Suizos
+                  </option>
+                </select>
+                {errors.monedaPago && (
+                  <span className="error-text">
+                    {errors.monedaPago.message}
+                  </span>
+                )}
+              </td>
+
               <td>
                 <input
                   type="number"
@@ -86,9 +115,9 @@ function PaymentInfo() {
                 >
                   <option value="">Seleccione</option>
                   <option value="Antes del ">Antes</option>
-                  <option value="Después del ">Después</option>
-                  <option value="Fecha:">
-                    Fecha máxima de pago
+                  <option value="Despues del ">Despues</option>
+                  <option value="Hasta el ">
+                    Fecha maxima de pago
                   </option>
                 </select>
                 {errors.pagoLimite && (

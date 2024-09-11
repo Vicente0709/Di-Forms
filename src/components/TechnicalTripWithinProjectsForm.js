@@ -46,6 +46,27 @@ const validarCedulaEcuatoriana = (cedula) => {
   return digitoVerificador === parseInt(cedula[9], 10);
 };
 
+// Validación personalizada para la fecha de fin del evento
+const validateFechaFin = (fechaFin, fechaInicioEvento) => {
+  if (!fechaInicioEvento) {
+    return "Primero seleccione la fecha de inicio del evento.";
+  } else if (!fechaFin) {
+    return (
+      fechaFin >= fechaInicioEvento ||
+      "La fecha de fin debe ser mayor o igual a la fecha de inicio."
+    );
+  }
+  return (
+    fechaFin >= fechaInicioEvento ||
+    "La fecha de fin debe ser mayor o igual a la fecha de inicio."
+  );
+};
+const todayValidate = (fecha, todayDay) => {
+  return (
+    fecha >= todayDay || "La fecha debe ser mayor o igual a la fecha actual."
+  );
+};
+
 function TechnicalTripWithinProjectsForm() {
   const methods = useForm({
     mode: "onChange",
@@ -67,6 +88,12 @@ function TechnicalTripWithinProjectsForm() {
     clearErrors,
     formState: { errors },
   } = methods;
+
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000;
+  const adjustedNow = new Date(now.getTime() - localOffset)
+    .toISOString()
+    .split("T")[0];
 
   // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
@@ -453,16 +480,30 @@ function TechnicalTripWithinProjectsForm() {
               disabled={false}
             />
             <Label text="Fechas del evento" />
+
             <InputDate
               name="fechaInicioEvento"
               label="Desde:"
-              rules={{ required: "La fecha de inicio del evento es requerida" }}
+              rules={{
+                required: "La fecha de inicio del evento es requerida",
+                validate: (value) => {
+                  return (
+                    value >= adjustedNow ||
+                    "La fecha de inicio no puede ser anterior a la fecha actual."
+                  );
+                },
+              }}
               disabled={false}
             />
+
             <InputDate
               name="fechaFinEvento"
               label="Hasta:"
-              rules={{ required: "La fecha de fin del evento es requerida" }}
+              rules={{
+                required: "La fecha de fin del evento es requerida",
+                validate: (value) =>
+                  validateFechaFin(value, watch("fechaInicioEvento")),
+              }}
               disabled={false}
             />
             <Label text="Solicita para viaje tecnico" />
