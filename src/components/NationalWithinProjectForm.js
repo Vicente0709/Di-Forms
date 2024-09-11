@@ -1,13 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
-// Importación de los componentes del formulario
-
-import PaymentInfo from "./ComponetWithinProjects/PaymentInfo";
-import ActivitySchedule from "./ComponetWithinProjects/ActivitySchedule";
-import Transportation from "./ComponetWithinProjects/Transportation";
-
+// Importación de los componentes Props
 import Label from "./Labels/Label";
 import LabelTitle from "./Labels/LabelTitle";
 import LabelText from "./Labels/LabelText";
@@ -18,15 +13,10 @@ import InputDate from "./Inputs/InputDate";
 import RadioGroup from "./Inputs/RadioGroup";
 import ActionButton from "./Buttons/ActionButton";
 import DownloadButton from "./Buttons/DownloadButton";
-import today from "../utils/date";
+
+// Importación de los componentes del formulario
 
 // Importación de las funciones para generar documentos
-import {
-  generateMemoWithinProjec1,
-  generateMemoWithinProjec2,
-  generateAnexoA,
-  generateAnexoA2,
-} from "../utils/documentGenerator";
 
 // Validaciones personalizadas
 const validarCedulaEcuatoriana = (cedula) => {
@@ -63,18 +53,16 @@ const validateFechaFin = (fechaFin, fechaInicioEvento) => {
   );
 };
 
-function EventParticipationWithinProjectsForm() {
-  // Estados para manejar datos y visibilidad de la UI
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
-  const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
-
-  // Configuración de react-hook-form con valores predeterminados desde localStorage
+function NationalWithinProjectsForm() {
+  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues: JSON.parse(localStorage.getItem("formData")) || {},
+    defaultValues:
+      JSON.parse(localStorage.getItem("formNationalWithinProjects")) || {},
   });
+
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
 
   const {
     watch,
@@ -84,7 +72,6 @@ function EventParticipationWithinProjectsForm() {
     formState: { errors },
   } = methods;
 
-  // Obtener la fecha actual ajustada por zona horaria
   const now = new Date();
   const localOffset = now.getTimezoneOffset() * 60000;
   const adjustedNow = new Date(now.getTime() - localOffset)
@@ -93,119 +80,21 @@ function EventParticipationWithinProjectsForm() {
 
   // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
-    const calculateAndSetDiferenciaEnDias = (
-      primeraFechaSalida,
-      ultimaFechaLlegada
-    ) => {
-      if (primeraFechaSalida && ultimaFechaLlegada) {
-        const fechaInicio = new Date(primeraFechaSalida);
-        const fechaFinal = new Date(ultimaFechaLlegada);
-        const diferenciaEnDias =
-          Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
-
-        localStorage.setItem(
-          "diferenciaDias",
-          JSON.stringify({ diferencia: diferenciaEnDias })
-        );
-        setDiferenciaEnDias(diferenciaEnDias);
-      } else {
-        localStorage.setItem(
-          "diferenciaDias",
-          JSON.stringify({ diferencia: 0 })
-        );
-        setDiferenciaEnDias(0);
-      }
-    };
-
+    // Función para inicializar los valores desde localStorage
     const initializeFromLocalStorage = () => {
-      const formData = JSON.parse(localStorage.getItem("formData")) || {};
-      reset(formData); // Rellenar formulario con datos almacenados
-
-      // Actualizar selección de inscripción
-      setSeleccionInscripcion(formData.inscripcion || "");
-
-      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
-      const primeraFechaSalida = formData.transporteIda?.[0]?.fechaSalida || "";
-      const ultimaFechaLlegada =
-        formData.transporteRegreso?.[formData.transporteRegreso.length - 1]
-          ?.fechaLlegada || "";
-      calculateAndSetDiferenciaEnDias(primeraFechaSalida, ultimaFechaLlegada);
+      const formNationalWithinProjects =
+        JSON.parse(localStorage.getItem("formNationalWithinProjects")) || {};
+      reset(formNationalWithinProjects);
     };
-
     initializeFromLocalStorage();
-
+    // Suscribirse a los cambios en el formulario para guardar en localStorage
     const subscription = watch((data) => {
-      localStorage.setItem("formData", JSON.stringify(data));
-
-      // Actualizar selección de inscripción
-      setSeleccionInscripcion(data.inscripcion);
-
-      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
-      const primeraFechaSalida = data.transporteIda?.[0]?.fechaSalida || "";
-      const ultimaFechaLlegada =
-        data.transporteRegreso?.[data.transporteRegreso.length - 1]
-          ?.fechaLlegada || "";
-      calculateAndSetDiferenciaEnDias(primeraFechaSalida, ultimaFechaLlegada);
+      localStorage.setItem("formNationalWithinProjects", JSON.stringify(data));
     });
-
+    // Limpiar la suscripción al desmontar el componente
     return () => subscription.unsubscribe();
-  }, [watch, reset, setSeleccionInscripcion, setDiferenciaEnDias]);
-
-  // Manejadores de los botones y el metodo onSubmit
-  const onSubmit = (data) => {
-    console.log("asdasddasfasd");
-    setShowDownloadSection(true);
-    console.log(methods.getValues());
-  };
-
-  const handleGenerateDocx = () => {
-    const formData = methods.getValues();
-    if (formData.rolEnProyecto === "Director") {
-      generateMemoWithinProjec1(formData);
-      setShowDownloadSection(false);
-    }
-    if (
-      formData.rolEnProyecto === "Codirector" ||
-      formData.rolEnProyecto === "Colaborador"
-    ) {
-      generateMemoWithinProjec2(formData);
-      setShowDownloadSection(false);
-    }
-  };
-
-  const handleGeneratePdf = () => {
-    const formData = methods.getValues();
-    generateAnexoA(formData);
-    setShowDownloadSection(false);
-  };
-
-  const handleGeneratePdf2 = () => {
-    const formData = methods.getValues();
-    generateAnexoA2(formData);
-    setShowDownloadSection(false);
-  };
-
-  // Función para descargar todos los documentos
-  const handleDownloadAll = () => {
-    setTimeout(() => {
-      handleGenerateDocx();
-    }, 1000);
-
-    setTimeout(() => {
-      handleGeneratePdf();
-    }, 2000);
-
-    handleGeneratePdf2();
-
-    setShowDownloadSection(false);
-  };
-
-  // Función para limpiar el formulario y resetear datos
-  const handleClearForm = () => {
-    localStorage.removeItem("formData");
-    setShowDownloadSection(false);
-    window.location.reload();
-  };
+  }, [watch, reset]);
+  // A partir de aqui los handleButtons
 
   // Observadores de campos y visualización de campos
   const rolEnProyecto = watch("rolEnProyecto");
@@ -273,7 +162,6 @@ function EventParticipationWithinProjectsForm() {
     setValue,
     clearErrors,
   ]);
-
   // Opciones para roles
   const rolesOptions = [
     { value: "Director", label: "Director" },
@@ -414,13 +302,11 @@ function EventParticipationWithinProjectsForm() {
     <FormProvider {...methods}>
       <Container>
         <h1 className="text-center my-4">
-          Formulario para participación en eventos dentro de proyectos
+          Formulario para participación en viajes técnicos dentro de proyectos
         </h1>
-
-        {/* Formulario con diferentes secciones */}
-        <Form onSubmit={methods.handleSubmit(onSubmit)}>
+        <Form onSubmit={methods.handleSubmit()}>
           <div className="form-container">
-            <LabelTitle text="Detalles del proyecto" disabled={false} />
+            <LabelTitle text="Detalles del Proyecto" disabled={false} />
 
             <InputText
               name="codigoProyecto"
@@ -537,7 +423,10 @@ function EventParticipationWithinProjectsForm() {
               disabled={false}
             />
 
-            <LabelTitle text="Detalles del evento" disabled={false} />
+            <LabelTitle
+              text="Datos Del Evento y Requerimientos "
+              disabled={false}
+            />
 
             <InputText
               name="tituloEvento"
@@ -565,7 +454,8 @@ function EventParticipationWithinProjectsForm() {
               rules={{
                 required: "El país del evento es requerido",
               }}
-              disabled={false}
+              defaultValue="Ecuador"
+              disabled={true}
             />
 
             <LabelText text="Fechas del evento:" />
@@ -595,6 +485,19 @@ function EventParticipationWithinProjectsForm() {
               }}
               disabled={false}
             />
+            <RadioGroup
+              name="presentacionPonencia"
+              label="¿Va a realizar la presentación de una ponencia? "
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{
+                required:
+                  "Indique si se va a realizar la presentación de una ponencia",
+              }}
+            />
+            
             <RadioGroup
               name="tipoEvento"
               label="Tipo de evento:"
@@ -690,246 +593,11 @@ function EventParticipationWithinProjectsForm() {
               infoText="Describa la relevancia del evento y aporte al cumplimiento del objetivo."
               disabled={false}
             />
-
-            <Transportation />
-            <ActivitySchedule />
-            {seleccionInscripcion === "SI" && <PaymentInfo />}
-
-            <LabelTitle
-              text="DECLARACIÓN DE GASTOS, CONFORME REGLAMENTO DE VIÁTICOS AL EXTERIOR"
-              disabled={false}
-            />
-
-            <LabelText text="Selecciona según corresponda. Responda SI aunque la organización del evento cubra el rubro parcialmente." />
-
-            {/* La organización del evento cubre los siguientes rubros */}
-            <LabelTitle
-              text="La organización del evento cubre los siguientes rubros:"
-              disabled={false}
-            />
-
-            <RadioGroup
-              name="hospedaje"
-              label="a) Hospedaje"
-              options={[
-                { value: "SI", label: "SI" },
-                { value: "NO", label: "NO" },
-              ]}
-              rules={{ required: "Este campo es requerido" }}
-              disabled={false}
-            />
-
-            <RadioGroup
-              name="movilizacion"
-              label="b) Movilización interna"
-              options={[
-                { value: "SI", label: "SI" },
-                { value: "NO", label: "NO" },
-              ]}
-              rules={{ required: "Este campo es requerido" }}
-              disabled={false}
-            />
-
-            <RadioGroup
-              name="alimentacion"
-              label="c) Alimentación"
-              options={[
-                { value: "SI", label: "SI" },
-                { value: "NO", label: "NO" },
-              ]}
-              rules={{ required: "Este campo es requerido" }}
-              disabled={false}
-            />
-
-            <LabelText text="Para evitar reproceso, envíe un email al organizador del evento con copia a <span class='bolded'>daniel.sosa@epn.edu.ec</span> y <span class='bolded'>direccion.investigacion@epn.edu.ec</span> consultando:" />
-            <LabelText text="Dear event organizer: The National Polytechnic School will sponsor my participation in the event. To calculate the per diem, we need to know if the event offers, even for one time, any of the main meals breakfast, lunch, or dinner." />
-
-            {/* Selección de declaración */}
-            <LabelTitle text="Selección de declaración" disabled={false} />
-
-            <RadioGroup
-              name="seleccionDeclaracion"
-              label=""
-              options={[
-                {
-                  value: "noCubre",
-                  label: "Declaración si la organización NO cubre ningún rubro",
-                },
-                {
-                  value: "siCubre",
-                  label: "Declaración si la organización SI cubre algún rubro",
-                },
-              ]}
-              rules={{ required: "Este campo es requerido" }}
-              disabled={true} // Bloquear cambios manuales
-            />
-
-            {seleccionDeclaracion === "noCubre" && (
-              <LabelText text="En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento NO cubre ningún gasto, por lo que solicito se gestione la asignación de viáticos conforme se establece en el artículo 7 del Reglamento de Viáticos al Exterior." />
-            )}
-
-            {seleccionDeclaracion === "siCubre" && (
-              <div>
-                <LabelText text="En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento SI cubre gastos, por lo que solicito se gestione la asignación viáticos conforme se establece en el artículo 13 del Reglamento de Viáticos al Exterior." />
-                <LabelText text="**A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, o de los establecidos en el artículo 9 del Reglamento de Viáticos al Exterior, que no hayan sido cubiertos por estas instituciones u organismos, para el reconocimiento de estos rubros y su correspondiente liquidación." />
-              </div>
-            )}
-
-            <LabelTitle
-              text="CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS"
-              disabled={false}
-            />
-            <LabelText text="Obligatorio si marcó viáticos" />
-
-            {/* Nombre del banco */}
-            <InputText
-              name="nombreBanco"
-              label="Nombre del banco:"
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-
-            {/* Tipo de cuenta */}
-            <InputSelect
-              name="tipoCuenta"
-              label="Tipo de cuenta:"
-              options={[
-                { value: "", label: "Seleccione" },
-                { value: "Ahorros", label: "Ahorros" },
-                { value: "Corriente", label: "Corriente" },
-              ]}
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-
-            {/* Número de cuenta */}
-            <InputText
-              name="numeroCuenta"
-              label="No. De cuenta:"
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-
-            <LabelTitle
-              text="SERVIDORES QUE INTEGRAN LOS SERVICIOS INSTITUCIONALES (opcional)"
-              disabled={false}
-            />
-            <LabelText text="Completar esta sección solo en caso de que usted asista al mismo evento junto con otros funcionarios." />
-
-            {/* Nombre de los funcionarios */}
-            <InputTextArea
-              name="servidores"
-              label="Nombre de los funcionarios:"
-              placeholder="Escriba aquí los nombres de los funcionarios, separados por comas"
-              rules={{ required: false }} // Este campo es opcional
-              infoText="Escriba los nombres separados por comas."
-            />
-
-            <LabelTitle
-              text="DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS AL EXTERIOR"
-              disabled={false}
-            />
-
-            <Label text="REQUISITOS:" />
-
-            {/* Documentos de Requisito */}
-            <LabelText text="• Formulario de solicitud de autorización para cumplimiento de servicios institucionales." />
-            <LabelText text="• Formulario para salida al exterior dentro de proyectos." />
-            <LabelText text="• Copia de la carta o correo de aceptación de la ponencia a ser presentada, o copia del documento de registro en el evento, o copia de la carta de invitación." />
-            <LabelText text="• Copia del artículo, poster, abstract o ponencia, cuando aplique, aceptado para verificación de autores, afiliación de la EPN y agradecimiento." />
-            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avalada por el represente del curso y el Jefe o Director de la Unidad Académica. O en el caso de que esta actividad se realice fuera del periodo de clases, aval del Jefe o Director de la Unidad Académica indicando este particular." />
-            <LabelText text="• Documento donde se puede verificar el costo, fechas de la inscripción o fechas de participación en el viaje técnico (NO factura/ NO invoice)." />
-            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda." />
-            <LabelText text="• Quipux por parte del Director del Proyecto al Vicerrectorado de Investigación, Innovación y Vinculación, detallando el requerimiento de la salida al exterior." />
-
-            {/* Fin del formulario */}
           </div>
-
-          {/* Botón para enviar el formulario */}
-          <Row className="mt-4">
-            <Col className="text-center">
-              <ActionButton
-                onClick={onSubmit}
-                label="Enviar"
-                variant="primary" // Estilo de Bootstrap
-              />
-            </Col>
-          </Row>
-
-          {/* Sección de descarga de documentos, visible tras enviar el formulario */}
-          {showDownloadSection && (
-            <div className="mt-4">
-              <Row className="justify-content-center">
-                <Col md={4} className="text-center">
-                  <div onClick={handleGenerateDocx} className="download-item">
-                    <img
-                      src="IconWord.png"
-                      alt="Word Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Memorando</span>
-                  </div>
-                </Col>
-
-                <Col md={4} className="text-center">
-                  <div onClick={handleGeneratePdf} className="download-item">
-                    <img
-                      src="IconPdf.png"
-                      alt="PDF Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Anexo A</span>
-                  </div>
-                </Col>
-
-                <Col md={4} className="text-center">
-                  <div onClick={handleGeneratePdf2} className="download-item">
-                    <img
-                      src="IconPdf.png"
-                      alt="PDF Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Anexo 2A</span>
-                  </div>
-                </Col>
-              </Row>
-
-              {/* Botón para descargar todos los documentos */}
-              <Row className="mt-3">
-                <Col className="text-center">
-                  <ActionButton
-                    onClick={handleDownloadAll}
-                    label="Descargar Todo"
-                    variant="success"
-                  />
-                </Col>
-              </Row>
-            </div>
-          )}
-
-          {/* Botón para limpiar el formulario */}
-          <Row className="mt-4">
-            <Col className="text-center">
-              <ActionButton
-                onClick={handleClearForm}
-                label="Limpiar Formulario"
-                variant="danger"
-              />
-            </Col>
-          </Row>
         </Form>
       </Container>
     </FormProvider>
   );
 }
 
-export default EventParticipationWithinProjectsForm;
+export default NationalWithinProjectsForm;
