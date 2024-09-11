@@ -1,7 +1,8 @@
 import { useFormContext } from "react-hook-form";
 import Label from "../Labels/Label";
+import LabelText from "../Labels/LabelText"; // Nuevo componente
 
-const InputSelect = ({ name, label, options, rules, disabled }) => {
+const InputSelect = ({ name, label, options, rules, disabled, infoText }) => {
   const {
     register,
     formState: { errors },
@@ -10,6 +11,7 @@ const InputSelect = ({ name, label, options, rules, disabled }) => {
   return (
     <div className="form-group">
       <Label text={label} htmlFor={name} disabled={disabled} />
+      {infoText && <LabelText text={infoText} />} {/* Nuevo texto informativo */}
       <select
         id={name}
         {...register(name, rules)}

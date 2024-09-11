@@ -87,7 +87,7 @@ function Transportation() {
   }, [appendIda, appendRegreso, fieldsIda.length, fieldsRegreso.lengt, fieldsRegreso.length]);
 
   return (
-    <div className="form-container">
+    <div >
       <h3>• TRANSPORTE</h3>
       <h5>TRANSPORTE DE IDA
       </h5>

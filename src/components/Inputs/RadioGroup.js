@@ -1,30 +1,39 @@
+import React from "react";
 import { useFormContext } from "react-hook-form";
 import Label from "../Labels/Label";
 
-const RadioGroup = ({ label, name, options, rules, disabled }) => {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext();
+const RadioGroup = ({ name, label, options, rules, disabled = false, defaultValue }) => {
+  const { register, formState: { errors }, setValue } = useFormContext();
+
+  // Establecer valor predeterminado si está definido
+  React.useEffect(() => {
+    if (defaultValue) {
+      setValue(name, defaultValue);
+    }
+  }, [defaultValue, name, setValue]);
 
   return (
-    <div className={`form-group ${disabled ? "disabled" : ""}`}>
-      <Label text={label} htmlFor={name} disabled={disabled} />
-      <div className="radio-options">
-        {options.map((option) => (
-          <div key={option.value} className="radio-option">
+    <div className="form-group">
+      {/* Etiqueta opcional para el grupo */}
+      {label && <Label text={label} htmlFor={name} />}
+      
+      {/* Opciones del RadioGroup */}
+      <div className="radio-group">
+        {options.map((option, index) => (
+          <label key={index} className="radio-label" style={{ display: "block", marginBottom: "10px" }}>
             <input
               type="radio"
-              id={`${name}_${option.value}`}
               value={option.value}
               {...register(name, rules)}
               disabled={disabled}
-              className={`form-radio ${errors[name] ? "is-invalid" : ""}`}
+              style={{ marginRight: "8px" }} // Espacio entre radio button y el texto
             />
-            <Label text={option.label} htmlFor={`${name}_${option.value}`} disabled={disabled} />
-          </div>
+            {option.label}
+          </label>
         ))}
       </div>
+      
+      {/* Mostrar errores si existen */}
       {errors[name] && <span className="error-text">{errors[name].message}</span>}
     </div>
   );

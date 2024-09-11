@@ -1,6 +1,5 @@
-import React, { useEffect,useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
-
 
 const validarCedulaEcuatoriana = (cedula) => {
   if (cedula.length !== 10) return false;
@@ -29,7 +28,7 @@ function PersonalDetail() {
     setValue,
     formState: { errors },
   } = useFormContext();
- 
+
   const cedulaValue = watch("cedula");
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
@@ -38,30 +37,25 @@ function PersonalDetail() {
   const [showInputDirector, setshowInputDirector] = useState(false);
   /*Valida la elección de Codirector o Colaborador para ingresar nombre y cargo del director del proyecto*/
   useEffect(() => {
-
     if (participacionProyecto === "dentroProyecto") {
       setshowInputParticipacion(true);
     } else {
       setshowInputParticipacion(false);
-      setValue("codigoProyecto","");
-      setValue("nombreDirector","");
-      setValue("cargoDirector","");
+      setValue("codigoProyecto", "");
+      setValue("nombreDirector", "");
+      setValue("cargoDirector", "");
     }
-    
   }, [participacionProyecto, setValue]);
 
   useEffect(() => {
-
-    
-    if (rolEnProyecto === "Codirector" || rolEnProyecto ==="Colaborador") {
+    if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
       setshowInputDirector(true);
     } else {
       setshowInputDirector(false);
-      setValue("nombreDirector","");
-      setValue("cargoDirector","");
+      setValue("nombreDirector", "");
+      setValue("cargoDirector", "");
     }
   }, [rolEnProyecto, setValue]);
-
 
   return (
     <div className="form-container">
@@ -235,8 +229,9 @@ function PersonalDetail() {
           Cargo del Jefe inmediato:
         </label>
         <label htmlFor="cargoJefeInmediato">
-          Favor colocar el cargo del Jefe inmediato, puede usar las siglas
-          para referirse al departamento. Para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante
+          Favor colocar el cargo del Jefe inmediato, puede usar las siglas para
+          referirse al departamento. Para referirse al departamento. Ejemplo:
+          Jefe del DACI / Jefe del DACI, subrogante
         </label>
         <input
           type="text"
@@ -271,96 +266,102 @@ function PersonalDetail() {
           <option value="">Seleccione la participación</option>
           <option value="fueraProyecto">Fuera de Proyecto</option>
           <option value="dentroProyecto">Dentro de Proyecto</option>
-          </select>
+        </select>
         {errors.participacionProyecto && (
-          <span className="error-text">{errors.participacionProyecto.message}</span>
+          <span className="error-text">
+            {errors.participacionProyecto.message}
+          </span>
         )}
       </div>
 
-        {/* Campos de Nombre director y cargo director segun se escoga en el rol de proyectos*/}
+      {/* Campos de Nombre director y cargo director segun se escoga en el rol de proyectos*/}
       {showInputParticipacion && (
         <>
-        <div className="form-group">
-          <label htmlFor="codigoProyecto" className="form-label">
-            Código del Proyecto:
-          </label>
-          <input
-            type="text"
-            id="codigoProyecto"
-            {...register("codigoProyecto", {
-              required: "El código del Proyecto requerido",
-            })}
-            className="form-input"
-          />
-          {errors.codigoProyecto && (
-            <span className="error-text">{errors.codigoProyecto.message}</span>
+          <div className="form-group">
+            <label htmlFor="codigoProyecto" className="form-label">
+              Código del Proyecto:
+            </label>
+            <input
+              type="text"
+              id="codigoProyecto"
+              {...register("codigoProyecto", {
+                required: "El código del Proyecto requerido",
+              })}
+              className="form-input"
+            />
+            {errors.codigoProyecto && (
+              <span className="error-text">
+                {errors.codigoProyecto.message}
+              </span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="rolEnProyecto" className="form-label">
+              Rol en el proyecto:
+            </label>
+            <select
+              id="rolEnProyecto"
+              {...register("rolEnProyecto", {
+                required: "El rol en el proyecto es requerido",
+              })}
+              className="form-select"
+            >
+              <option value="">Seleccione un rol</option>
+              <option value="Director">Director</option>
+              <option value="Codirector">Codirector</option>
+              <option value="Colaborador">Colaborador</option>
+            </select>
+            {errors.rolEnProyecto && (
+              <span className="error-text">{errors.rolEnProyecto.message}</span>
+            )}
+          </div>
+
+          {/* Campos de Nombre director y cargo director segun se escoga en el rol de proyectos*/}
+          {showInputDirector && (
+            <div className="form-group">
+              <label htmlFor="nombreDirector" className="form-label">
+                Nombre del Director del proyecto:
+              </label>
+              <input
+                type="text"
+                id="nombreDirector"
+                {...register("nombreDirector", {
+                  required: "El nombre del Director es requerido",
+                })}
+                className="form-input"
+              />
+              {errors.nombreDirector && (
+                <span className="error-text">
+                  {errors.nombreDirector.message}
+                </span>
+              )}
+            </div>
           )}
-        </div>
 
-<div className="form-group">
-<label htmlFor="rolEnProyecto" className="form-label">
-  Rol en el proyecto:
-</label>
-<select
-  id="rolEnProyecto"
-  {...register("rolEnProyecto", {
-    required: "El rol en el proyecto es requerido",
-  })}
-  className="form-select"
->
-  <option value="">Seleccione un rol</option>
-  <option value="Director">Director</option>
-  <option value="Codirector">Codirector</option>
-  <option value="Colaborador">Colaborador</option>
-</select>
-{errors.rolEnProyecto && (
-  <span className="error-text">{errors.rolEnProyecto.message}</span>
-)}
-
-</div>
-
-{/* Campos de Nombre director y cargo director segun se escoga en el rol de proyectos*/}
-{showInputDirector && (
-<div className="form-group">
-  <label htmlFor="nombreDirector" className="form-label">
-    Nombre del Director del proyecto:
-  </label>
-  <input
-    type="text"
-    id="nombreDirector"
-    {...register("nombreDirector", {
-      required: "El nombre del Director es requerido",
-    })}
-    className="form-input"
-  />
-  {errors.nombreDirector && (
-    <span className="error-text">{errors.nombreDirector.message}</span>
-  )}
-</div>
-)}
-
-{showInputDirector && (
-<div className="form-group">
-  <label htmlFor="cargoDirector" className="form-label">
-    Cargo del Director del proyecto:
-  </label>
-  <input
-    type="text"
-    id="cargoDirector"
-    {...register("cargoDirector", {
-      required: "El cargo del director es requerido",
-    })}
-    className="form-input"
-  />
-  {errors.cargoDirector && (
-    <span className="error-text">{errors.cargoDirector.message}</span>
-  )}
-</div>
-)}
-     </> )}
-
+          {showInputDirector && (
+            <div className="form-group">
+              <label htmlFor="cargoDirector" className="form-label">
+                Cargo del Director del proyecto:
+              </label>
+              <input
+                type="text"
+                id="cargoDirector"
+                {...register("cargoDirector", {
+                  required: "El cargo del director es requerido",
+                })}
+                className="form-input"
+              />
+              {errors.cargoDirector && (
+                <span className="error-text">
+                  {errors.cargoDirector.message}
+                </span>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
-    
   );
 }
 
