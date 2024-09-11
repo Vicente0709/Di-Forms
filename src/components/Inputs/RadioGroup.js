@@ -20,12 +20,13 @@ const RadioGroup = ({ name, label, options, rules, disabled = false, defaultValu
       {/* Opciones del RadioGroup */}
       <div className="radio-group">
         {options.map((option, index) => (
-          <label key={index} className="radio-label" style={{ marginRight: "20px" }}>
+          <label key={index} className="radio-label" style={{ display: "block", marginBottom: "10px" }}>
             <input
               type="radio"
               value={option.value}
               {...register(name, rules)}
               disabled={disabled}
+              style={{ marginRight: "8px" }} // Espacio entre radio button y el texto
             />
             {option.label}
           </label>

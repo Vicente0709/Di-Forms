@@ -36,7 +36,7 @@ function PaymentDetail() {
   };
 
   return (
-    <div className="form-container">
+    <div >
       <h3>• Valor de la inscripción</h3>
       <p>
         Por favor, ingrese las fechas máximas de pago según la información

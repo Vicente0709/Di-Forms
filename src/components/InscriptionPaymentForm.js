@@ -50,8 +50,11 @@ const validarCedulaEcuatoriana = (cedula) => {
 };
 
 function InscriptionPaymentForm() {
-  // Estado para manejar la visibilidad de la sección de descargas
+  // Estado para manejar la visibilidad de secciones y descarga de documentos
   const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const [showInputParticipacion, setShowInputParticipacion] = useState(false);
+  const [showInputDirector, setShowInputDirector] = useState(false);
+  const [showInputArticulo, setShowInputArticulo] = useState(false);
 
   // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
@@ -61,17 +64,23 @@ function InscriptionPaymentForm() {
       JSON.parse(localStorage.getItem("formInscriptionPayment")) || {},
   });
 
-  const { watch, setValue } = methods;
+  const { watch, setValue, reset } = methods;
+
+  // Observadores para campos clave
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
-  const [showInputParticipacion, setshowInputParticipacion] = useState(false);
-  const [showInputDirector, setshowInputDirector] = useState(false);
-  const participacionEvento = watch("participacionEvento"); // Escucha los cambios en la participación en el evento
-  const [showInputArticulo, setshowInputArticulo] = useState(false);
+  const participacionEvento = watch("participacionEvento");
   const seleccionArticulo = watch("articuloPublicado");
   const fechaInicioEvento = watch("fechaInicioEvento");
+
+  // Obtener la fecha actual ajustada por zona horaria
   const now = new Date();
-  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const localOffset = now.getTimezoneOffset() * 60000;
+  const adjustedNow = new Date(now.getTime() - localOffset)
+    .toISOString()
+    .split("T")[0];
+
+  // Validación personalizada para la fecha de fin
   const validateFechaFin = (fechaFin) => {
     if (!fechaInicioEvento) {
       return "Primero seleccione la fecha de inicio.";
@@ -81,53 +90,57 @@ function InscriptionPaymentForm() {
       "La fecha de finalización no puede ser anterior a la fecha de inicio."
     );
   };
+
   // Efecto para sincronizar con localStorage y manejar la inicialización
   useEffect(() => {
-    // Función para inicializar el estado desde localStorage
+    // Inicializar el formulario desde localStorage
     const initializeFromLocalStorage = () => {
       const formData =
         JSON.parse(localStorage.getItem("formInscriptionPayment")) || {};
-      // Aquí puedes agregar cualquier lógica adicional de inicialización
+      reset(formData); // Rellenar el formulario con datos almacenados
     };
 
-    // Llamar a la inicialización al montar el componente
+    // Llamar a la inicialización cuando el componente se monta
     initializeFromLocalStorage();
 
+    // Suscribirse a los cambios en el formulario y almacenarlos en localStorage
     const subscription = watch((data) => {
       localStorage.setItem("formInscriptionPayment", JSON.stringify(data));
     });
 
+    // Mostrar u ocultar campos según las selecciones del formulario
     if (participacionProyecto === "dentroProyecto") {
-      setshowInputParticipacion(true);
+      setShowInputParticipacion(true);
     } else {
-      setshowInputParticipacion(false);
+      setShowInputParticipacion(false);
       setValue("codigoProyecto", "");
       setValue("nombreDirector", "");
       setValue("cargoDirector", "");
     }
 
     if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
-      setshowInputDirector(true);
+      setShowInputDirector(true);
     } else {
-      setshowInputDirector(false);
+      setShowInputDirector(false);
       setValue("nombreDirector", "");
       setValue("cargoDirector", "");
     }
 
     if (seleccionArticulo === "NO") {
-      setshowInputArticulo(false);
+      setShowInputArticulo(false);
       setValue("detalleArticuloSI", "");
     } else {
-      setshowInputArticulo(true);
+      setShowInputArticulo(true);
     }
 
     // Limpieza al desmontar el componente
     return () => subscription.unsubscribe();
   }, [
-    rolEnProyecto,
     participacionProyecto,
+    rolEnProyecto,
     seleccionArticulo,
     watch,
+    reset,
     setValue,
   ]);
 
@@ -370,15 +383,17 @@ function InscriptionPaymentForm() {
                 <InputText
                   name="codigoProyecto"
                   label="Código del Proyecto"
-                  rules={{ required: "El código del Proyecto es requerido",
+                  rules={{
+                    required: "El código del Proyecto es requerido",
                     pattern: {
                       value: /^[A-Za-z]+(-[A-Za-z0-9]+)+$/,
-                      message: "El código del proyecto debe estar conformado por una combinación de letras y números separadas por guiones."
-                    }
-                   }}
+                      message:
+                        "El código del proyecto debe estar conformado por una combinación de letras y números separadas por guiones.",
+                    },
+                  }}
                   disable={false}
                 />
- 
+
                 <InputSelect
                   name="rolEnProyecto"
                   label="Rol en el proyecto"
@@ -481,7 +496,7 @@ function InscriptionPaymentForm() {
               rules={{ required: "Indique si el artículo será publicado" }}
               disable={false}
             />
-              
+
             {showInputArticulo && (
               <InputText
                 name="detalleArticuloSI"
@@ -496,19 +511,18 @@ function InscriptionPaymentForm() {
                 disable={false}
               />
             )}
-            
-          <PaymentDetail/>
 
-          <LabelTitle text="DOCUMENTACIÓN REQUERIDA PARA PAGOS DE INSCRIPCIÓN"/>
-          <Label text="REQUISITOS:"/>
-          <LabelText text= "• Formulario para pago de inscripciones." />
-          <LabelText text= "• Copia de la carta o correo de la aceptación de la ponencia y/o poster para participar en el evento." />
-          <LabelText text= "• Copia del artículo, ponencia o poster aceptado para verificación de autores y afiliación de la EPN." />
-          <LabelText text= "• Documento donde se pueda verificar el costo y  fechas de pago de inscripción al evento (NO factura/ NO invoice)." />
-          <LabelText text= "• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda." />
-          <LabelText text= "• Quipux del Director del Proyecto o Profesor solicitante dirigido al Vicerrectorado de Investigación, Innovación y Vinculación en el cual deberá solicitar el pago de la inscripción." />
+            <PaymentDetail />
+
+            <LabelTitle text="DOCUMENTACIÓN REQUERIDA PARA PAGOS DE INSCRIPCIÓN" />
+            <Label text="REQUISITOS:" />
+            <LabelText text="• Formulario para pago de inscripciones." />
+            <LabelText text="• Copia de la carta o correo de la aceptación de la ponencia y/o poster para participar en el evento." />
+            <LabelText text="• Copia del artículo, ponencia o poster aceptado para verificación de autores y afiliación de la EPN." />
+            <LabelText text="• Documento donde se pueda verificar el costo y  fechas de pago de inscripción al evento (NO factura/ NO invoice)." />
+            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda." />
+            <LabelText text="• Quipux del Director del Proyecto o Profesor solicitante dirigido al Vicerrectorado de Investigación, Innovación y Vinculación en el cual deberá solicitar el pago de la inscripción." />
           </div>
-
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
@@ -525,19 +539,19 @@ function InscriptionPaymentForm() {
               <Row className="justify-content-center">
                 <Col md={4} className="text-center">
                   <DownloadButton
-                  onClick={handleGenerateMemo1}
-                  icon="IconWord.png"
-                  altText="Word Icon"
-                  label="Descargar Memorando Pago de Inscripcion"
+                    onClick={handleGenerateMemo1}
+                    icon="IconWord.png"
+                    altText="Word Icon"
+                    label="Descargar Memorando Pago de Inscripcion"
                   />
                 </Col>
 
                 <Col md={4} className="text-center">
-                 <DownloadButton
-                  onClick={handleGeneratePdf}
-                  icon="IconPdf.png"
-                  altText="PDF Icon"
-                  label="Descargar Anexo 5"
+                  <DownloadButton
+                    onClick={handleGeneratePdf}
+                    icon="IconPdf.png"
+                    altText="PDF Icon"
+                    label="Descargar Anexo 5"
                   />
                 </Col>
               </Row>

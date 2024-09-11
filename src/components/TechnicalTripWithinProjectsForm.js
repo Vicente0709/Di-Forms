@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFormContext } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
-// Importación de los componentes Forma nueva como vamsos a crear el formulario
+// Importación de los componentes Props
 import Label from "./Labels/Label";
 import LabelTitle from "./Labels/LabelTitle";
 import LabelText from "./Labels/LabelText";
@@ -47,31 +47,29 @@ const validarCedulaEcuatoriana = (cedula) => {
 };
 
 function TechnicalTripWithinProjectsForm() {
-  // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
-    mode: "onChange", // El formulario se valida en cada cambio
-    reValidateMode: "onChange", // Se revalida en cada cambio
+    mode: "onChange",
+    reValidateMode: "onChange",
     defaultValues:
       JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects")) || {},
   });
-  // Estados para manejar datos y visibilidad de la UI
+
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [
     diferenciaDiasViajeTecnicoDeProyectos,
     setDiferenciaDiasViajeTecnicoDeProyectos,
   ] = useState(0);
 
-
   const {
     watch,
     setValue,
+    reset,
     clearErrors,
     formState: { errors },
   } = methods;
 
   // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
-    // Función para calcular y actualizar la diferencia en días
     const calculateAndSetDiferenciaDiasViajeTecnico = (
       primeraFechaSalida,
       ultimaFechaLlegada
@@ -79,16 +77,14 @@ function TechnicalTripWithinProjectsForm() {
       if (ultimaFechaLlegada && primeraFechaSalida) {
         const fechaInicio = new Date(primeraFechaSalida);
         const fechaFinal = new Date(ultimaFechaLlegada);
-        const diferenciaDiasViajeTecnicoDeProyectos =
+        const diferenciaDias =
           Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
 
         localStorage.setItem(
           "diferenciaDiasViajeTecnicoDeProyectos",
-          JSON.stringify({ diferencia: diferenciaDiasViajeTecnicoDeProyectos })
+          JSON.stringify({ diferencia: diferenciaDias })
         );
-        setDiferenciaDiasViajeTecnicoDeProyectos(
-          setDiferenciaDiasViajeTecnicoDeProyectos
-        );
+        setDiferenciaDiasViajeTecnicoDeProyectos(diferenciaDias);
       } else {
         localStorage.setItem(
           "diferenciaDiasViajeTecnicoDeProyectos",
@@ -98,13 +94,12 @@ function TechnicalTripWithinProjectsForm() {
       }
     };
 
-    // Función para inicializar el estado desde localStorage
     const initializeFromLocalStorage = () => {
       const formTechnicalTripWithinProjects =
         JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects")) ||
         {};
+      reset(formTechnicalTripWithinProjects);
 
-      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
       const primeraFechaSalida =
         formTechnicalTripWithinProjects.transporteIda?.[0]?.fechaSalida || "";
       const ultimaFechaLlegada =
@@ -117,17 +112,14 @@ function TechnicalTripWithinProjectsForm() {
       );
     };
 
-    // Llamar a la inicialización al montar el componente
     initializeFromLocalStorage();
 
-    // Suscripción a los cambios en el formulario
     const subscription = watch((data) => {
       localStorage.setItem(
         "formTechnicalTripWithinProjects",
         JSON.stringify(data)
       );
 
-      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
       const primeraFechaSalida = data.transporteIda?.[0]?.fechaSalida || "";
       const ultimaFechaLlegada =
         data.transporteRegreso?.[data.transporteRegreso.length - 1]
@@ -138,9 +130,8 @@ function TechnicalTripWithinProjectsForm() {
       );
     });
 
-    // Limpieza al desmontar el componente
     return () => subscription.unsubscribe();
-  }, [watch, setDiferenciaDiasViajeTecnicoDeProyectos]);
+  }, [watch, reset]);
 
   // Función que se ejecuta cuando se envía el formulario
   const onSubmitTechnicalTrip = (data) => {
@@ -192,7 +183,8 @@ function TechnicalTripWithinProjectsForm() {
 
   const [showInputDirector, setShowInputDirector] = useState(false);
 
-  useEffect(() => {    if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
+  useEffect(() => {
+    if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
       setShowInputDirector(true);
     } else {
       setShowInputDirector(false);

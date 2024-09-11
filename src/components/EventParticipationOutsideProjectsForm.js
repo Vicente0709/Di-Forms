@@ -55,9 +55,6 @@ const validarCedulaEcuatoriana = (cedula) => {
 };
 
 function EventParticipationOutsideProjectsForm() {
-  // Estado para manejar la visibilidad de la sección de descargas
-  
-  
   // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
@@ -66,48 +63,61 @@ function EventParticipationOutsideProjectsForm() {
       JSON.parse(localStorage.getItem("formEventOutsideProject")) || {},
   });
 
-  const { watch, setValue } = methods;
+  const { watch, setValue, reset } = methods;
 
+  // Estados para manejar la visibilidad de la sección de descargas y el input condicional
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const participacionEvento = watch("participacionEvento"); // Escucha los cambios en la participación en el evento
-  const [showInputArticulo, setshowInputArticulo] = useState(false);
-  const seleccionArticulo = watch ("articuloPublicado");
-  const fechaInicioEvento = watch('fechaInicioEvento'); 
+  const [showInputArticulo, setShowInputArticulo] = useState(false);
+
+  // Observadores para los cambios en los campos del formulario
+  const participacionEvento = watch("participacionEvento"); // Observa el campo "participacionEvento"
+  const seleccionArticulo = watch("articuloPublicado"); // Observa el campo "articuloPublicado"
+  const fechaInicioEvento = watch("fechaInicioEvento"); // Observa el campo "fechaInicioEvento"
+
+  // Obtener la fecha y la zona horaria local
   const now = new Date();
   const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-
+  const adjustedNow = new Date(now.getTime() - localOffset)
+    .toISOString()
+    .split("T")[0]; // Fecha ajustada para la zona horaria local
 
   // Efecto para sincronizar con localStorage y manejar la inicialización
   useEffect(() => {
-    // Función para inicializar el estado desde localStorage
+    // Función para inicializar el formulario con datos de localStorage
     const initializeFromLocalStorage = () => {
       const formData =
         JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
-      // Aquí puedes agregar cualquier lógica adicional de inicialización
+      reset(formData); // Rellenar el formulario con los datos del localStorage
     };
 
     // Llamar a la inicialización al montar el componente
     initializeFromLocalStorage();
 
+    // Escuchar los cambios en el formulario y guardar en localStorage
     const subscription = watch((data) => {
       localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
     });
 
+    // Manejar la lógica para mostrar u ocultar el campo de detalle del artículo
     if (seleccionArticulo === "NO") {
-      setshowInputArticulo(false);
-      setValue("detalleArticuloSI", "");
+      setShowInputArticulo(false);
+      setValue("detalleArticuloSI", ""); // Limpiar el campo si selecciona NO
     } else {
-      setshowInputArticulo(true);
+      setShowInputArticulo(true);
     }
-    // Limpieza al desmontar el componente
+
+    // Limpiar la suscripción al desmontar el componente
     return () => subscription.unsubscribe();
-  }, [seleccionArticulo,watch, setValue]);
+  }, [watch, reset, seleccionArticulo, setValue]);
 
   const validateFechaFin = (fechaFin) => {
     if (!fechaInicioEvento) {
       return "Primero seleccione la fecha de inicio.";
     }
-    return fechaFin >= fechaInicioEvento || "La fecha de finalización no puede ser anterior a la fecha de inicio.";
+    return (
+      fechaFin >= fechaInicioEvento ||
+      "La fecha de finalización no puede ser anterior a la fecha de inicio."
+    );
   };
   // Función que se ejecuta al enviar el formulario
   const onSubmitEventParticipationOutside = (data) => {
@@ -263,8 +273,8 @@ function EventParticipationOutsideProjectsForm() {
 
   const participarElementosOptions = [
     {
-      value:"SI",
-      label:"SI",
+      value: "SI",
+      label: "SI",
     },
     {
       value: "NO",
@@ -363,7 +373,7 @@ function EventParticipationOutsideProjectsForm() {
               }}
             />
 
-            <LabelTitle text="Detalles del evento"/>
+            <LabelTitle text="Detalles del evento" />
             <InputText
               name="tituloEvento"
               label="Título del Evento"
@@ -425,17 +435,17 @@ function EventParticipationOutsideProjectsForm() {
             <InputText
               name="tituloPonencia"
               label="Título de la Ponencia"
-              rules={{required: "El título de la ponencia es requerido"}}
+              rules={{ required: "El título de la ponencia es requerido" }}
               disable={false}
             />
 
-              <InputText
+            <InputText
               name="tipoPonencia"
               label="Tipo de Ponencia"
               placeholder="Plenaria, poster, otros"
-              rules={{required: "El tipo de ponencia es requerido"}}
+              rules={{ required: "El tipo de ponencia es requerido" }}
               disable={false}
-              />
+            />
 
             <RadioGroup
               label="¿El Artículo será publicado?"
@@ -444,7 +454,7 @@ function EventParticipationOutsideProjectsForm() {
               rules={{ required: "Indique si el artículo será publicado" }}
               disable={false}
             />
-              
+
             {showInputArticulo && (
               <InputText
                 name="detalleArticuloSI"
@@ -460,7 +470,7 @@ function EventParticipationOutsideProjectsForm() {
               />
             )}
 
-          <RadioGroup
+            <RadioGroup
               label="Pasajes aéreos"
               name="pasajesAereos"
               options={participarElementosOptions}
@@ -472,7 +482,9 @@ function EventParticipationOutsideProjectsForm() {
               label="Viáticos y subsistencias"
               name="viaticosSubsistencias"
               options={participarElementosOptions}
-              rules={{ required: "Indique si requiere viáticos y subsistencias" }}
+              rules={{
+                required: "Indique si requiere viáticos y subsistencias",
+              }}
               disable={false}
             />
             <RadioGroup
@@ -482,7 +494,6 @@ function EventParticipationOutsideProjectsForm() {
               rules={{ required: "Indique si requiere inscripción" }}
               disable={false}
             />
-
           </div>
 
           {/* Botón para enviar el formulario */}

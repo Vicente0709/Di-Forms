@@ -772,7 +772,7 @@ export function generateMemoTripWithinProjec1(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.nombreInstitucionAcogida}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.nombreIntitucionAcogida}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -919,7 +919,7 @@ export function generateMemoTripWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr."${nombresApellidos}", ${data.rolEnProyecto} del proyecto pueda realizar un viaje tecnico "${data.nombreInstitucionAcogida}", a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr."${nombresApellidos}", ${data.rolEnProyecto} del proyecto pueda realizar un viaje tecnico "${data.nombreIntitucionAcogida}", a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -1347,14 +1347,14 @@ export async function generateAnexoATripWithingProject(data) {
       " titulado  '" +
       data.tituloProyecto +
       "'  se llevará a cabo un viaje técnico a cargo de la intitucion de acogida '" +
-      data.nombreInstitucionAcogida +
+      data.nombreIntitucionAcogida +
       "', que tendrá lugar del  " +
       data.fechaInicioEvento +
       "  al  " +
       data.fechaFinEvento +
       " en la ciudad de  " +
       data.ciudadEvento +
-      "," +
+      ", " +
       data.paisEvento +
       ". ",
 
@@ -1699,7 +1699,7 @@ export async function generateAnexoB2WithinProject(data) {
       "nombresParticipante": data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
       "rolProyecto": data.rolEnProyecto,
       "departamento": data.departamento,
-      "nombreInstitucionAcogida": data.nombreInstitucionAcogida,
+      "nombreInstitucionAcogida": data.nombreIntitucionAcogida,
       "ciudad": data.ciudadEvento,
       "pais": data.paisEvento,
       "fechasEvento":  "Desde el " + data.fechaInicioEvento + " hasta el " + data.fechaFinEvento,
