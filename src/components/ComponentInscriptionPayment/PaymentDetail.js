@@ -1,4 +1,4 @@
-import React from "react";
+import React,{ useEffect,useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
 function PaymentDetail() {
@@ -17,9 +17,18 @@ function PaymentDetail() {
   const fechaFinEvento = watch("fechaFinEvento");
   const now = new Date();
   const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-  const today = new Date(now.getTime() - localOffset)
-    .toISOString()
-    .split("T")[0];
+  const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
+
+  useEffect(()=>{
+    if (fields.length === 0) {
+      append({
+        valorInscripcion: "",
+        pagoLimite: "",
+        limiteFecha: "",
+      });
+    }
+  }, [ fields, append]);
+
 
   const validateSingleDateSelection = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
@@ -138,6 +147,7 @@ function PaymentDetail() {
                   className="form-input"
                   {...register(`inscripciones[${index}].limiteFecha`, {
                     validate: () => validateSingleDateSelection(index),
+                    required: "La fecha es requerida",
                   })}
                 />
                 {errors.inscripciones &&

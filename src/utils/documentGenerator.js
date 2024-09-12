@@ -1583,7 +1583,6 @@ export async function generateAnexoAOutsideProject(data){
   );
 }
 
-
 export async function generateAnexo8OutsideProject(data){
 
   const template= {
@@ -1604,7 +1603,7 @@ export async function generateAnexo8OutsideProject(data){
          }
    
          if (inscripcion.pagoLimite && inscripcion.limiteFecha) {
-           fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
+           fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${formatDate(inscripcion.limiteFecha)}\n`;
          }
        } else if (data.inscripcion === "NO") {
          // Manejo del caso en que data.inscripcion es "NO"
@@ -1620,8 +1619,8 @@ export async function generateAnexo8OutsideProject(data){
      "departamento":             data.departamento,
      "tituloEvento":             data.tituloEvento,
      "lugarEvento":              data.ciudadEvento+", "+data.paisEvento,
-     "fechaInicioEvento":        data.fechaInicioEvento,
-     "fechaFinEvento":           data.fechaFinEvento,
+     "fechaInicioEvento":        formatDate(data.fechaInicioEvento),
+     "fechaFinEvento":           formatDate(data.fechaFinEvento),
      "RelevanciaAcademica":      data.RelevanciaAcademica,
      "tituloPonencia":           data.tituloPonencia,
      "tipoPonencia":             data.tipoPonencia,
@@ -1723,7 +1722,6 @@ export async function generateAnexoB2WithinProject(data) {
   );
 }
 
-
 export async function generateAnexo5InscriptionPayment (data) {
 
   const template ={
@@ -1756,7 +1754,7 @@ export async function generateAnexo5InscriptionPayment (data) {
     }
 
     if(inscripciones.pagoLimite && inscripciones.limiteFecha){
-      fechaPagoInscripcionStr += `${inscripciones.pagoLimite} ${inscripciones.limiteFecha}\n`;
+      fechaPagoInscripcionStr += `${inscripciones.pagoLimite} ${formatDate(inscripciones.limiteFecha)}\n`;
     }
 
   });
@@ -1770,8 +1768,8 @@ export async function generateAnexo5InscriptionPayment (data) {
     "codigoProyecto":                   data.codigoProyecto,
     "tituloEvento":                     data.tituloEvento,
     "ciudadPaisEvento":                 data.ciudadEvento + ", " + data.paisEvento,
-    "fechaInicioEvento":                data.fechaInicioEvento,
-    "fechaFinEvento":                   data.fechaFinEvento,
+    "fechaInicioEvento":                formatDate(data.fechaInicioEvento),
+    "fechaFinEvento":                   formatDate(data.fechaFinEvento),
     "RelevanciaAcademica":              data.RelevanciaAcademica,
     "tituloArticulo":                   data.tituloArticulo,
     "articuloPublicadoSi":              data.articuloPublicado==="SI" ? "X":"",

@@ -68,7 +68,7 @@ function Home() {
         </Col>
         <Col md={4}>
           <FormCard
-            title="Formulario : Salidas Nacionales Fuera de Proyectos"
+            title="Formulario : Participacion en Eventos Nacionales Fuera de Proyectos"
             description="Este formulario está diseñado para salidas nacionales fuera de proyectos con el fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud."
             imageSrc="form.png"
             altText="Formulario"

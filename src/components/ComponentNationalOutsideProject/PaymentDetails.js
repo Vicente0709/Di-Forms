@@ -1,4 +1,4 @@
-import React from "react";
+import React,{ useEffect,useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
 function PaymentDetails() {
@@ -6,6 +6,7 @@ function PaymentDetails() {
     register,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext();
   const { fields, append, remove } = useFieldArray({
@@ -16,28 +17,53 @@ function PaymentDetails() {
   const metodoPago = watch("metodoPago");
   const fechaFinEvento = watch("fechaFinEvento");
   const now = new Date();
-const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
 
+  const inscripcion = watch("inscripcion");
+  const [showInputInscripcion, setshowInputInscripcion] = useState(false);
 
-  const validateSingleDateSelection = (index) => {    
+  useEffect(() => {
+
+    if (inscripcion === "SI") {
+      setshowInputInscripcion(true);
+      } else {
+      setshowInputInscripcion(false);
+      setValue("inscripciones");
+     
+    }
+
+    const initialValor={
+      valorInscripcion: "",
+      pagoLimite: "",
+      limiteFecha: "",
+    }
+
+    if(fields.length===0){
+      append(initialValor);
+    }
+      
+  }, [inscripcion, setValue, fields.length]);
+
+  
+  const validateSingleDateSelection = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
 
-    
     if (limiteFecha && limiteFecha > fechaFinEvento) {
       return `La fecha no puede ser mayor que la fecha de fin del evento (${fechaFinEvento})`;
     }
-//validacion para fechas anteriores a la actual
+    //validacion para fechas anteriores a la actual
     if (limiteFecha && limiteFecha < today) {
       return `La fecha no puede ser menor que la fecha actual (${today})`;
     }
-
 
     return true;
   };
 
   return (
-    <div className="form-container">
+    <div >
+      {showInputInscripcion && (
+        <>
       <h3>• Valor de la inscripción</h3>
       <p>
         Por favor, ingrese las fechas máximas de pago según la información
@@ -50,7 +76,7 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
       {/* Tabla Dinámica */}
       <table className="payment-table">
         <thead>
-        <tr>
+          <tr>
             <th>Nro.</th>
             <th>Valor de inscripción</th>
             <th>Pago a realizarse</th>
@@ -98,9 +124,7 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                   <option value="">Seleccione</option>
                   <option value="Antes del ">Antes</option>
                   <option value="Despues del ">Despues</option>
-                  <option value="Hasta el ">
-                    Fecha maxima de pago
-                  </option>
+                  <option value="Hasta el ">Fecha maxima de pago</option>
                 </select>
                 {errors.pagoLimite && (
                   <span className="error-text">
@@ -116,6 +140,7 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                   className="form-input"
                   {...register(`inscripciones[${index}].limiteFecha`, {
                     validate: () => validateSingleDateSelection(index),
+                    required: "La fecha es requerida",
                   })}
                 />
                 {errors.inscripciones &&
@@ -160,7 +185,7 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
         por reembolso siempre y cuando se tenga la contestación oficial de la
         organización de no tener un banco intermediario.
       </p>
-
+      
       {/* Método de pago */}
       <div className="form-group">
         <h3>Método de pago:</h3>
@@ -182,7 +207,9 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
           <div className="sub-group">
             <p>En la solicitud se debe adjuntar los siguientes documentos:</p>
             <ul>
-              <li>Formulario de pagos al exterior, de ser el caso, (Anexo 4)</li>
+              <li>
+                Formulario de pagos al exterior, de ser el caso, (Anexo 4)
+              </li>
               <li>
                 Documento donde se puede verificar el costo y fechas de la
                 inscripción al evento
@@ -208,8 +235,8 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
             <p>Incluir la siguiente información y documentos:</p>
             <ul>
               <li>
-                Solicitud de REEMBOLSO.
-                Incluir texto con justificación en el mismo memorando del requerimiento.
+                Solicitud de REEMBOLSO. Incluir texto con justificación en el
+                mismo memorando del requerimiento.
               </li>
               <li>
                 Documento donde se puede verificar el costo y fechas de la
@@ -221,7 +248,13 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
         {errors.metodoPago && (
           <span className="error-text">{errors.metodoPago.message}</span>
         )}
+
+        <p>
+        *A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, mismos que deberán justificar el 70% del valor del viatico, caso contrario la diferencia deberá ser reintegrada a la cuenta de la EOD-UGIPS. (Norma Técnica para el pago de viáticos Artículo 15 Control y liquidación). 
+        </p>
       </div>
+      </>
+    )}
     </div>
   );
 }

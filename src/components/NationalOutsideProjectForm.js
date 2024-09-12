@@ -19,11 +19,11 @@ import DownloadButton from "./Buttons/DownloadButton";
 // Importación de las funciones para generar documentos
 
 import {
-  generateMemoOutsideProject1,
-  generateMemoOutsideProject2,
-  generateAnexoAOutsideProject,
-  generateAnexo8OutsideProject,
-} from "../utils/documentGenerator.js";
+  generateMemoNationalOutsideProject1,
+  generateMemoNationalOutsideProject2,
+  generateAnexo10NationalOutsideProject,
+  generateAnexoANationalOutsideProject,
+} from "../utils/documentGeneratorNational.js";
 
 //Funciones Validación
 
@@ -78,28 +78,31 @@ function NationalOutsideProjectForm() {
     const habilitarCampos = seleccionViaticosSubsistencias === "SI";
   
     // Efecto para sincronizar con localStorage y manejar la inicialización
+
+    useEffect(() => {
+      // Función para inicializar los valores desde localStorage
+      const initializeFromLocalStorage = () => {
+        const formNationalOutsideProject =
+          JSON.parse(localStorage.getItem("formNationalOutsideProject")) || {};
+        reset(formNationalOutsideProject);
+      };
+      initializeFromLocalStorage();
+      // Suscribirse a los cambios en el formulario para guardar en localStorage
+      const subscription = watch((data) => {
+        localStorage.setItem("formNationalOutsideProject", JSON.stringify(data));
+      });
+      // Limpiar la suscripción al desmontar el componente
+      return () => subscription.unsubscribe();
+    }, [watch, reset]);
+
   useEffect(() => {
-    // Función para inicializar el formulario con datos de localStorage
-    const initializeFromLocalStorage = () => {
-      const formData =
-        JSON.parse(localStorage.getItem("formNationalOutsideProject")) || {};
-      reset(formData); // Rellenar el formulario con los datos del localStorage
-    };
-
-    // Llamar a la inicialización al montar el componente
-    initializeFromLocalStorage();
-
-    // Escuchar los cambios en el formulario y guardar en localStorage
-    const subscription = watch((data) => {
-      localStorage.setItem("formNationalOutsideProject", JSON.stringify(data));
-    });
-
+    
     // Manejar la lógica para mostrar u ocultar el campo de detalle del artículo
-    if (seleccionArticulo === "NO") {
-      setShowInputArticulo(false);
-      setValue("detalleArticuloSI", ""); // Limpiar el campo si selecciona NO
-    } else {
+    if (seleccionArticulo === "SI") {
       setShowInputArticulo(true);
+    } else {
+      setShowInputArticulo(false);
+      setValue("detalleArticuloSI", "");
     }
 
     if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
@@ -121,8 +124,7 @@ function NationalOutsideProjectForm() {
       setValue("numeroCuenta", "");
       clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
     }
-    // Limpiar la suscripción al desmontar el componente
-    return () => subscription.unsubscribe();
+        
   }, [watch, reset, seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos, setValue, clearErrors]);
 
   const validateFechaFin = (fechaFin) => {
@@ -142,28 +144,29 @@ function NationalOutsideProjectForm() {
 
   // Funciones para manejar la generación de documentos
   const handleGenerateMemo1 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateMemoOutsideProject1(formEventOutsideProject);
+   const formNationalOutsideProject = methods.getValues();
+    generateMemoNationalOutsideProject1(formNationalOutsideProject);
     setShowDownloadSection(false);
   };
 
   const handleGenerateMemo2 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateMemoOutsideProject2(formEventOutsideProject);
+    const formNationalOutsideProject = methods.getValues();
+    generateMemoNationalOutsideProject2(formNationalOutsideProject);
     setShowDownloadSection(false);
   };
 
   const handleGeneratePdf = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateAnexoAOutsideProject(formEventOutsideProject);
+    const formNationalOutsideProject= methods.getValues();
+    generateAnexoANationalOutsideProject(formNationalOutsideProject);
     setShowDownloadSection(false);
   };
 
   const handleGeneratePdf2 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateAnexo8OutsideProject(formEventOutsideProject);
+    const formNationalOutsideProject = methods.getValues();
+    generateAnexo10NationalOutsideProject(formNationalOutsideProject);
     setShowDownloadSection(false);
   };
+  
 
   // Función para descargar todos los documentos
 
@@ -325,7 +328,7 @@ function NationalOutsideProjectForm() {
       <Container>
         {/* Título del formulario */}
         <h1 className="text-center my-4">
-          Formulario para participacion en eventos fuera de proyectos
+          Formulario para participacion nacional en eventos fuera de proyectos
         </h1>
         <Form
           onSubmit={methods.handleSubmit(onSubmitNationalOutside)}
@@ -368,8 +371,8 @@ function NationalOutsideProjectForm() {
               name="puesto"
               label="Puesto que ocupa"
               infoText="Tal como consta en su acción de personal. Ejemplos: Profesor
-          Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
-          Profesor Principal a Tiempo Completo."
+              Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
+              Profesor Principal a Tiempo Completo."
               rules={{ required: "El puesta que ocupa es requerido" }}
               disabled={false}
             />
@@ -420,7 +423,7 @@ function NationalOutsideProjectForm() {
             <InputText
               name="paisEvento"
               label="País"
-              placeholder="Ecuador"
+              defaultValue="Ecuador"
               disabled
             />
             <Label text="Fechas del evento" />
@@ -430,9 +433,7 @@ function NationalOutsideProjectForm() {
               rules={{
                 required: "La fecha de inicio del evento es requerida",
                 validate: (value) => {
-                  const today = new Date(now.getTime() - localOffset)
-                    .toISOString()
-                    .split("T")[0];
+                  const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
                   return (
                     value >= today ||
                     "La fecha de inicio no puede ser anterior a la fecha actual."
@@ -527,7 +528,6 @@ function NationalOutsideProjectForm() {
               <PaymentDetails />
               <Transportation />
               
-
               <LabelTitle text="Declaración de gastos, conforme reglamento de viáticos al exterior" />
               <LabelText text=" Selecciona según corresponda. Responda SI aunque la organización del
               evento cubra el rubro parcialmente. "/>
@@ -632,9 +632,11 @@ function NationalOutsideProjectForm() {
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button id="btn_enviar" type="submit" variant="primary">
-                Enviar
-              </Button>
+              <ActionButton
+              onClick={onSubmitNationalOutside}
+              label="Enviar"
+              variant="primary"
+              />
             </Col>
           </Row>
 
@@ -683,7 +685,7 @@ function NationalOutsideProjectForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Anexo 8</span>
+                    <span>Descargar Anexo 10</span>
                   </div>
                 </Col>
               </Row>
@@ -691,13 +693,11 @@ function NationalOutsideProjectForm() {
               {/* Botón para descargar todos los documentos */}
               <Row className="mt-3">
                 <Col className="text-center">
-                  <Button
-                    type="button"
-                    onClick={handleDownloadAll}
-                    variant="success"
-                  >
-                    Descargar Todo
-                  </Button>
+                  <ActionButton
+                  onClick={handleDownloadAll}
+                  label="Descargar Todo"
+                  variant="success"
+                  />
                 </Col>
               </Row>
             </div>
@@ -706,9 +706,11 @@ function NationalOutsideProjectForm() {
           {/* Botón para limpiar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button type="button" onClick={handleClearForm} variant="danger">
-                Limpiar Formulario
-              </Button>
+             <ActionButton
+              onClick={handleClearForm}
+              label="Limpiar Formulario"
+              variant="danger"
+              />
             </Col>
           </Row>
         </Form>

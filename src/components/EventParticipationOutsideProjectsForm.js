@@ -70,9 +70,7 @@ function EventParticipationOutsideProjectsForm() {
   // Obtener la fecha y la zona horaria local
   const now = new Date();
   const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-  const adjustedNow = new Date(now.getTime() - localOffset)
-    .toISOString()
-    .split("T")[0]; // Fecha ajustada para la zona horaria local
+  const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0]; // Fecha ajustada para la zona horaria local
     const hospedaje = watch("hospedaje");
     const movilizacion = watch("movilizacion");
     const alimentacion = watch("alimentacion");
@@ -80,29 +78,32 @@ function EventParticipationOutsideProjectsForm() {
     const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
     const habilitarCampos = seleccionViaticosSubsistencias === "SI";
   
+
+    useEffect(() => {
+      // Función para inicializar los valores desde localStorage
+      const initializeFromLocalStorage = () => {
+        const formEventOutsideProject =
+          JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
+        reset(formEventOutsideProject);
+      };
+      initializeFromLocalStorage();
+      // Suscribirse a los cambios en el formulario para guardar en localStorage
+      const subscription = watch((data) => {
+        localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
+      });
+      // Limpiar la suscripción al desmontar el componente
+      return () => subscription.unsubscribe();
+    }, [watch, reset]);
+
     // Efecto para sincronizar con localStorage y manejar la inicialización
   useEffect(() => {
-    // Función para inicializar el formulario con datos de localStorage
-    const initializeFromLocalStorage = () => {
-      const formData =
-        JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
-      reset(formData); // Rellenar el formulario con los datos del localStorage
-    };
-
-    // Llamar a la inicialización al montar el componente
-    initializeFromLocalStorage();
-
-    // Escuchar los cambios en el formulario y guardar en localStorage
-    const subscription = watch((data) => {
-      localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
-    });
-
+    
     // Manejar la lógica para mostrar u ocultar el campo de detalle del artículo
-    if (seleccionArticulo === "NO") {
-      setShowInputArticulo(false);
-      setValue("detalleArticuloSI", ""); // Limpiar el campo si selecciona NO
-    } else {
+    if (seleccionArticulo === "SI") {
       setShowInputArticulo(true);
+    } else {
+      setShowInputArticulo(false);
+      setValue("detalleArticuloSI", "");
     }
 
     if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
@@ -124,8 +125,7 @@ function EventParticipationOutsideProjectsForm() {
       setValue("numeroCuenta", "");
       clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
     }
-    // Limpiar la suscripción al desmontar el componente
-    return () => subscription.unsubscribe();
+    
   }, [watch, reset, seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos, setValue, clearErrors]);
 
   const validateFechaFin = (fechaFin) => {
@@ -606,7 +606,7 @@ function EventParticipationOutsideProjectsForm() {
             disabled={!habilitarCampos}
             />
 
-            <LabelTitle text= "Serviores que integran los servicios institucionales (opcional)"/>
+            <LabelTitle text= "Servidores que integran los servicios institucionales (opcional)"/>
 
             <InputTextArea
             name="servidores"
@@ -637,9 +637,11 @@ function EventParticipationOutsideProjectsForm() {
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button id="btn_enviar" type="submit" variant="primary">
-                Enviar
-              </Button>
+             <ActionButton
+              onClick={onSubmitEventParticipationOutside}
+              label="Enviar"
+              variant="primary"
+              />
             </Col>
           </Row>
 
@@ -696,13 +698,11 @@ function EventParticipationOutsideProjectsForm() {
               {/* Botón para descargar todos los documentos */}
               <Row className="mt-3">
                 <Col className="text-center">
-                  <Button
-                    type="button"
-                    onClick={handleDownloadAll}
-                    variant="success"
-                  >
-                    Descargar Todo
-                  </Button>
+                 <ActionButton
+                  onClick={handleDownloadAll}
+                  label="Desacargar Todo"
+                  variant="success"
+                  />
                 </Col>
               </Row>
             </div>
@@ -711,9 +711,11 @@ function EventParticipationOutsideProjectsForm() {
           {/* Botón para limpiar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button type="button" onClick={handleClearForm} variant="danger">
-                Limpiar Formulario
-              </Button>
+              <ActionButton
+              onClick={handleClearForm}
+              label="Limpiar Formulario"
+              variant="danger"
+              />
             </Col>
           </Row>
         </Form>
