@@ -56,6 +56,11 @@ function Header() {
                 Pago de Inscripción dentro o fuera de proyectos
               </NavDropdown.Item>
               
+              <NavDropdown.Item as={NavLink} to="/NationalOutsideProject"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Salidas Nacionales Fuera de Proyectos
+              </NavDropdown.Item>
+              
             </NavDropdown>
           </Nav>
 
