@@ -1,4 +1,4 @@
-import React from "react";
+import React,{ useEffect,useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
 function PaymentDetail() {
@@ -6,6 +6,7 @@ function PaymentDetail() {
     register,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext();
   const { fields, append, remove } = useFieldArray({
@@ -16,9 +17,30 @@ function PaymentDetail() {
   const metodoPago = watch("metodoPago");
   const fechaFinEvento = watch("fechaFinEvento");
   const now = new Date();
-const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
+  const inscripcion = watch("inscripcion");
+  const [showInputInscripcion, setshowInputInscripcion] = useState(false);
 
+
+  useEffect(() => {
+
+    if (inscripcion === "SI") {
+      setshowInputInscripcion(true);
+    } else {
+      setshowInputInscripcion(false);
+      setValue("inscripciones");
+    }
+    if (fields.length === 0) {
+      append({
+        valorInscripcion: "",
+        pagoLimite: "",
+        limiteFecha: "",
+      });
+    }
+
+   
+  }, [inscripcion, setValue, fields, append]);
 
   const validateSingleDateSelection = (index) => {    
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
@@ -37,7 +59,9 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
   };
 
   return (
-    <div className="form-container">
+    <div>
+      {showInputInscripcion && (
+        <>
       <h3>• Valor de la inscripción</h3>
       <p>
         Por favor, ingrese las fechas máximas de pago según la información
@@ -48,7 +72,7 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
       </p>
 
       {/* Tabla Dinámica */}
-      <table className="payment-table">
+      <table>
         <thead>
         <tr>
             <th>Nro.</th>
@@ -139,6 +163,7 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
                   className="form-input"
                   {...register(`inscripciones[${index}].limiteFecha`, {
                     validate: () => validateSingleDateSelection(index),
+                    required: "La fecha es requerida",
                   })}
                 />
                 {errors.inscripciones &&
@@ -183,9 +208,10 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
         por reembolso siempre y cuando se tenga la contestación oficial de la
         organización de no tener un banco intermediario.
       </p>
+      
 
       {/* Método de pago */}
-      <div className="form-group">
+      <div >
         <h3>Método de pago:</h3>
 
         <div>
@@ -245,7 +271,10 @@ const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
           <span className="error-text">{errors.metodoPago.message}</span>
         )}
       </div>
+      </>
+    )}
     </div>
+    
   );
 }
 

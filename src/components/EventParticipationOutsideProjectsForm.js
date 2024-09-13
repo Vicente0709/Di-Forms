@@ -3,15 +3,8 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
-import PersonalDetails from "./ComponetOutsideProjects/PersonalDetails.js";
-import EventDetails from "./ComponetOutsideProjects/EventDetails.js";
 import PaymentDetail from "./ComponetOutsideProjects/PaymentDetail.js";
-import ExpensesDeclaration from "./ComponetOutsideProjects/ExpensesDeclaration.js";
-import BankAccount from "./ComponetOutsideProjects/BankAccount.js";
 import Transportation from "./ComponetOutsideProjects/Transportation.js";
-import InstitutionalServices from "./ComponetOutsideProjects/InstitutionalServices.js";
-import ExteriorDetail from "./ComponetOutsideProjects/ExteriorDetail.js";
-
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
 import LabelText from "./Labels/LabelText.js";
@@ -70,46 +63,46 @@ function EventParticipationOutsideProjectsForm() {
   const [showInputArticulo, setShowInputArticulo] = useState(false);
 
   // Observadores para los cambios en los campos del formulario
-  const participacionEvento = watch("participacionEvento"); // Observa el campo "participacionEvento"
+ 
   const seleccionArticulo = watch("articuloPublicado"); // Observa el campo "articuloPublicado"
   const fechaInicioEvento = watch("fechaInicioEvento"); // Observa el campo "fechaInicioEvento"
 
   // Obtener la fecha y la zona horaria local
-  const now = new Date();
-  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-  const adjustedNow = new Date(now.getTime() - localOffset)
-    .toISOString()
-    .split("T")[0]; // Fecha ajustada para la zona horaria local
+    const now = new Date();
+    const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+    const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0]; // Fecha ajustada para la zona horaria local
     const hospedaje = watch("hospedaje");
     const movilizacion = watch("movilizacion");
     const alimentacion = watch("alimentacion");
     const seleccionDeclaracion = watch("seleccionDeclaracion");
     const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
     const habilitarCampos = seleccionViaticosSubsistencias === "SI";
-  
+
+
+    useEffect(() => {
+      // Función para inicializar los valores desde localStorage
+      const initializeFromLocalStorage = () => {
+        const formEventOutsideProject =JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
+        reset(formEventOutsideProject);
+      };
+      initializeFromLocalStorage();
+      // Suscribirse a los cambios en el formulario para guardar en localStorage
+      const subscription = watch((data) => {
+        localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
+      });
+      // Limpiar la suscripción al desmontar el componente
+      return () => subscription.unsubscribe();
+    }, [watch, reset]);
+
     // Efecto para sincronizar con localStorage y manejar la inicialización
   useEffect(() => {
-    // Función para inicializar el formulario con datos de localStorage
-    const initializeFromLocalStorage = () => {
-      const formData =
-        JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
-      reset(formData); // Rellenar el formulario con los datos del localStorage
-    };
-
-    // Llamar a la inicialización al montar el componente
-    initializeFromLocalStorage();
-
-    // Escuchar los cambios en el formulario y guardar en localStorage
-    const subscription = watch((data) => {
-      localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
-    });
-
+    
     // Manejar la lógica para mostrar u ocultar el campo de detalle del artículo
-    if (seleccionArticulo === "NO") {
-      setShowInputArticulo(false);
-      setValue("detalleArticuloSI", ""); // Limpiar el campo si selecciona NO
-    } else {
+    if (seleccionArticulo === "SI") {
       setShowInputArticulo(true);
+    } else {
+      setShowInputArticulo(false);
+      setValue("detalleArticuloSI", "");
     }
 
     if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
@@ -131,8 +124,7 @@ function EventParticipationOutsideProjectsForm() {
       setValue("numeroCuenta", "");
       clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
     }
-    // Limpiar la suscripción al desmontar el componente
-    return () => subscription.unsubscribe();
+    
   }, [watch, reset, seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos, setValue, clearErrors]);
 
   const validateFechaFin = (fechaFin) => {
@@ -148,6 +140,7 @@ function EventParticipationOutsideProjectsForm() {
   const onSubmitEventParticipationOutside = (data) => {
     console.log(data);
     setShowDownloadSection(true);
+    console.log(methods.getValues());
   };
 
   // Funciones para manejar la generación de documentos
@@ -504,7 +497,7 @@ function EventParticipationOutsideProjectsForm() {
                 la revista o memorias en las cuales se publicará el artículo."
                 placeholder="Especifique"
                 rules={{
-                  required: "Por favor el detalle del artículo es requerido",
+                  required: "El detalle del artículo es requerido",
                 }}
                 disabled={false}
               />
@@ -613,7 +606,7 @@ function EventParticipationOutsideProjectsForm() {
             disabled={!habilitarCampos}
             />
 
-            <LabelTitle text= "Serviores que integran los servicios institucionales (opcional)"/>
+            <LabelTitle text= "Servidores que integran los servicios institucionales (opcional)"/>
 
             <InputTextArea
             name="servidores"
@@ -644,7 +637,7 @@ function EventParticipationOutsideProjectsForm() {
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button id="btn_enviar" type="submit" variant="primary">
+            <Button id="btn_enviar" type="submit" variant="primary">
                 Enviar
               </Button>
             </Col>
@@ -703,13 +696,11 @@ function EventParticipationOutsideProjectsForm() {
               {/* Botón para descargar todos los documentos */}
               <Row className="mt-3">
                 <Col className="text-center">
-                  <Button
-                    type="button"
-                    onClick={handleDownloadAll}
-                    variant="success"
-                  >
-                    Descargar Todo
-                  </Button>
+                 <ActionButton
+                  onClick={handleDownloadAll}
+                  label="Desacargar Todo"
+                  variant="success"
+                  />
                 </Col>
               </Row>
             </div>
@@ -718,9 +709,11 @@ function EventParticipationOutsideProjectsForm() {
           {/* Botón para limpiar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button type="button" onClick={handleClearForm} variant="danger">
-                Limpiar Formulario
-              </Button>
+              <ActionButton
+              onClick={handleClearForm}
+              label="Limpiar Formulario"
+              variant="danger"
+              />
             </Col>
           </Row>
         </Form>

@@ -3,10 +3,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
-import PersonalDetail from "./ComponentInscriptionPayment/PersonalDetail.js";
-import EventDetails from "./ComponentInscriptionPayment/EventDetails.js";
 import PaymentDetail from "./ComponentInscriptionPayment/PaymentDetail.js";
-import DocumentationDetail from "./ComponentInscriptionPayment/DocumentationDetail.js";
 
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
@@ -22,8 +19,6 @@ import DownloadButton from "./Buttons/DownloadButton";
 
 import {
   generateMemoInscriptionPaymentOutProyect1,
-  generateMemoInscriptionPaymentt2,
-  generateAnexoAOutsideProject,
   generateAnexo5InscriptionPayment,
 } from "../utils/documentGenerator.js";
 
@@ -69,16 +64,13 @@ function InscriptionPaymentForm() {
   // Observadores para campos clave
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
-  const participacionEvento = watch("participacionEvento");
   const seleccionArticulo = watch("articuloPublicado");
   const fechaInicioEvento = watch("fechaInicioEvento");
 
   // Obtener la fecha actual ajustada por zona horaria
   const now = new Date();
   const localOffset = now.getTimezoneOffset() * 60000;
-  const adjustedNow = new Date(now.getTime() - localOffset)
-    .toISOString()
-    .split("T")[0];
+  const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
 
   // Validación personalizada para la fecha de fin
   const validateFechaFin = (fechaFin) => {
@@ -91,23 +83,26 @@ function InscriptionPaymentForm() {
     );
   };
 
-  // Efecto para sincronizar con localStorage y manejar la inicialización
+  
   useEffect(() => {
-    // Inicializar el formulario desde localStorage
+    // Función para inicializar los valores desde localStorage
     const initializeFromLocalStorage = () => {
-      const formData =
+      const formInscriptionPayment =
         JSON.parse(localStorage.getItem("formInscriptionPayment")) || {};
-      reset(formData); // Rellenar el formulario con datos almacenados
+      reset(formInscriptionPayment);
     };
-
-    // Llamar a la inicialización cuando el componente se monta
     initializeFromLocalStorage();
-
-    // Suscribirse a los cambios en el formulario y almacenarlos en localStorage
+    // Suscribirse a los cambios en el formulario para guardar en localStorage
     const subscription = watch((data) => {
       localStorage.setItem("formInscriptionPayment", JSON.stringify(data));
     });
+    // Limpiar la suscripción al desmontar el componente
+    return () => subscription.unsubscribe();
+  }, [watch, reset]);
 
+  // Efecto para sincronizar con localStorage y manejar la inicialización
+  useEffect(() => {
+    
     // Mostrar u ocultar campos según las selecciones del formulario
     if (participacionProyecto === "dentroProyecto") {
       setShowInputParticipacion(true);
@@ -126,15 +121,13 @@ function InscriptionPaymentForm() {
       setValue("cargoDirector", "");
     }
 
-    if (seleccionArticulo === "NO") {
+    if (seleccionArticulo === "SI") {
+      setShowInputArticulo(true);
+    } else {
       setShowInputArticulo(false);
       setValue("detalleArticuloSI", "");
-    } else {
-      setShowInputArticulo(true);
     }
 
-    // Limpieza al desmontar el componente
-    return () => subscription.unsubscribe();
   }, [
     participacionProyecto,
     rolEnProyecto,
@@ -148,6 +141,7 @@ function InscriptionPaymentForm() {
   const onSubmitInscriptionPayment = (data) => {
     console.log(data);
     setShowDownloadSection(true);
+    console.log(methods.getValues());
   };
 
   // Funciones para manejar la generación de documentos
@@ -158,22 +152,10 @@ function InscriptionPaymentForm() {
     setShowDownloadSection(false);
   };
 
-  const handleGenerateMemo2 = () => {
-    /*const formInscriptionPayment = methods.getValues();
-    generateMemoInscriptionPayment2(formInscriptionPayment);
-    setShowDownloadSection(false);*/
-  };
-
   const handleGeneratePdf = () => {
     const formInscriptionPayment = methods.getValues();
     generateAnexo5InscriptionPayment(formInscriptionPayment);
     setShowDownloadSection(false);
-  };
-
-  const handleGeneratePdf2 = () => {
-    /* const formInscriptionPayment = methods.getValues();
-    generateAnexo5InscriptionPayment(formInscriptionPayment);
-    setShowDownloadSection(false);*/
   };
 
   // Función para descargar todos los documentos
@@ -445,9 +427,7 @@ function InscriptionPaymentForm() {
               rules={{
                 required: "La fecha de inicio del evento es requerida",
                 validate: (value) => {
-                  const today = new Date(now.getTime() - localOffset)
-                    .toISOString()
-                    .split("T")[0];
+                  const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
                   return (
                     value >= today ||
                     "La fecha de inicio no puede ser anterior a la fecha actual."
@@ -527,7 +507,7 @@ function InscriptionPaymentForm() {
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button id="btn_enviar" type="submit" variant="primary">
+            <Button id="btn_enviar" type="submit" variant="primary">
                 Enviar
               </Button>
             </Col>
@@ -559,13 +539,11 @@ function InscriptionPaymentForm() {
               {/* Botón para descargar todos los documentos */}
               <Row className="mt-3">
                 <Col className="text-center">
-                  <Button
-                    type="button"
-                    onClick={handleDownloadAll}
-                    variant="success"
-                  >
-                    Descargar Todo
-                  </Button>
+                  <ActionButton
+                  onClick={handleDownloadAll}
+                  label="Descargar Todo"
+                  variant="success"
+                  />
                 </Col>
               </Row>
             </div>
@@ -574,9 +552,11 @@ function InscriptionPaymentForm() {
           {/* Botón para limpiar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button type="button" onClick={handleClearForm} variant="danger">
-                Limpiar Formulario
-              </Button>
+              <ActionButton
+              onClick={handleClearForm}
+              label="Limpiar Formulario"
+              variant="danger"
+              />
             </Col>
           </Row>
         </Form>

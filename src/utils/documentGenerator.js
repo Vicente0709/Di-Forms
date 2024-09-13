@@ -341,18 +341,18 @@ export function generateMemoWithinProjec2(data) {
     saveAs(blob, "Memorando solicitud para participar en evento académico " + data.codigoProyecto + ".docx");
   });
 }
-
 export function generateMemoOutsideProject1(data){
   const departament = capitalizeWords((data.departamento).toLowerCase());
   // Array para almacenar las solicitudes
   let solicitudes = [];
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
+  
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
     solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
+  }
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
@@ -507,16 +507,16 @@ export function generateMemoOutsideProject1(data){
     saveAs(blob, "Memorando para Jefe del Departamento al VIIV.docx");
   });
 }
-
 export function generateMemoOutsideProject2(data){
 
   let solicitudes = [];
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
+  
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
     solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
+  }
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
@@ -607,7 +607,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}`, 
+                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}.`, 
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -971,8 +971,6 @@ export function generateMemoTripWithinProjec2(data) {
 
 export function generateMemoInscriptionPaymentOutProyect1(data){
 
-    
-    
     // Array para almacenar las solicitudes
     let ponencias = [];
     // Verificar si se debe incluir "pasajes aéreos"
@@ -1157,8 +1155,6 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
     saveAs(blob, `Memorando para pago de inscripción ${formulario} ${codigoP}.docx`);
   });
 }
-
-
 
 // Nueva función para generar el Anexo A en PDF
 export async function generateAnexoA(data) {
@@ -1501,15 +1497,13 @@ export async function generateAnexoAOutsideProject(data){
     data.tituloPonencia.trim() !== "No aplica"
   ) {
     ponentciaText =
-      "Para la participación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
+      " Para la presentación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
   } else {
     ponentciaText = "";
   }
   const plugins = { text, image, qrcode: barcodes.qrcode };
   const transporteInfo = {};
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-    
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+ // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
   for (let i = 0; i < 8; i++) {
     transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
     transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
@@ -1585,7 +1579,6 @@ export async function generateAnexoAOutsideProject(data){
   );
 }
 
-
 export async function generateAnexo8OutsideProject(data){
 
   const template= {
@@ -1606,7 +1599,7 @@ export async function generateAnexo8OutsideProject(data){
          }
    
          if (inscripcion.pagoLimite && inscripcion.limiteFecha) {
-           fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
+           fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${formatDate(inscripcion.limiteFecha)}\n`;
          }
        } else if (data.inscripcion === "NO") {
          // Manejo del caso en que data.inscripcion es "NO"
@@ -1622,8 +1615,8 @@ export async function generateAnexo8OutsideProject(data){
      "departamento":             data.departamento,
      "tituloEvento":             data.tituloEvento,
      "lugarEvento":              data.ciudadEvento+", "+data.paisEvento,
-     "fechaInicioEvento":        data.fechaInicioEvento,
-     "fechaFinEvento":           data.fechaFinEvento,
+     "fechaInicioEvento":        formatDate(data.fechaInicioEvento),
+     "fechaFinEvento":           formatDate(data.fechaFinEvento),
      "RelevanciaAcademica":      data.RelevanciaAcademica,
      "tituloPonencia":           data.tituloPonencia,
      "tipoPonencia":             data.tipoPonencia,
@@ -1638,8 +1631,8 @@ export async function generateAnexo8OutsideProject(data){
      "inscripcionNo":            data.inscripcion==="NO"?"X":"",
      "valorInscripcion":         valorInscripcionStr.trim(),
      "limiteFecha":              fechaPagoInscripcionStr.trim(),
-     "metodoPagoTransferencia":  data.metodoPago==="Transferencia"? "X":"",
-     "metodoPagoOtra":           data.metodoPago==="Otra"? "X":"",
+     "metodoPagoTransferencia":  (data.metodoPago === "Transferencia" && data.inscripcion === "SI") ? "X" : "",
+     "metodoPagoOtra":           (data.metodoPago === "Otra" && data.inscripcion === "SI") ? "X" : "",
      "hospedajeSi":              data.hospedaje==="SI"?"X":"",
      "HospedajeNo":              data.hospedaje==="NO"?"X":"",
      "alimentacionSi":           data.alimentacion==="SI"?"X":"",
@@ -1725,7 +1718,6 @@ export async function generateAnexoB2WithinProject(data) {
   );
 }
 
-
 export async function generateAnexo5InscriptionPayment (data) {
 
   const template ={
@@ -1758,7 +1750,7 @@ export async function generateAnexo5InscriptionPayment (data) {
     }
 
     if(inscripciones.pagoLimite && inscripciones.limiteFecha){
-      fechaPagoInscripcionStr += `${inscripciones.pagoLimite} ${inscripciones.limiteFecha}\n`;
+      fechaPagoInscripcionStr += `${inscripciones.pagoLimite} ${formatDate(inscripciones.limiteFecha)}\n`;
     }
 
   });
@@ -1772,8 +1764,8 @@ export async function generateAnexo5InscriptionPayment (data) {
     "codigoProyecto":                   data.codigoProyecto,
     "tituloEvento":                     data.tituloEvento,
     "ciudadPaisEvento":                 data.ciudadEvento + ", " + data.paisEvento,
-    "fechaInicioEvento":                data.fechaInicioEvento,
-    "fechaFinEvento":                   data.fechaFinEvento,
+    "fechaInicioEvento":                formatDate(data.fechaInicioEvento),
+    "fechaFinEvento":                   formatDate(data.fechaFinEvento),
     "RelevanciaAcademica":              data.RelevanciaAcademica,
     "tituloArticulo":                   data.tituloArticulo,
     "articuloPublicadoSi":              data.articuloPublicado==="SI" ? "X":"",

@@ -54,6 +54,29 @@ function Home() {
             ariaLabel="Ir al formulario de pago de inscripción dentro o fuera de proyectos"
           />
         </Col>
+
+        <Col md={4}>
+          <FormCard
+            title="Formulario : Participacion en Eventos Nacionales Dentro de Proyectos"
+            description="Este Formualrio esta diseñadao para la participacion en eventos nacionales dentro de proyectos."
+            imageSrc="form.png"
+            altText="Formulario"
+            buttonText="Ir al formulario"
+            path="/NationalWithinProject"
+            ariaLabel="Ir al formulario de pago de inscripción dentro o fuera de proyectos"
+          />
+        </Col>
+        <Col md={4}>
+          <FormCard
+            title="Formulario : Participacion en Eventos Nacionales Fuera de Proyectos"
+            description="Este formulario está diseñado para salidas nacionales fuera de proyectos con el fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud."
+            imageSrc="form.png"
+            altText="Formulario"
+            buttonText="Ir al formulario"
+            path="/NationalOutsideProject"
+            ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
+          />
+        </Col>
       </Row>
     </Container>
   );
