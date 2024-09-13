@@ -60,6 +60,10 @@ function Header() {
                 className={({ isActive }) => (isActive ? "active" : "")} >
                 Participacion en Eventos Nacionales Fuera de Proyectos
               </NavDropdown.Item>
+              <NavDropdown.Item as={NavLink} to="/NationalWithinProject"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Salidas Nacionales Dentro de Proyectos
+              </NavDropdown.Item>
               
             </NavDropdown>
           </Nav>

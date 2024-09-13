@@ -224,6 +224,7 @@ function EventParticipationWithinProjectsForm() {
   // Estados locales para mostrar/ocultar campos
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showOtherEvent, setShowOtherEvent] = useState(false);
+  const [isDisabledDeclaration, setIsDisabledDeclaration] = useState(true);
 
   useEffect(() => {
     // Mostrar el campo 'nombreDirector' solo para ciertos roles en el proyecto
@@ -760,8 +761,7 @@ function EventParticipationWithinProjectsForm() {
                   label: "Declaración si la organización SI cubre algún rubro",
                 },
               ]}
-              rules={{ required: "Este campo es requerido" }}
-              disabled={true} // Bloquear cambios manuales
+              disabled={isDisabledDeclaration} // Bloquear cambios manuales
             />
 
             {seleccionDeclaracion === "noCubre" && (
@@ -854,11 +854,9 @@ function EventParticipationWithinProjectsForm() {
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <ActionButton
-                onClick={onSubmit}
-                label="Enviar"
-                variant="primary" // Estilo de Bootstrap
-              />
+              <Button id="btn_enviar" type="submit" variant="primary">
+                Enviar
+              </Button>
             </Col>
           </Row>
 

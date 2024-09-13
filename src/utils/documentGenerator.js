@@ -1180,7 +1180,7 @@ export async function generateAnexoA(data) {
   if (
     data.tituloPonencia &&
     data.tituloPonencia.trim() !== "" &&
-    data.tituloPonencia.trim() !== "No aplica"
+    data.tituloPonencia.trim() !== "No Aplica"
   ) {
     ponentciaText =
       "Para la participacion de la ponencia '" + data.tituloPonencia + "'";
@@ -1438,8 +1438,8 @@ export async function generateAnexoA2(data) {
       "fechaPagoInscripcion": fechaPagoInscripcionStr.trim(), // Removemos el último salto de línea
 
 
-      "transferencia": data.metodoPago === "Transferencia" ? "X" : "",
-      "otroPago": data.metodoPago === "Otra" ? "X" : "",
+      "transferencia": (data.metodoPago === "Transferencia" && data.inscripcion === "SI") ? "X" : "",
+      "otroPago": (data.metodoPago === "Otra" && data.inscripcion === "SI") ? "X" : "",
       "hospedajeS": data.hospedaje === "SI" ? "X" : "",
       "hospedajeN": data.hospedaje === "NO" ? "X" : "",
       "movS": data.movilizacion === "SI" ? "X" : "",
