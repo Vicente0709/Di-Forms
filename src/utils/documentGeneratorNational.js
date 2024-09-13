@@ -6,8 +6,8 @@ import { text, image, barcodes } from "@pdfme/schemas";
 import {basePdfAnexo10} from "./basePdfAnexo10";
 import {schemasAnexo10} from "./schemasAnexo10";
 
-import { basePdfAnexoA } from "./basePdfAnexoA";
-import { schemasAnexoA } from "./schemasAnexoA";
+import { basePdfAnexoANational } from "./basePdfAnexoANational";
+import { schemasAnexoANational } from "./schemasAnexoANational";
 //Constantes
 const today = new Date();
 const day = String(today.getDate()).padStart(2, "0");
@@ -19,13 +19,14 @@ export async function generateMemoNationalOutsideProject1(data){
   const departament = capitalizeWords((data.departamento).toLowerCase());
   // Array para almacenar las solicitudes
   let solicitudes = [];
+  
+  // Verificar si se debe incluir "viáticos y subsistencias"
+  if (data.viaticosSubsistencias === "SI") {
+    solicitudes.push(" la asignación de viáticos y subsistencias");
+  }
   // Verificar si se debe incluir "pasajes aéreos"
   if (data.pasajesAereos === "SI") {
     solicitudes.push(" la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
@@ -85,7 +86,7 @@ export async function generateMemoNationalOutsideProject1(data){
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje dentro del país",
+                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje nacional",
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -183,12 +184,13 @@ export async function generateMemoNationalOutsideProject1(data){
 
 export async function generateMemoNationalOutsideProject2(data){
   let solicitudes = [];
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
+  
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
+    solicitudes.push(" la asignación de viáticos y subsistencias");
+  }
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
@@ -249,7 +251,7 @@ export async function generateMemoNationalOutsideProject2(data){
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje dentro del país",
+                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje nacional",
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
@@ -420,8 +422,8 @@ export async function generateAnexo10NationalOutsideProject(data){
 
 export async function generateAnexoANationalOutsideProject(data){
   const template = {
-    schemas: schemasAnexoA,
-    basePdf: basePdfAnexoA,
+    schemas: schemasAnexoANational,
+    basePdf: basePdfAnexoANational,
   };
 
   // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
@@ -443,7 +445,7 @@ export async function generateAnexoANationalOutsideProject(data){
     data.tituloPonencia.trim() !== "No aplica"
   ) {
     ponentciaText =
-      "Para la participación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
+      "Para la presentación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
   } else {
     ponentciaText = "";
   }
@@ -451,7 +453,7 @@ export async function generateAnexoANationalOutsideProject(data){
   const transporteInfo = {};
     
   // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 6; i++) {
     transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
     transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
     transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";

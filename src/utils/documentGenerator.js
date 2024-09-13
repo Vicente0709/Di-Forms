@@ -341,18 +341,18 @@ export function generateMemoWithinProjec2(data) {
     saveAs(blob, "Memorando solicitud para participar en evento académico " + data.codigoProyecto + ".docx");
   });
 }
-
 export function generateMemoOutsideProject1(data){
   const departament = capitalizeWords((data.departamento).toLowerCase());
   // Array para almacenar las solicitudes
   let solicitudes = [];
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
+  
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
     solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
+  }
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
@@ -507,16 +507,16 @@ export function generateMemoOutsideProject1(data){
     saveAs(blob, "Memorando para Jefe del Departamento al VIIV.docx");
   });
 }
-
 export function generateMemoOutsideProject2(data){
 
   let solicitudes = [];
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
+  
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
     solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
+  }
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
@@ -1499,15 +1499,13 @@ export async function generateAnexoAOutsideProject(data){
     data.tituloPonencia.trim() !== "No aplica"
   ) {
     ponentciaText =
-      "Para la participación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
+      "Para la presentación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
   } else {
     ponentciaText = "";
   }
   const plugins = { text, image, qrcode: barcodes.qrcode };
   const transporteInfo = {};
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-    
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+ // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
   for (let i = 0; i < 8; i++) {
     transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
     transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";

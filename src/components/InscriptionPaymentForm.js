@@ -144,6 +144,7 @@ function InscriptionPaymentForm() {
   const onSubmitInscriptionPayment = (data) => {
     console.log(data);
     setShowDownloadSection(true);
+    console.log(methods.getValues());
   };
 
   // Funciones para manejar la generación de documentos
@@ -154,22 +155,10 @@ function InscriptionPaymentForm() {
     setShowDownloadSection(false);
   };
 
-  const handleGenerateMemo2 = () => {
-    /*const formInscriptionPayment = methods.getValues();
-    generateMemoInscriptionPayment2(formInscriptionPayment);
-    setShowDownloadSection(false);*/
-  };
-
   const handleGeneratePdf = () => {
     const formInscriptionPayment = methods.getValues();
     generateAnexo5InscriptionPayment(formInscriptionPayment);
     setShowDownloadSection(false);
-  };
-
-  const handleGeneratePdf2 = () => {
-    /* const formInscriptionPayment = methods.getValues();
-    generateAnexo5InscriptionPayment(formInscriptionPayment);
-    setShowDownloadSection(false);*/
   };
 
   // Función para descargar todos los documentos
@@ -441,9 +430,7 @@ function InscriptionPaymentForm() {
               rules={{
                 required: "La fecha de inicio del evento es requerida",
                 validate: (value) => {
-                  const today = new Date(now.getTime() - localOffset)
-                    .toISOString()
-                    .split("T")[0];
+                  const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
                   return (
                     value >= today ||
                     "La fecha de inicio no puede ser anterior a la fecha actual."
@@ -524,6 +511,7 @@ function InscriptionPaymentForm() {
           <Row className="mt-4">
             <Col className="text-center">
              <ActionButton
+              type="submit"
               onClick={onSubmitInscriptionPayment}
               label="Enviar"
               variant="primary"

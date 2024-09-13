@@ -140,6 +140,7 @@ function NationalOutsideProjectForm() {
   const onSubmitNationalOutside = (data) => {
     console.log(data);
     setShowDownloadSection(true);
+    console.log(methods.getValues());
   };
 
   // Funciones para manejar la generación de documentos
@@ -494,7 +495,7 @@ function NationalOutsideProjectForm() {
                 la revista o memorias en las cuales se publicará el artículo."
                 placeholder="Especifique"
                 rules={{
-                  required: "Por favor el detalle del artículo es requerido",
+                  required: "El detalle del artículo es requerido",
                 }}
                 disabled={false}
               />
@@ -633,6 +634,7 @@ function NationalOutsideProjectForm() {
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
+              type="submit"
               onClick={onSubmitNationalOutside}
               label="Enviar"
               variant="primary"

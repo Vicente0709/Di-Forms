@@ -68,22 +68,21 @@ function EventParticipationOutsideProjectsForm() {
   const fechaInicioEvento = watch("fechaInicioEvento"); // Observa el campo "fechaInicioEvento"
 
   // Obtener la fecha y la zona horaria local
-  const now = new Date();
-  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-  const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0]; // Fecha ajustada para la zona horaria local
+    const now = new Date();
+    const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+    const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0]; // Fecha ajustada para la zona horaria local
     const hospedaje = watch("hospedaje");
     const movilizacion = watch("movilizacion");
     const alimentacion = watch("alimentacion");
     const seleccionDeclaracion = watch("seleccionDeclaracion");
     const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
     const habilitarCampos = seleccionViaticosSubsistencias === "SI";
-  
+
 
     useEffect(() => {
       // Función para inicializar los valores desde localStorage
       const initializeFromLocalStorage = () => {
-        const formEventOutsideProject =
-          JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
+        const formEventOutsideProject =JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
         reset(formEventOutsideProject);
       };
       initializeFromLocalStorage();
@@ -141,6 +140,7 @@ function EventParticipationOutsideProjectsForm() {
   const onSubmitEventParticipationOutside = (data) => {
     console.log(data);
     setShowDownloadSection(true);
+    console.log(methods.getValues());
   };
 
   // Funciones para manejar la generación de documentos
@@ -497,7 +497,7 @@ function EventParticipationOutsideProjectsForm() {
                 la revista o memorias en las cuales se publicará el artículo."
                 placeholder="Especifique"
                 rules={{
-                  required: "Por favor el detalle del artículo es requerido",
+                  required: "El detalle del artículo es requerido",
                 }}
                 disabled={false}
               />
@@ -638,6 +638,7 @@ function EventParticipationOutsideProjectsForm() {
           <Row className="mt-4">
             <Col className="text-center">
              <ActionButton
+             type="submit"
               onClick={onSubmitEventParticipationOutside}
               label="Enviar"
               variant="primary"
