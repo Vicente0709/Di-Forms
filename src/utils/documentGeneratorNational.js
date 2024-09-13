@@ -3,15 +3,15 @@ import { saveAs } from "file-saver";
 import { generate } from "@pdfme/generator";
 import { text, image, barcodes } from "@pdfme/schemas";
 
-import {basePdfAnexo10} from "./basePdfAnexo10";
-import {schemasAnexo10} from "./schemasAnexo10";
+import {basePdfAnexo10} from "../utilsNational/basePdfAnexo10";
+import {schemasAnexo10} from "../utilsNational/schemasAnexo10";
 
-import { basePdfAnexoANational } from "./basePdfAnexoANational";
-import { schemasAnexoANational } from "./schemasAnexoANational";
 
 import { basePdfAnexo2 } from "./basePdfAnexo2";
 import { schemasAnexo2 } from "./schemasAnexo2";
 
+import { basePdfAnexoANational } from "../utilsNational/basePdfAnexoANational";
+import { schemasAnexoANational } from "../utilsNational/schemasAnexoANational";
 
 
 //Constantes
@@ -410,8 +410,8 @@ export async function generateAnexo10NationalOutsideProject(data){
       "inscripcionNo":                  data.inscripcion==="NO"?"X":"",
       "valorInscripcion":               valorInscripcionStr.trim(),
       "pagoLimiteFecha":                fechaPagoInscripcionStr.trim(),
-      "metodoPagoTransferencia":        data.metodoPago==="Transferencia"? "X":"",
-      "metodoPagoOtra":                 data.metodoPago==="Otra"? "X":"",
+      "metodoPagoTransferencia":        (data.metodoPago === "Transferencia" && data.inscripcion === "SI") ? "X" : "",
+      "metodoPagoOtra":                 (data.metodoPago === "Otra" && data.inscripcion === "SI") ? "X" : "",
       "nombresAp":                      data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase(),
       "departament":                    data.puesto.toUpperCase()
     }
@@ -452,7 +452,7 @@ export async function generateAnexoANationalOutsideProject(data){
     data.tituloPonencia.trim() !== "No aplica"
   ) {
     ponentciaText =
-      "Para la presentación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
+      " Para la presentación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
   } else {
     ponentciaText = "";
   }

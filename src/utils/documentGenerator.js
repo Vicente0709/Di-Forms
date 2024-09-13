@@ -607,7 +607,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}`, 
+                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}.`, 
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -971,8 +971,6 @@ export function generateMemoTripWithinProjec2(data) {
 
 export function generateMemoInscriptionPaymentOutProyect1(data){
 
-    
-    
     // Array para almacenar las solicitudes
     let ponencias = [];
     // Verificar si se debe incluir "pasajes aéreos"
@@ -1499,7 +1497,7 @@ export async function generateAnexoAOutsideProject(data){
     data.tituloPonencia.trim() !== "No aplica"
   ) {
     ponentciaText =
-      "Para la presentación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
+      " Para la presentación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
   } else {
     ponentciaText = "";
   }
@@ -1633,8 +1631,8 @@ export async function generateAnexo8OutsideProject(data){
      "inscripcionNo":            data.inscripcion==="NO"?"X":"",
      "valorInscripcion":         valorInscripcionStr.trim(),
      "limiteFecha":              fechaPagoInscripcionStr.trim(),
-     "metodoPagoTransferencia":  data.metodoPago==="Transferencia"? "X":"",
-     "metodoPagoOtra":           data.metodoPago==="Otra"? "X":"",
+     "metodoPagoTransferencia":  (data.metodoPago === "Transferencia" && data.inscripcion === "SI") ? "X" : "",
+     "metodoPagoOtra":           (data.metodoPago === "Otra" && data.inscripcion === "SI") ? "X" : "",
      "hospedajeSi":              data.hospedaje==="SI"?"X":"",
      "HospedajeNo":              data.hospedaje==="NO"?"X":"",
      "alimentacionSi":           data.alimentacion==="SI"?"X":"",
