@@ -30,7 +30,6 @@ function PaymentDetails() {
       } else {
       setshowInputInscripcion(false);
       setValue("inscripciones");
-     
     }
 
     const initialValor={

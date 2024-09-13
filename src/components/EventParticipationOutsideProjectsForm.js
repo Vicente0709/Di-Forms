@@ -63,7 +63,7 @@ function EventParticipationOutsideProjectsForm() {
   const [showInputArticulo, setShowInputArticulo] = useState(false);
 
   // Observadores para los cambios en los campos del formulario
-  const participacionEvento = watch("participacionEvento"); // Observa el campo "participacionEvento"
+ 
   const seleccionArticulo = watch("articuloPublicado"); // Observa el campo "articuloPublicado"
   const fechaInicioEvento = watch("fechaInicioEvento"); // Observa el campo "fechaInicioEvento"
 
@@ -637,12 +637,9 @@ function EventParticipationOutsideProjectsForm() {
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-             <ActionButton
-             type="submit"
-              onClick={onSubmitEventParticipationOutside}
-              label="Enviar"
-              variant="primary"
-              />
+            <Button id="btn_enviar" type="submit" variant="primary">
+                Enviar
+              </Button>
             </Col>
           </Row>
 

@@ -19,8 +19,6 @@ import DownloadButton from "./Buttons/DownloadButton";
 
 import {
   generateMemoInscriptionPaymentOutProyect1,
-  generateMemoInscriptionPaymentt2,
-  generateAnexoAOutsideProject,
   generateAnexo5InscriptionPayment,
 } from "../utils/documentGenerator.js";
 
@@ -66,7 +64,6 @@ function InscriptionPaymentForm() {
   // Observadores para campos clave
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
-  const participacionEvento = watch("participacionEvento");
   const seleccionArticulo = watch("articuloPublicado");
   const fechaInicioEvento = watch("fechaInicioEvento");
 
@@ -510,12 +507,9 @@ function InscriptionPaymentForm() {
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-             <ActionButton
-              type="submit"
-              onClick={onSubmitInscriptionPayment}
-              label="Enviar"
-              variant="primary"
-              />
+            <Button id="btn_enviar" type="submit" variant="primary">
+                Enviar
+              </Button>
             </Col>
           </Row>
 
