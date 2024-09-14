@@ -3,8 +3,8 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
-import PaymentDetail from "./ComponetOutsideProjects/PaymentDetail.js";
-import Transportation from "./ComponetOutsideProjects/Transportation.js";
+import PaymentDetails from "./ComponentNationalOutsideProject/PaymentDetails.js";
+import Transportation from "./ComponentNationalOutsideProject/Transportation.js";
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
 import LabelText from "./Labels/LabelText.js";
@@ -19,11 +19,11 @@ import DownloadButton from "./Buttons/DownloadButton";
 // Importación de las funciones para generar documentos
 
 import {
-  generateMemoOutsideProject1,
-  generateMemoOutsideProject2,
-  generateAnexoAOutsideProject,
-  generateAnexo8OutsideProject,
-} from "../utils/documentGenerator.js";
+  generateMemoNationalOutsideProject1,
+  generateMemoNationalOutsideProject2,
+  generateAnexo10NationalOutsideProject,
+  generateAnexoANationalOutsideProject,
+} from "../utils/documentGeneratorNational.js";
 
 //Funciones Validación
 
@@ -47,13 +47,13 @@ const validarCedulaEcuatoriana = (cedula) => {
   return digitoVerificador === parseInt(cedula[9], 10);
 };
 
-function EventParticipationOutsideProjectsForm() {
+function NationalOutsideProjectForm() {
   // Configuración de react-hook-form con valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
     defaultValues:
-      JSON.parse(localStorage.getItem("formEventOutsideProject")) || {},
+      JSON.parse(localStorage.getItem("formNationalOutsideProject")) || {},
   });
 
   const { watch, setValue, reset, clearErrors } = methods;
@@ -63,38 +63,37 @@ function EventParticipationOutsideProjectsForm() {
   const [showInputArticulo, setShowInputArticulo] = useState(false);
 
   // Observadores para los cambios en los campos del formulario
- 
   const seleccionArticulo = watch("articuloPublicado"); // Observa el campo "articuloPublicado"
   const fechaInicioEvento = watch("fechaInicioEvento"); // Observa el campo "fechaInicioEvento"
-
   // Obtener la fecha y la zona horaria local
-    const now = new Date();
-    const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-    const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0]; // Fecha ajustada para la zona horaria local
+  const now = new Date();
+  const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
+  const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0]; // Fecha ajustada para la zona horaria local
     const hospedaje = watch("hospedaje");
     const movilizacion = watch("movilizacion");
     const alimentacion = watch("alimentacion");
     const seleccionDeclaracion = watch("seleccionDeclaracion");
     const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
     const habilitarCampos = seleccionViaticosSubsistencias === "SI";
-
+  
+    // Efecto para sincronizar con localStorage y manejar la inicialización
 
     useEffect(() => {
       // Función para inicializar los valores desde localStorage
       const initializeFromLocalStorage = () => {
-        const formEventOutsideProject =JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
-        reset(formEventOutsideProject);
+        const formNationalOutsideProject =
+          JSON.parse(localStorage.getItem("formNationalOutsideProject")) || {};
+        reset(formNationalOutsideProject);
       };
       initializeFromLocalStorage();
       // Suscribirse a los cambios en el formulario para guardar en localStorage
       const subscription = watch((data) => {
-        localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
+        localStorage.setItem("formNationalOutsideProject", JSON.stringify(data));
       });
       // Limpiar la suscripción al desmontar el componente
       return () => subscription.unsubscribe();
     }, [watch, reset]);
 
-    // Efecto para sincronizar con localStorage y manejar la inicialización
   useEffect(() => {
     
     // Manejar la lógica para mostrar u ocultar el campo de detalle del artículo
@@ -124,7 +123,7 @@ function EventParticipationOutsideProjectsForm() {
       setValue("numeroCuenta", "");
       clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
     }
-    
+        
   }, [watch, reset, seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos, setValue, clearErrors]);
 
   const validateFechaFin = (fechaFin) => {
@@ -137,7 +136,7 @@ function EventParticipationOutsideProjectsForm() {
     );
   };
   // Función que se ejecuta al enviar el formulario
-  const onSubmitEventParticipationOutside = (data) => {
+  const onSubmitNationalOutside = (data) => {
     console.log(data);
     setShowDownloadSection(true);
     console.log(methods.getValues());
@@ -145,28 +144,29 @@ function EventParticipationOutsideProjectsForm() {
 
   // Funciones para manejar la generación de documentos
   const handleGenerateMemo1 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateMemoOutsideProject1(formEventOutsideProject);
+   const formNationalOutsideProject = methods.getValues();
+    generateMemoNationalOutsideProject1(formNationalOutsideProject);
     setShowDownloadSection(false);
   };
 
   const handleGenerateMemo2 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateMemoOutsideProject2(formEventOutsideProject);
+    const formNationalOutsideProject = methods.getValues();
+    generateMemoNationalOutsideProject2(formNationalOutsideProject);
     setShowDownloadSection(false);
   };
 
   const handleGeneratePdf = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateAnexoAOutsideProject(formEventOutsideProject);
+    const formNationalOutsideProject= methods.getValues();
+    generateAnexoANationalOutsideProject(formNationalOutsideProject);
     setShowDownloadSection(false);
   };
 
   const handleGeneratePdf2 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateAnexo8OutsideProject(formEventOutsideProject);
+    const formNationalOutsideProject = methods.getValues();
+    generateAnexo10NationalOutsideProject(formNationalOutsideProject);
     setShowDownloadSection(false);
   };
+  
 
   // Función para descargar todos los documentos
 
@@ -180,7 +180,7 @@ function EventParticipationOutsideProjectsForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formEventOutsideProject");
+    localStorage.removeItem("formNationalOutsideProject");
     setShowDownloadSection(false);
     window.location.reload();
   };
@@ -328,10 +328,10 @@ function EventParticipationOutsideProjectsForm() {
       <Container>
         {/* Título del formulario */}
         <h1 className="text-center my-4">
-          Formulario para participacion en eventos fuera de proyectos
+          Formulario para participacion nacional en eventos fuera de proyectos
         </h1>
         <Form
-          onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}
+          onSubmit={methods.handleSubmit(onSubmitNationalOutside)}
         >
         
           <div className="form-container">
@@ -366,17 +366,17 @@ function EventParticipationOutsideProjectsForm() {
               }}
               disabled={false}
             />
-
+            
             <InputText
               name="puesto"
               label="Puesto que ocupa"
               infoText="Tal como consta en su acción de personal. Ejemplos: Profesor
-          Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
-          Profesor Principal a Tiempo Completo."
+              Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
+              Profesor Principal a Tiempo Completo."
               rules={{ required: "El puesta que ocupa es requerido" }}
               disabled={false}
             />
-
+                
             <InputSelect
               name="departamento"
               label="Departamento / Instituto"
@@ -384,14 +384,13 @@ function EventParticipationOutsideProjectsForm() {
               disabled={false}
               options={departamentoOptions}
             />
-
+            
             <InputText
               name="nombreJefeInmediato"
               label="Nombres y Apellidos del Jefe Inmediato"
               rules={{ required: "El nombre del jefe inmediato es requerido" }}
               disabled={false}
             />
-
             <InputText
               name="cargoJefeInmediato"
               label="Cargo del Jefe inmediato"
@@ -424,8 +423,8 @@ function EventParticipationOutsideProjectsForm() {
             <InputText
               name="paisEvento"
               label="País"
-              rules={{ required: "El país del evento es requerido" }}
-              disabled={false}
+              defaultValue="Ecuador"
+              disabled
             />
             <Label text="Fechas del evento" />
             <InputDate
@@ -434,9 +433,7 @@ function EventParticipationOutsideProjectsForm() {
               rules={{
                 required: "La fecha de inicio del evento es requerida",
                 validate: (value) => {
-                  const today = new Date(now.getTime() - localOffset)
-                    .toISOString()
-                    .split("T")[0];
+                  const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
                   return (
                     value >= today ||
                     "La fecha de inicio no puede ser anterior a la fecha actual."
@@ -528,9 +525,9 @@ function EventParticipationOutsideProjectsForm() {
               disabled={false}
             />
 
+              <PaymentDetails />
               <Transportation />
-              <PaymentDetail />
-
+              
               <LabelTitle text="Declaración de gastos, conforme reglamento de viáticos al exterior" />
               <LabelText text=" Selecciona según corresponda. Responda SI aunque la organización del
               evento cubra el rubro parcialmente. "/>
@@ -606,7 +603,7 @@ function EventParticipationOutsideProjectsForm() {
             disabled={!habilitarCampos}
             />
 
-            <LabelTitle text= "Servidores que integran los servicios institucionales (opcional)"/>
+            <LabelTitle text= "Serviores que integran los servicios institucionales (opcional)"/>
 
             <InputTextArea
             name="servidores"
@@ -616,19 +613,17 @@ function EventParticipationOutsideProjectsForm() {
             disabled={false}
             />
 
-            <LabelTitle text= "DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS AL EXTERIOR"/>
+            <LabelTitle text= "DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS DE SALIDA NACIONAL FUERA DE PROYECTOS"/>
             <Label text= "REQUISITOS:"/>
             <LabelText text="• Formulario de solicitud de autorización para cumplimiento de servicios institucionales."/>
-            <LabelText text="• Formulario para salida al exterior fuera de proyectos."/>
+            <LabelText text="• Formulario para salida nacional  fuera de proyectos."/>
             <LabelText text="• Copia de la carta o correo de aceptación de la ponencia y/o poster a ser presentada por el profesor solicitante."/>
             <LabelText text="• Copia de artículo, ponencia o poster aceptado para verificación de autores y afiliación de la EPN."/>
-            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avalada por el represente del curso y el jefe inmediato."/>
-            <LabelText text="• Documento donde se puede verificar el costo, fechas de la inscripción al evento y fechas de participación en el evento. (NO factura/ NO invoice)"/>
-            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda."/>
-            <LabelText text="• Quipux del profesor al Jefe  o Director de la Unidad Académica solicitando el permiso y aval correspondiente para 
-              participar en el evento, deberá detallar todo el requerimiento, viáticos, pasajes, inscripción, de ser el caso."/>
-            <LabelText text="• Quipux por parte del Jefe o Director de la Unidad Académica, al Vicerrectorado de Investigación, Innovación y Vinculación, 
-              detallando el requerimiento de la salida al exterior y auspicio solicitado."/>
+            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avaladas por el Jefe o Director de la Unidad Académica del profesor que realizará la salida nacional y del representante estudiantil del curso. O en el caso de que esta actividad se realice fuera del periodo de clases  el aval del Jefe o Director de la Unidad Académica indicando este particular."/>
+            <LabelText text="• Documento donde se puede verificar el costo, fechas de la inscripción al evento y fechas de participación en el evento (NO factura/ NO invoice)."/>
+            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda o Información de la cuenta bancaria."/>
+            <LabelText text="• Quipux del profesor al Jefe o Director de la Unidad Académica solicitando el permiso y aval correspondiente para participar en el evento, deberá detallar todo el requerimiento, viáticos, pasajes, inscripción, de ser el caso."/>
+            <LabelText text="• Quipux por parte del Jefe o Director de la Unidad Académica, al Vicerrectorado de Investigación, Innovación y Vinculación, detallando el requerimiento de la salida nacional y auspicio solicitado."/>
 
 
 
@@ -688,7 +683,7 @@ function EventParticipationOutsideProjectsForm() {
                       className="download-icon"
                       style={{ cursor: "pointer" }}
                     />
-                    <span>Descargar Anexo 8</span>
+                    <span>Descargar Anexo 10</span>
                   </div>
                 </Col>
               </Row>
@@ -696,9 +691,9 @@ function EventParticipationOutsideProjectsForm() {
               {/* Botón para descargar todos los documentos */}
               <Row className="mt-3">
                 <Col className="text-center">
-                 <ActionButton
+                  <ActionButton
                   onClick={handleDownloadAll}
-                  label="Desacargar Todo"
+                  label="Descargar Todo"
                   variant="success"
                   />
                 </Col>
@@ -709,7 +704,7 @@ function EventParticipationOutsideProjectsForm() {
           {/* Botón para limpiar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <ActionButton
+             <ActionButton
               onClick={handleClearForm}
               label="Limpiar Formulario"
               variant="danger"
@@ -721,4 +716,4 @@ function EventParticipationOutsideProjectsForm() {
     </FormProvider>
   );
 }
-export default EventParticipationOutsideProjectsForm;
+export default NationalOutsideProjectForm;

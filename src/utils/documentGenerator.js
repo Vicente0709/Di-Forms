@@ -19,7 +19,6 @@ import { schemasAnexoB2 } from "./schemasAnexoB2";
 import { basePdfAnexo5 } from "./basePdfAnexo5";
 import { schemasAnexo5 } from "./schemasAnexo5";
 
-
 //Constantes
 const today = new Date();
 const day = String(today.getDate()).padStart(2, "0");
@@ -342,18 +341,18 @@ export function generateMemoWithinProjec2(data) {
     saveAs(blob, "Memorando solicitud para participar en evento académico " + data.codigoProyecto + ".docx");
   });
 }
-
 export function generateMemoOutsideProject1(data){
   const departament = capitalizeWords((data.departamento).toLowerCase());
   // Array para almacenar las solicitudes
   let solicitudes = [];
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
+  
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
     solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
+  }
+  // Verificar si se debe incluir "pasajes aéreos"
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
@@ -508,16 +507,16 @@ export function generateMemoOutsideProject1(data){
     saveAs(blob, "Memorando para Jefe del Departamento al VIIV.docx");
   });
 }
-
 export function generateMemoOutsideProject2(data){
 
   let solicitudes = [];
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
+  
   // Verificar si se debe incluir "viáticos y subsistencias"
   if (data.viaticosSubsistencias === "SI") {
     solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
+  }
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push(" la compra de pasajes aéreos");
   }
   // Verificar si se debe incluir "pago de inscripción"
   if (data.inscripcion === "SI") {
@@ -608,7 +607,7 @@ export function generateMemoOutsideProject2(data){
           new Paragraph({
             children: [
               new TextRun({
-                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}`, 
+                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}.`, 
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -755,7 +754,7 @@ export function generateMemoTripWithinProjec1(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.nombreInstitucionAcogida}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para realizar un viaje técnico  "${data.nombreIntitucionAcogida}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -902,7 +901,7 @@ export function generateMemoTripWithinProjec2(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr."${nombresApellidos}", ${data.rolEnProyecto} del proyecto pueda realizar un viaje tecnico "${data.nombreInstitucionAcogida}", a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
+                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr."${nombresApellidos}", ${data.rolEnProyecto} del proyecto pueda realizar un viaje tecnico "${data.nombreIntitucionAcogida}", a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -966,13 +965,13 @@ export function generateMemoTripWithinProjec2(data) {
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando solicitud para viaje técnico " + data.codigoProyecto + ".docx");
+    saveAs(blob, "Memorando solicitud para viaje técnico" + data.codigoProyecto + ".docx");
   });
 }
 
 export function generateMemoInscriptionPaymentOutProyect1(data){
 
-    // Array para almacenar titulo ponencia
+    // Array para almacenar las solicitudes
     let ponencias = [];
     // Verificar si se debe incluir "titulo ponencia"
     if (data.tituloPonencia === "") {
@@ -998,9 +997,10 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
     
     let dirCargo = [];
     if (data.nombreDirector===""){
+    if (data.nombreDirector===""){
       dirCargo.push("Profesor");
     } else{
-      dirCargo.push(`Director de Proyecto ${data.codigoProyecto}`);
+      dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
     }
 
     let formulario = [];
@@ -1091,6 +1091,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
             children: [
               new TextRun({
                 text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
+                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -1157,8 +1158,6 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
   });
 }
 
-
-
 // Nueva función para generar el Anexo A en PDF
 export async function generateAnexoA(data) {
   const template = {
@@ -1181,7 +1180,7 @@ export async function generateAnexoA(data) {
   if (
     data.tituloPonencia &&
     data.tituloPonencia.trim() !== "" &&
-    data.tituloPonencia.trim() !== "No aplica"
+    data.tituloPonencia.trim() !== "No Aplica"
   ) {
     ponentciaText =
       "Para la participacion de la ponencia '" + data.tituloPonencia + "'";
@@ -1204,10 +1203,10 @@ export async function generateAnexoA(data) {
     {
       "fechaSolicitud":     formattedDate,
       "viaticos":           data.viaticosSubsistencias === "SI" ? "X" : "",
-      "movilizacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
+      "movilizacion":       data.viaticosSubsistencia === "SI" ? "X" : "",
       "subsistencias":      data.viaticosSubsistencias === "SI" ? "X" : "",
-      "alimentacion":       data.viaticosSubsistencias === "SI" ? "X" : "",
-
+      "alimentacion":       data.viaticosSubsistencia === "SI" ? "X" : "",
+      
       "nombresCompletos":   data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
       "lugar":              data.ciudadEvento + ", " + data.paisEvento,
       "puesto":             data.cargo,
@@ -1328,14 +1327,14 @@ export async function generateAnexoATripWithingProject(data) {
       " titulado  '" +
       data.tituloProyecto +
       "'  se llevará a cabo un viaje técnico a cargo de la intitucion de acogida '" +
-      data.nombreInstitucionAcogida +
+      data.nombreIntitucionAcogida +
       "', que tendrá lugar del  " +
       data.fechaInicioEvento +
       "  al  " +
       data.fechaFinEvento +
       " en la ciudad de  " +
       data.ciudadEvento +
-      "," +
+      ", " +
       data.paisEvento +
       ". ",
 
@@ -1394,7 +1393,7 @@ export async function generateAnexoA2(data) {
   data.inscripciones.forEach((inscripcion) => {
     // Concatenamos el valor de inscripción con un '$' y un salto de línea
     if (data.inscripcion === "SI" && inscripcion.valorInscripcion) {
-      valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
+      valorInscripcionStr += `${inscripcion.monedaPago}${inscripcion.valorInscripcion}\n`;
     }
 
     // Construimos la cadena de la fecha de pago dependiendo de cuál campo tiene valor
@@ -1439,8 +1438,8 @@ export async function generateAnexoA2(data) {
       "fechaPagoInscripcion": fechaPagoInscripcionStr.trim(), // Removemos el último salto de línea
 
 
-      "transferencia": data.metodoPago === "Transferencia" ? "X" : "",
-      "otroPago": data.metodoPago === "Otra" ? "X" : "",
+      "transferencia": (data.metodoPago === "Transferencia" && data.inscripcion === "SI") ? "X" : "",
+      "otroPago": (data.metodoPago === "Otra" && data.inscripcion === "SI") ? "X" : "",
       "hospedajeS": data.hospedaje === "SI" ? "X" : "",
       "hospedajeN": data.hospedaje === "NO" ? "X" : "",
       "movS": data.movilizacion === "SI" ? "X" : "",
@@ -1454,7 +1453,7 @@ export async function generateAnexoA2(data) {
 
       ...actividades,
 
-      "justificacionMas15":diferencia < 16 ? "No aplica" : `${data.justificacionComision}`,
+      "justificacionMas15":diferencia < 16 ? "No aplica" :data.justificacionComision,
       "fechaSolicitud": formattedDate,
       "nombreDirector":  data.nombres.toUpperCase()+ " "+data.apellidos.toUpperCase(),
       "codigoProyecto2": data.codigoProyecto,
@@ -1500,15 +1499,13 @@ export async function generateAnexoAOutsideProject(data){
     data.tituloPonencia.trim() !== "No aplica"
   ) {
     ponentciaText =
-      "Para la participacion de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
+      " Para la presentación de la ponencia '" + data.tituloPonencia +"' del tipo "+ data.tipoPonencia;
   } else {
     ponentciaText = "";
   }
   const plugins = { text, image, qrcode: barcodes.qrcode };
   const transporteInfo = {};
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-    
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+ // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
   for (let i = 0; i < 8; i++) {
     transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
     transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
@@ -1539,7 +1536,7 @@ export async function generateAnexoAOutsideProject(data){
 
       "servidores":         data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase() + ". " +data.servidores.toUpperCase(),
 
-      "actividades": "Participación en el evento  '" +
+      "actividades": "Asistencia al evento '" +
       data.tituloEvento +
       "', que tendrá lugar del  " +
       data.fechaInicioEvento +
@@ -1586,81 +1583,81 @@ export async function generateAnexoAOutsideProject(data){
 
 export async function generateAnexo8OutsideProject(data){
 
- const template= {
- schemas: schemaAnexo8,
- basePdf: basepdfAnexo8,
- };
- const plugins = { text, image, qrcode: barcodes.qrcode };
-
- //Generacion de la constante
-  let valorInscripcionStr = "";
-  let fechaPagoInscripcionStr = "";
-    
-  if (data && data.inscripciones && Array.isArray(data.inscripciones)) {
-    data.inscripciones.forEach((inscripcion) => {
-      if (data.inscripcion === "SI") {
-        if (inscripcion.valorInscripcion) {
-          valorInscripcionStr += `${inscripcion.monedaPago} ${inscripcion.valorInscripcion}\n`;
-        }
-  
-        if (inscripcion.pagoLimite && inscripcion.limiteFecha) {
-          fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
-        }
-      } else if (data.inscripcion === "NO") {
-        // Manejo del caso en que data.inscripcion es "NO"
-        valorInscripcionStr += '\n';
-        fechaPagoInscripcionStr += '\n';
-      }
-    });
-  }
-
- const inputs = [
-  {
-    "nombres":                  data.nombres.toUpperCase() +" "+ data.apellidos.toUpperCase(),
-    "departamento":             data.departamento,
-    "tituloEvento":             data.tituloEvento,
-    "lugarEvento":              data.ciudadEvento+", "+data.paisEvento,
-    "fechaInicioEvento":        data.fechaInicioEvento,
-    "fechaFinEvento":           data.fechaFinEvento,
-    "RelevanciaAcademica":      data.RelevanciaAcademica,
-    "tituloPonencia":           data.tituloPonencia,
-    "tipoPonencia":             data.tipoPonencia,
-    "detalleArticuloSI":        data.detalleArticuloSI,
-    "articuloPublicadoSi":      data.articuloPublicado==="SI" ? "X":"",
-    "articuloPublicadoNo":      data.articuloPublicado==="NO"? "X":"",
-    "pasajesAereosSi":          data.pasajesAereos==="SI" ? "X":"",
-    "pasajesAereosNo":          data.pasajesAereos==="NO" ? "X":"",
-    "viaticosSubsistenciasSi":  data.viaticosSubsistencias==="SI"? "X": "",
-    "viaticosSubsistenciasNo":  data.viaticosSubsistencias==="NO"? "X": "",
-    "inscripsionSi":            data.inscripcion==="SI"?"X":"",
-    "inscripcionNo":            data.inscripcion==="NO"?"X":"",
-    "valorInscripcion":         valorInscripcionStr.trim(),
-    "limiteFecha":              fechaPagoInscripcionStr.trim(),
-    "metodoPagoTransferencia":  data.metodoPago==="Transferencia"? "X":"",
-    "metodoPagoOtra":           data.metodoPago==="Otra"? "X":"",
-    "hospedajeSi":              data.hospedaje==="SI"?"X":"",
-    "HospedajeNo":              data.hospedaje==="NO"?"X":"",
-    "alimentacionSi":           data.alimentacion==="SI"?"X":"",
-    "alimentacionNo":           data.alimentacion==="NO"?"X":"",
-    "movilizacionInternaSi":    data.movilizacion==="SI"?"X":"",
-    "movilizacionInternaNo":    data.movilizacion==="NO"?"X":"",
-    "seleccionDeclaracionNo":   data.seleccionDeclaracion==="noCubre"?"X":"",
-    "seleccionDeclaracionSi":   data.seleccionDeclaracion==="siCubre"?"X":"",
-    "nombre":                   data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase(),
-    "puesto":                   data.puesto.toUpperCase()   
-  }
-  
- ];
-
- const pdf = await generate({ template, plugins, inputs });
-
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(
-    blob,
-    "Anexo 8 - Formulario fuera de proyecto EPN.pdf"
-  );
-
-}
+  const template= {
+  schemas: schemaAnexo8,
+  basePdf: basepdfAnexo8,
+  };
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+ 
+  //Generacion de la constante
+   let valorInscripcionStr = "";
+   let fechaPagoInscripcionStr = "";
+     
+   if (data && data.inscripciones && Array.isArray(data.inscripciones)) {
+     data.inscripciones.forEach((inscripcion) => {
+       if (data.inscripcion === "SI") {
+         if (inscripcion.valorInscripcion) {
+           valorInscripcionStr += `${inscripcion.monedaPago} ${inscripcion.valorInscripcion}\n`;
+         }
+   
+         if (inscripcion.pagoLimite && inscripcion.limiteFecha) {
+           fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${formatDate(inscripcion.limiteFecha)}\n`;
+         }
+       } else if (data.inscripcion === "NO") {
+         // Manejo del caso en que data.inscripcion es "NO"
+         valorInscripcionStr += '\n';
+         fechaPagoInscripcionStr += '\n';
+       }
+     });
+   }
+ 
+  const inputs = [
+   {
+     "nombres":                  data.nombres.toUpperCase() +" "+ data.apellidos.toUpperCase(),
+     "departamento":             data.departamento,
+     "tituloEvento":             data.tituloEvento,
+     "lugarEvento":              data.ciudadEvento+", "+data.paisEvento,
+     "fechaInicioEvento":        formatDate(data.fechaInicioEvento),
+     "fechaFinEvento":           formatDate(data.fechaFinEvento),
+     "RelevanciaAcademica":      data.RelevanciaAcademica,
+     "tituloPonencia":           data.tituloPonencia,
+     "tipoPonencia":             data.tipoPonencia,
+     "detalleArticuloSI":        data.detalleArticuloSI,
+     "articuloPublicadoSi":      data.articuloPublicado==="SI" ? "X":"",
+     "articuloPublicadoNo":      data.articuloPublicado==="NO"? "X":"",
+     "pasajesAereosSi":          data.pasajesAereos==="SI" ? "X":"",
+     "pasajesAereosNo":          data.pasajesAereos==="NO" ? "X":"",
+     "viaticosSubsistenciasSi":  data.viaticosSubsistencias==="SI"? "X": "",
+     "viaticosSubsistenciasNo":  data.viaticosSubsistencias==="NO"? "X": "",
+     "inscripsionSi":            data.inscripcion==="SI"?"X":"",
+     "inscripcionNo":            data.inscripcion==="NO"?"X":"",
+     "valorInscripcion":         valorInscripcionStr.trim(),
+     "limiteFecha":              fechaPagoInscripcionStr.trim(),
+     "metodoPagoTransferencia":  (data.metodoPago === "Transferencia" && data.inscripcion === "SI") ? "X" : "",
+     "metodoPagoOtra":           (data.metodoPago === "Otra" && data.inscripcion === "SI") ? "X" : "",
+     "hospedajeSi":              data.hospedaje==="SI"?"X":"",
+     "HospedajeNo":              data.hospedaje==="NO"?"X":"",
+     "alimentacionSi":           data.alimentacion==="SI"?"X":"",
+     "alimentacionNo":           data.alimentacion==="NO"?"X":"",
+     "movilizacionInternaSi":    data.movilizacion==="SI"?"X":"",
+     "movilizacionInternaNo":    data.movilizacion==="NO"?"X":"",
+     "seleccionDeclaracionNo":   data.seleccionDeclaracion==="noCubre"?"X":"",
+     "seleccionDeclaracionSi":   data.seleccionDeclaracion==="siCubre"?"X":"",
+     "nombre":                   data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase(),
+     "puesto":                   data.puesto.toUpperCase()   
+   }
+   
+  ];
+ 
+  const pdf = await generate({ template, plugins, inputs });
+ 
+   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+   saveAs(
+     blob,
+     "Anexo 8 - Formulario fuera de proyecto EPN.pdf"
+   );
+ 
+ }
 
 export async function generateAnexoB2WithinProject(data) {
   const template = {
@@ -1687,7 +1684,7 @@ export async function generateAnexoB2WithinProject(data) {
       "nombresParticipante": data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
       "rolProyecto": data.rolEnProyecto,
       "departamento": data.departamento,
-      "nombreInstitucionAcogida": data.nombreInstitucionAcogida,
+      "nombreInstitucionAcogida": data.nombreIntitucionAcogida,
       "ciudad": data.ciudadEvento,
       "pais": data.paisEvento,
       "fechasEvento":  "Desde el " + data.fechaInicioEvento + " hasta el " + data.fechaFinEvento,
@@ -1751,11 +1748,11 @@ export async function generateAnexo5InscriptionPayment (data) {
 
   data.inscripciones.forEach((inscripciones)=>{
     if(inscripciones.valorInscripcion){
-      valorInscripcionStr += `$${inscripciones.valorInscripcion}\n`;
+      valorInscripcionStr += `${inscripciones.monedaPago}${inscripciones.valorInscripcion}\n`;
     }
 
     if(inscripciones.pagoLimite && inscripciones.limiteFecha){
-      fechaPagoInscripcionStr += `${inscripciones.pagoLimite} ${inscripciones.limiteFecha}\n`;
+      fechaPagoInscripcionStr += `${inscripciones.pagoLimite} ${formatDate(inscripciones.limiteFecha)}\n`;
     }
 
   });
@@ -1769,8 +1766,8 @@ export async function generateAnexo5InscriptionPayment (data) {
     "codigoProyecto":                   data.codigoProyecto,
     "tituloEvento":                     data.tituloEvento,
     "ciudadPaisEvento":                 data.ciudadEvento + ", " + data.paisEvento,
-    "fechaInicioEvento":                data.fechaInicioEvento,
-    "fechaFinEvento":                   data.fechaFinEvento,
+    "fechaInicioEvento":                formatDate(data.fechaInicioEvento),
+    "fechaFinEvento":                   formatDate(data.fechaFinEvento),
     "RelevanciaAcademica":              data.RelevanciaAcademica,
     "tituloArticulo":                   data.tituloArticulo,
     "articuloPublicadoSi":              data.articuloPublicado==="SI" ? "X":"",
@@ -1808,4 +1805,3 @@ function capitalizeWords(str) {
             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
             .join(' ');
 }
-

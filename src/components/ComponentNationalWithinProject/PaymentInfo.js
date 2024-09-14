@@ -1,7 +1,7 @@
-import React,{ useEffect,useState } from "react";
+import React, { useEffect } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
-function PaymentDetail() {
+function PaymentInfo() {
   const {
     register,
     control,
@@ -17,9 +17,22 @@ function PaymentDetail() {
   const fechaFinEvento = watch("fechaFinEvento");
   const now = new Date();
   const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-  const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
+  const today = new Date(now.getTime() - localOffset)
+    .toISOString()
+    .split("T")[0];
 
-  useEffect(()=>{
+  const validateSingleDateSelection = (index) => {
+    const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
+
+    if (limiteFecha && limiteFecha > fechaFinEvento) {
+      return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
+    }
+
+    return true;
+  };
+
+  // Asegurar que siempre haya al menos una fila vacía al montar el componente
+  useEffect(() => {
     if (fields.length === 0) {
       append({
         valorInscripcion: "",
@@ -27,25 +40,10 @@ function PaymentDetail() {
         limiteFecha: "",
       });
     }
-  }, [ fields, append]);
-
-
-  const validateSingleDateSelection = (index) => {
-    const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
-
-    if (limiteFecha && limiteFecha > fechaFinEvento) {
-      return `La fecha no puede ser mayor que la fecha de fin del evento (${fechaFinEvento})`;
-    }
-    //validacion para fechas anteriores a la actual
-    if (limiteFecha && limiteFecha < today) {
-      return `La fecha no puede ser menor que la fecha actual (${today})`;
-    }
-
-    return true;
-  };
+  }, [fields, append]);
 
   return (
-    <div >
+    <div>
       <h3>• Valor de la inscripción</h3>
       <p>
         Por favor, ingrese las fechas máximas de pago según la información
@@ -58,7 +56,7 @@ function PaymentDetail() {
       {/* Tabla Dinámica */}
       <table className="payment-table">
         <thead>
-        <tr>
+          <tr>
             <th>Nro.</th>
             <th>Moneda</th>
             <th>Valor de inscripción</th>
@@ -87,17 +85,16 @@ function PaymentDetail() {
                   className="form-select"
                 >
                   <option value="">Seleccione</option>
-                  <option value="$ ">Dólares</option>
-                  <option value="€ ">Euros</option>
-                  <option value="CHF ">
-                    Francos Suizos
-                  </option>
+                  <option value="$">Dólares</option>
+                  <option value="€">Euros</option>
+                  <option value="CHF">Francos Suizos</option>
                 </select>
-                {errors.monedaPago && (
-                  <span className="error-text">
-                    {errors.monedaPago.message}
-                  </span>
-                )}
+                {errors.inscripciones &&
+                  errors.inscripciones[index]?.monedaPago && (
+                    <span className="error-text">
+                      {errors.inscripciones[index].monedaPago.message}
+                    </span>
+                  )}
               </td>
 
               <td>
@@ -127,17 +124,16 @@ function PaymentDetail() {
                   className="form-select"
                 >
                   <option value="">Seleccione</option>
-                  <option value="Antes del ">Antes</option>
-                  <option value="Despues del ">Despues</option>
-                  <option value="Hasta el ">
-                    Fecha maxima de pago
-                  </option>
+                  <option value="Antes del">Antes</option>
+                  <option value="Despues del">Después</option>
+                  <option value="Hasta el">Fecha máxima de pago</option>
                 </select>
-                {errors.pagoLimite && (
-                  <span className="error-text">
-                    {errors.pagoLimite.message}
-                  </span>
-                )}
+                {errors.inscripciones &&
+                  errors.inscripciones[index]?.pagoLimite && (
+                    <span className="error-text">
+                      {errors.inscripciones[index].pagoLimite.message}
+                    </span>
+                  )}
               </td>
 
               <td>
@@ -147,7 +143,6 @@ function PaymentDetail() {
                   className="form-input"
                   {...register(`inscripciones[${index}].limiteFecha`, {
                     validate: () => validateSingleDateSelection(index),
-                    required: "La fecha es requerida",
                   })}
                 />
                 {errors.inscripciones &&
@@ -183,12 +178,12 @@ function PaymentDetail() {
 
       <p>
         Considere que si el pago de inscripción es una moneda diferente a la
-        moneda legal del país se requiere un banco intermediario , por lo que se
+        moneda legal del país se requiere un banco intermediario, por lo que se
         solicita se comunique con la organización del evento para obtener esta
         información.
       </p>
       <p>
-        En el caso que no exista banco intermediario se podrá solicitar un pago
+        En el caso que no exista banco intermediario, se podrá solicitar un pago
         por reembolso siempre y cuando se tenga la contestación oficial de la
         organización de no tener un banco intermediario.
       </p>
@@ -214,7 +209,7 @@ function PaymentDetail() {
           <div className="sub-group">
             <p>En la solicitud se debe adjuntar los siguientes documentos:</p>
             <ul>
-              <li>Formulario de pagos al exterior (Anexo 6)</li>
+              <li>Formulario de pagos al exterior,segun el caso (Anexo 4)</li>
               <li>
                 Documento donde se puede verificar el costo y fechas de la
                 inscripción al evento
@@ -240,12 +235,10 @@ function PaymentDetail() {
             <p>Incluir la siguiente información y documentos:</p>
             <ul>
               <li>
-                Solicitud de REEMBOLSO. Incluir texto con justificación en el
-                mismo memorando del requerimiento.
+              Solicitud de REEMBOLSO. Incluir texto con justificación en el mismo memorando del requerimiento.
               </li>
               <li>
-                Documento donde se puede verificar el costo y fechas de la
-                inscripción al evento
+              Documento donde se puede verificar el costo y fechas de la inscripción al evento.
               </li>
             </ul>
           </div>
@@ -258,4 +251,4 @@ function PaymentDetail() {
   );
 }
 
-export default PaymentDetail;
+export default PaymentInfo;

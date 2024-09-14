@@ -82,7 +82,7 @@ function ActivitySchedule() {
 
   return (
     
-    <div className="form-container">
+    <div >
       <h3>• CRONOGRAMA DE ACTIVIDADES</h3>
       <p className="instruction-text">
         Incluir desde la fecha de salida del país y días de traslado hasta el día de llegada al destino.

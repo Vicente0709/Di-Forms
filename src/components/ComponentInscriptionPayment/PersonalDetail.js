@@ -311,3 +311,4 @@ function PersonalDetail() {
 }
 
 export default PersonalDetail;
+
