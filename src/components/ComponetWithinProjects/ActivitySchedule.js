@@ -87,9 +87,9 @@ function ActivitySchedule() {
   }, [fechaInicioEvento, fechaFinEvento, replace]);
 
   return (
-    <div className="form-container">
+    <div >
       {showActivity && (
-      <div className="form-container">
+      <div >
       <h3>• CRONOGRAMA DE ACTIVIDADES</h3>
       <p className="instruction-text">
         Incluir desde la fecha de salida del país y días de traslado hasta el
@@ -158,7 +158,7 @@ function ActivitySchedule() {
         </tbody>
       </table>
       {showInputJustificacion && (
-        <div className="form-container">
+        <div>
           <h3>
             Justificar la necesidad de la comisión de servicios mayor a 15 días
           </h3>

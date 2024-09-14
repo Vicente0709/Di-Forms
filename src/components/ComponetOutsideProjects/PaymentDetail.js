@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from "react";
+import React,{ useEffect,useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
 function PaymentDetail() {
@@ -21,7 +21,8 @@ function PaymentDetail() {
   const today = new Date(now.getTime() - localOffset).toISOString().split('T')[0];
   const inscripcion = watch("inscripcion");
   const [showInputInscripcion, setshowInputInscripcion] = useState(false);
- 
+
+
   useEffect(() => {
 
     if (inscripcion === "SI") {
@@ -30,8 +31,16 @@ function PaymentDetail() {
       setshowInputInscripcion(false);
       setValue("inscripciones");
     }
-    
-  }, [inscripcion, setValue]);
+    if (fields.length === 0) {
+      append({
+        valorInscripcion: "",
+        pagoLimite: "",
+        limiteFecha: "",
+      });
+    }
+
+   
+  }, [inscripcion, setValue, fields, append]);
 
   const validateSingleDateSelection = (index) => {    
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
@@ -50,7 +59,7 @@ function PaymentDetail() {
   };
 
   return (
-    <div className="form-container">
+    <div>
       {showInputInscripcion && (
         <>
       <h3>• Valor de la inscripción</h3>
@@ -63,10 +72,9 @@ function PaymentDetail() {
       </p>
 
       {/* Tabla Dinámica */}
-      
-      <table className="payment-table">
+      <table>
         <thead>
-          <tr>
+        <tr>
             <th>Nro.</th>
             <th>Moneda</th>
             <th>Valor de inscripción</th>
@@ -155,6 +163,7 @@ function PaymentDetail() {
                   className="form-input"
                   {...register(`inscripciones[${index}].limiteFecha`, {
                     validate: () => validateSingleDateSelection(index),
+                    required: "La fecha es requerida",
                   })}
                 />
                 {errors.inscripciones &&
@@ -199,10 +208,10 @@ function PaymentDetail() {
         por reembolso siempre y cuando se tenga la contestación oficial de la
         organización de no tener un banco intermediario.
       </p>
-      </> )}
+      
 
       {/* Método de pago */}
-      <div className="form-group">
+      <div >
         <h3>Método de pago:</h3>
 
         <div>
@@ -262,7 +271,10 @@ function PaymentDetail() {
           <span className="error-text">{errors.metodoPago.message}</span>
         )}
       </div>
+      </>
+    )}
     </div>
+    
   );
 }
 
