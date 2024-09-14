@@ -1,14 +1,14 @@
-export const schemaAnexo8 =  [
+export const schemasAnexo10= [
   {
-    "nombres": {
+    "nombresApellidos": {
       "type": "text",
       "content": "",
       "position": {
-        "x": 66.28,
-        "y": 49.7
+        "x": 56.83,
+        "y": 35.06
       },
-      "width": 124.37,
-      "height": 4.97,
+      "width": 136.81,
+      "height": 8.4,
       "rotate": 0,
       "alignment": "left",
       "verticalAlignment": "top",
@@ -28,11 +28,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 66.52,
-        "y": 56.79
+        "x": 57.09,
+        "y": 45.94
       },
-      "width": 124.37,
-      "height": 8.14,
+      "width": 136.55,
+      "height": 7.35,
       "rotate": 0,
       "alignment": "left",
       "verticalAlignment": "top",
@@ -52,11 +52,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 50.46,
-        "y": 87.27
+        "x": 51.61,
+        "y": 71.54
       },
-      "width": 143.16,
-      "height": 6.55,
+      "width": 142.37,
+      "height": 7.09,
       "rotate": 0,
       "alignment": "left",
       "verticalAlignment": "top",
@@ -72,15 +72,15 @@ export const schemaAnexo8 =  [
       "readOnly": false,
       "fontName": "Roboto"
     },
-    "lugarEvento": {
+    "ciudadPaisEvento": {
       "type": "text",
       "content": "",
       "position": {
-        "x": 50.69,
-        "y": 96.48
+        "x": 51.9,
+        "y": 80.52
       },
-      "width": 41.03,
-      "height": 9.47,
+      "width": 38.65,
+      "height": 6.82,
       "rotate": 0,
       "alignment": "left",
       "verticalAlignment": "top",
@@ -100,11 +100,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 122.98,
-        "y": 101.2
+        "x": 129.76,
+        "y": 83.56
       },
-      "width": 23.04,
-      "height": 5.76,
+      "width": 21.18,
+      "height": 3.65,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -124,11 +124,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 156.29,
-        "y": 100.97
+        "x": 160.54,
+        "y": 83.36
       },
-      "width": 30.98,
-      "height": 5.76,
+      "width": 28.6,
+      "height": 3.91,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -148,11 +148,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 50.46,
-        "y": 108.98
+        "x": 51.64,
+        "y": 89.03
       },
-      "width": 142.89,
-      "height": 25.87,
+      "width": 142.9,
+      "height": 32.49,
       "rotate": 0,
       "alignment": "left",
       "verticalAlignment": "top",
@@ -172,11 +172,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 50.46,
-        "y": 137.35
+        "x": 51.91,
+        "y": 123.02
       },
       "width": 142.63,
-      "height": 11.58,
+      "height": 9.99,
       "rotate": 0,
       "alignment": "left",
       "verticalAlignment": "top",
@@ -196,11 +196,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 50.22,
-        "y": 151.52
+        "x": 51.64,
+        "y": 134.59
       },
-      "width": 143.16,
-      "height": 9.47,
+      "width": 142.63,
+      "height": 8.14,
       "rotate": 0,
       "alignment": "left",
       "verticalAlignment": "top",
@@ -220,11 +220,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 71.24,
-        "y": 163.33
+        "x": 68.88,
+        "y": 144.27
       },
-      "width": 122.52,
-      "height": 14.49,
+      "width": 125.43,
+      "height": 20.05,
       "rotate": 0,
       "alignment": "left",
       "verticalAlignment": "top",
@@ -244,11 +244,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 39.59,
-        "y": 170.89
+        "x": 38.38,
+        "y": 155.18
       },
-      "width": 2.93,
-      "height": 3.65,
+      "width": 3.17,
+      "height": 3.09,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -268,11 +268,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 51.83,
-        "y": 170.87
+        "x": 51.17,
+        "y": 154.95
       },
-      "width": 3.72,
-      "height": 3.37,
+      "width": 2.89,
+      "height": 3.1,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -292,11 +292,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 76.68,
-        "y": 182.7
+        "x": 74.55,
+        "y": 168.88
       },
-      "width": 2.66,
-      "height": 2.85,
+      "width": 2.39,
+      "height": 2.84,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -316,11 +316,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 87.55,
-        "y": 182.7
+        "x": 85.16,
+        "y": 168.94
       },
-      "width": 2.67,
-      "height": 2.85,
+      "width": 2.39,
+      "height": 3.09,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -340,11 +340,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 128.18,
-        "y": 182.67
+        "x": 125.82,
+        "y": 168.61
       },
-      "width": 3.2,
-      "height": 2.85,
+      "width": 2.94,
+      "height": 3.11,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -364,11 +364,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 141.17,
-        "y": 182.47
+        "x": 138.96,
+        "y": 168.77
       },
       "width": 2.93,
-      "height": 3.38,
+      "height": 2.84,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -384,15 +384,15 @@ export const schemaAnexo8 =  [
       "readOnly": false,
       "fontName": "Roboto"
     },
-    "inscripsionSi": {
+    "inscripcionSi": {
       "type": "text",
       "content": "",
       "position": {
-        "x": 175.17,
-        "y": 182.84
+        "x": 174.94,
+        "y": 168.66
       },
-      "width": 2.93,
-      "height": 3.38,
+      "width": 2.94,
+      "height": 3.37,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -412,11 +412,11 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 187.76,
-        "y": 182.74
+        "x": 187.82,
+        "y": 168.74
       },
-      "width": 2.94,
-      "height": 3.38,
+      "width": 2.91,
+      "height": 3.09,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -436,13 +436,13 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 59.2,
-        "y": 213.89
+        "x": 59.22,
+        "y": 191.58
       },
-      "width": 37.33,
-      "height": 11.32,
+      "width": 37.59,
+      "height": 13.44,
       "rotate": 0,
-      "alignment": "center",
+      "alignment": "left",
       "verticalAlignment": "top",
       "fontSize": 8,
       "lineHeight": 1,
@@ -456,17 +456,17 @@ export const schemaAnexo8 =  [
       "readOnly": false,
       "fontName": "Roboto"
     },
-    "limiteFecha": {
+    "pagoLimiteFecha": {
       "type": "text",
       "content": "",
       "position": {
-        "x": 147.21,
-        "y": 214.11
+        "x": 147.1,
+        "y": 191.55
       },
-      "width": 43.94,
-      "height": 11.32,
+      "width": 45.26,
+      "height": 13.17,
       "rotate": 0,
-      "alignment": "center",
+      "alignment": "left",
       "verticalAlignment": "top",
       "fontSize": 8,
       "lineHeight": 1,
@@ -484,13 +484,13 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 68.88,
-        "y": 233.97
+        "x": 69.12,
+        "y": 213.5
       },
-      "width": 3.2,
-      "height": 2.85,
+      "width": 2.91,
+      "height": 3.63,
       "rotate": 0,
-      "alignment": "center",
+      "alignment": "left",
       "verticalAlignment": "top",
       "fontSize": 8,
       "lineHeight": 1,
@@ -508,13 +508,13 @@ export const schemaAnexo8 =  [
       "type": "text",
       "content": "",
       "position": {
-        "x": 178.6,
-        "y": 234.16
+        "x": 178.38,
+        "y": 213.62
       },
-      "width": 2.39,
-      "height": 2.85,
+      "width": 2.12,
+      "height": 3.37,
       "rotate": 0,
-      "alignment": "center",
+      "alignment": "left",
       "verticalAlignment": "top",
       "fontSize": 8,
       "lineHeight": 1,
@@ -530,207 +530,15 @@ export const schemaAnexo8 =  [
     }
   },
   {
-    "hospedajeSi": {
+    "nombresAp": {
       "type": "text",
       "content": "",
       "position": {
-        "x": 99.41,
-        "y": 43.22
+        "x": 54.84,
+        "y": 66.1
       },
-      "width": 2.66,
-      "height": 3.11,
-      "rotate": 0,
-      "alignment": "center",
-      "verticalAlignment": "top",
-      "fontSize": 8,
-      "lineHeight": 1,
-      "characterSpacing": 0,
-      "fontColor": "#2573ca",
-      "backgroundColor": "",
-      "opacity": 1,
-      "strikethrough": false,
-      "underline": false,
-      "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
-    },
-    "HospedajeNo": {
-      "type": "text",
-      "content": "",
-      "position": {
-        "x": 100.33,
-        "y": 47.23
-      },
-      "width": 2.93,
-      "height": 2.32,
-      "rotate": 0,
-      "alignment": "left",
-      "verticalAlignment": "top",
-      "fontSize": 8,
-      "lineHeight": 1,
-      "characterSpacing": 0,
-      "fontColor": "#2573ca",
-      "backgroundColor": "",
-      "opacity": 1,
-      "strikethrough": false,
-      "underline": false,
-      "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
-    },
-    "alimentacionSi": {
-      "type": "text",
-      "content": "",
-      "position": {
-        "x": 141.64,
-        "y": 43.22
-      },
-      "width": 2.93,
-      "height": 2.59,
-      "rotate": 0,
-      "alignment": "center",
-      "verticalAlignment": "top",
-      "fontSize": 8,
-      "lineHeight": 1,
-      "characterSpacing": 0,
-      "fontColor": "#2573ca",
-      "backgroundColor": "",
-      "opacity": 1,
-      "strikethrough": false,
-      "underline": false,
-      "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
-    },
-    "alimentacionNo": {
-      "type": "text",
-      "content": "",
-      "position": {
-        "x": 142.59,
-        "y": 47
-      },
-      "width": 2.67,
-      "height": 2.59,
-      "rotate": 0,
-      "alignment": "center",
-      "verticalAlignment": "top",
-      "fontSize": 8,
-      "lineHeight": 1,
-      "characterSpacing": 0,
-      "fontColor": "#2573ca",
-      "backgroundColor": "",
-      "opacity": 1,
-      "strikethrough": false,
-      "underline": false,
-      "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
-    },
-    "movilizacionInternaSi": {
-      "type": "text",
-      "content": "",
-      "position": {
-        "x": 185.29,
-        "y": 43.07
-      },
-      "width": 2.39,
-      "height": 2.85,
-      "rotate": 0,
-      "alignment": "center",
-      "verticalAlignment": "top",
-      "fontSize": 8,
-      "lineHeight": 1,
-      "characterSpacing": 0,
-      "fontColor": "#2573ca",
-      "backgroundColor": "",
-      "opacity": 1,
-      "strikethrough": false,
-      "underline": false,
-      "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
-    },
-    "movilizacionInternaNo": {
-      "type": "text",
-      "content": "",
-      "position": {
-        "x": 186.1,
-        "y": 47.31
-      },
-      "width": 2.4,
-      "height": 2.58,
-      "rotate": 0,
-      "alignment": "center",
-      "verticalAlignment": "top",
-      "fontSize": 8,
-      "lineHeight": 1,
-      "characterSpacing": 0,
-      "fontColor": "#2573ca",
-      "backgroundColor": "",
-      "opacity": 1,
-      "strikethrough": false,
-      "underline": false,
-      "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
-    },
-    "seleccionDeclaracionNo": {
-      "type": "text",
-      "content": "",
-      "position": {
-        "x": 84.71,
-        "y": 66.12
-      },
-      "width": 2.94,
-      "height": 3.11,
-      "rotate": 0,
-      "alignment": "center",
-      "verticalAlignment": "top",
-      "fontSize": 8,
-      "lineHeight": 1,
-      "characterSpacing": 0,
-      "fontColor": "#2573ca",
-      "backgroundColor": "",
-      "opacity": 1,
-      "strikethrough": false,
-      "underline": false,
-      "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
-    },
-    "seleccionDeclaracionSi": {
-      "type": "text",
-      "content": "",
-      "position": {
-        "x": 56.33,
-        "y": 81.47
-      },
-      "width": 3.18,
-      "height": 2.85,
-      "rotate": 0,
-      "alignment": "center",
-      "verticalAlignment": "top",
-      "fontSize": 8,
-      "lineHeight": 1,
-      "characterSpacing": 0,
-      "fontColor": "#2573ca",
-      "backgroundColor": "",
-      "opacity": 1,
-      "strikethrough": false,
-      "underline": false,
-      "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
-    },
-    "nombre": {
-      "type": "text",
-      "content": "",
-      "position": {
-        "x": 58.86,
-        "y": 135
-      },
-      "width": 102.41,
-      "height": 4.17,
+      "width": 99.77,
+      "height": 3.38,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -743,18 +551,17 @@ export const schemaAnexo8 =  [
       "strikethrough": false,
       "underline": false,
       "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
+      "readOnly": false
     },
-    "puesto": {
+    "departament": {
       "type": "text",
       "content": "",
       "position": {
-        "x": 40.68,
-        "y": 138.52
+        "x": 43.5,
+        "y": 69.99
       },
-      "width": 137.34,
-      "height": 4.17,
+      "width": 121.46,
+      "height": 3.38,
       "rotate": 0,
       "alignment": "center",
       "verticalAlignment": "top",
@@ -767,9 +574,7 @@ export const schemaAnexo8 =  [
       "strikethrough": false,
       "underline": false,
       "required": false,
-      "readOnly": false,
-      "fontName": "Roboto"
+      "readOnly": false
     }
-  },
-  {}
+  }
 ];

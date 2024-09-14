@@ -1,11 +1,12 @@
 import React,{ useEffect,useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 
-function PaymentDetail() {
+function PaymentDetails() {
   const {
     register,
     control,
     watch,
+    setValue,
     formState: { errors },
   } = useFormContext();
   const { fields, append, remove } = useFieldArray({
@@ -19,17 +20,31 @@ function PaymentDetail() {
   const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
   const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
 
-  useEffect(()=>{
-    if (fields.length === 0) {
-      append({
-        valorInscripcion: "",
-        pagoLimite: "",
-        limiteFecha: "",
-      });
+  const inscripcion = watch("inscripcion");
+  const [showInputInscripcion, setshowInputInscripcion] = useState(false);
+
+  useEffect(() => {
+
+    if (inscripcion === "SI") {
+      setshowInputInscripcion(true);
+      } else {
+      setshowInputInscripcion(false);
+      setValue("inscripciones");
     }
-  }, [ fields, append]);
 
+    const initialValor={
+      valorInscripcion: "",
+      pagoLimite: "",
+      limiteFecha: "",
+    }
 
+    if(fields.length===0){
+      append(initialValor);
+    }
+      
+  }, [inscripcion, setValue, fields.length]);
+
+  
   const validateSingleDateSelection = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
 
@@ -46,6 +61,8 @@ function PaymentDetail() {
 
   return (
     <div >
+      {showInputInscripcion && (
+        <>
       <h3>• Valor de la inscripción</h3>
       <p>
         Por favor, ingrese las fechas máximas de pago según la información
@@ -58,9 +75,8 @@ function PaymentDetail() {
       {/* Tabla Dinámica */}
       <table className="payment-table">
         <thead>
-        <tr>
+          <tr>
             <th>Nro.</th>
-            <th>Moneda</th>
             <th>Valor de inscripción</th>
             <th>Pago a realizarse</th>
             <th>Fecha</th>
@@ -78,28 +94,6 @@ function PaymentDetail() {
                   className="form-input"
                 />
               </td>
-              <td>
-                <select
-                  id="monedaPago"
-                  {...register(`inscripciones[${index}].monedaPago`, {
-                    required: "La moneda es requerida",
-                  })}
-                  className="form-select"
-                >
-                  <option value="">Seleccione</option>
-                  <option value="$ ">Dólares</option>
-                  <option value="€ ">Euros</option>
-                  <option value="CHF ">
-                    Francos Suizos
-                  </option>
-                </select>
-                {errors.monedaPago && (
-                  <span className="error-text">
-                    {errors.monedaPago.message}
-                  </span>
-                )}
-              </td>
-
               <td>
                 <input
                   type="number"
@@ -129,9 +123,7 @@ function PaymentDetail() {
                   <option value="">Seleccione</option>
                   <option value="Antes del ">Antes</option>
                   <option value="Despues del ">Despues</option>
-                  <option value="Hasta el ">
-                    Fecha maxima de pago
-                  </option>
+                  <option value="Hasta el ">Fecha maxima de pago</option>
                 </select>
                 {errors.pagoLimite && (
                   <span className="error-text">
@@ -192,7 +184,7 @@ function PaymentDetail() {
         por reembolso siempre y cuando se tenga la contestación oficial de la
         organización de no tener un banco intermediario.
       </p>
-
+      
       {/* Método de pago */}
       <div className="form-group">
         <h3>Método de pago:</h3>
@@ -214,7 +206,9 @@ function PaymentDetail() {
           <div className="sub-group">
             <p>En la solicitud se debe adjuntar los siguientes documentos:</p>
             <ul>
-              <li>Formulario de pagos al exterior (Anexo 6)</li>
+              <li>
+                Formulario de pagos al exterior, de ser el caso, (Anexo 4)
+              </li>
               <li>
                 Documento donde se puede verificar el costo y fechas de la
                 inscripción al evento
@@ -245,7 +239,7 @@ function PaymentDetail() {
               </li>
               <li>
                 Documento donde se puede verificar el costo y fechas de la
-                inscripción al evento
+                inscripción al evento.
               </li>
             </ul>
           </div>
@@ -253,9 +247,15 @@ function PaymentDetail() {
         {errors.metodoPago && (
           <span className="error-text">{errors.metodoPago.message}</span>
         )}
+
+        <p>
+        *A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, mismos que deberán justificar el 70% del valor del viatico, caso contrario la diferencia deberá ser reintegrada a la cuenta de la EOD-UGIPS. (Norma Técnica para el pago de viáticos Artículo 15 Control y liquidación). 
+        </p>
       </div>
+      </>
+    )}
     </div>
   );
 }
 
-export default PaymentDetail;
+export default PaymentDetails;
