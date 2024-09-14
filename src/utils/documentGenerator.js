@@ -973,11 +973,11 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
 
     // Array para almacenar las solicitudes
     let ponencias = [];
-    // Verificar si se debe incluir "pasajes aéreos"
+    // Verificar si se debe incluir "titulo ponencia"
     if (data.tituloPonencia === "") {
       ponencias.push();
     }else{
-      ponencias.push(`, para la presentación de la ponencia:" ${data.tituloPonencia} "`);
+      ponencias.push(`, para la presentación de la ponencia: " ${data.tituloPonencia} "`);
     }
      
     
@@ -985,7 +985,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
     if (data.codigoProyecto === "") {
       codigo.push();
     }else{
-      codigo.push(`/ ${data.codigoProyecto} `);
+      codigo.push(` / ${data.codigoProyecto} `);
     }
 
     let director = [];
@@ -996,6 +996,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
     }
     
     let dirCargo = [];
+    if (data.nombreDirector===""){
     if (data.nombreDirector===""){
       dirCargo.push("Profesor");
     } else{
@@ -1090,6 +1091,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
             children: [
               new TextRun({
                 text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
+                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -1152,7 +1154,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data){
   });
 
   Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, `Memorando para pago de inscripción ${formulario} ${codigoP}.docx`);
+    saveAs(blob, `Memorando para Pago de Inscripción ${formulario} ${codigoP}.docx`);
   });
 }
 

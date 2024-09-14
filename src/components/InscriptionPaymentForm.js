@@ -158,6 +158,7 @@ function InscriptionPaymentForm() {
     setShowDownloadSection(false);
   };
 
+
   // Función para descargar todos los documentos
 
   const handleDownloadAll = () => {
