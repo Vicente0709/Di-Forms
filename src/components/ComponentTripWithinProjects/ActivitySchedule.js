@@ -59,10 +59,11 @@ function ActivitySchedule() {
   useEffect(() => {
       if (diferenciaDiasViajeTecnicoDeProyectos > 15) {
         setshowInputJustificacion(true);
-        setValue("justificacionComision", ""); 
+         
       } else {
         setshowInputJustificacion(false);
         setValue("justificacionComision", "No Aplica"); // Limpia el campo si la diferencia es 15 días o menos
+        setValue("justificacionComision", "");
       }
   }, [[setValue]]);
 
