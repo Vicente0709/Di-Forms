@@ -77,6 +77,18 @@ function Home() {
             ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
           />
         </Col>
+
+        <Col md={4}>
+          <FormCard
+            title="Formulario : Pago Publicaciones Dentro o Fuera de Proyecto"
+            description="Este formulario está diseñado para el pago de publicaciones dentro o fuera de proyectos con el fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud."
+            imageSrc="form.png"
+            altText="Formulario"
+            buttonText="Ir al formulario"
+            path="/PublicationsPayment"
+            ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
+          />
+        </Col>
       </Row>
     </Container>
   );

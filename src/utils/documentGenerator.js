@@ -19,6 +19,12 @@ import { schemasAnexoB2 } from "./schemasAnexoB2";
 import { basePdfAnexo5 } from "./basePdfAnexo5";
 import { schemasAnexo5 } from "./schemasAnexo5";
 
+import { basePdfAnexo1P } from "./basePdfAnexo1P";
+import { schemasAnexo1P } from "./schemasAnexo1P";
+
+import { basePdfAnexo2P } from "./basePdfAnexo2P";
+import { schemasAnexo2P } from "./schemasAnexo2P";
+
 //Constantes
 const today = new Date();
 const day = String(today.getDate()).padStart(2, "0");
@@ -1180,6 +1186,189 @@ export function generateMemoInscriptionPaymentOutProyect1(data) {
   }
 }
 
+export function generateMemoPublicationPaymentProject(data) {
+  let codigo = [];
+  if (data.codigoProyecto === "") {
+    codigo.push();
+  } else {
+    codigo.push(` / ${data.codigoProyecto} `);
+  }
+
+  let director = [];
+  if (data.nombreDirector === "") {
+    director.push(
+      `${data.nombres.toUpperCase()} ${data.apellidos.toUpperCase()}`
+    );
+  } else {
+    director.push(`${data.nombreDirector.toUpperCase()}`);
+  }
+
+  let dirCargo = [];
+  
+    if (data.nombreDirector === "") {
+      dirCargo.push("Profesor");
+    } else {
+      dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
+    }
+
+    let formulario = [];
+    if (data.participacionProyecto === "fueraProyecto") {
+      formulario.push("Fuera de Proyecto");
+    } else {
+      formulario.push("Dentro de Proyecto");
+    }
+
+    let codigoP = [];
+    if (data.codigoProyecto === "") {
+      codigoP.push();
+    } else {
+      codigoP.push(`${data.codigoProyecto} `);
+    }
+
+    const doc = new Document({
+      sections: [
+        {
+          properties: {},
+          children: [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Formato de memorando para pago de inscripción ${formulario}`,
+                  bold: true,
+                  size: 24,
+                  font: "Aptos (Cuerpo)",
+                }),
+              ],
+              spacing: { after: 300 },
+              alignment: "start",
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "PARA:\t\t",
+                  bold: true,
+                  size: 22,
+                  font: "Aptos (Cuerpo)",
+                }),
+                new TextRun({
+                  text: "Dr. Marco Santorum",
+                  size: 22,
+                  font: "Aptos (Cuerpo)",
+                }),
+              ],
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                  size: 22,
+                  bold: true,
+                  font: "Aptos (Cuerpo)",
+                }),
+              ],
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "ASUNTO:\t",
+                  bold: true,
+                  size: 22,
+                  font: "Aptos (Cuerpo)",
+                }),
+                new TextRun({
+                  text: `Solicitud para pago de publicación ${codigo}`,
+                  size: 22,
+                  font: "Aptos (Cuerpo)",
+                }),
+              ],
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "De mi consideración:",
+                  size: 22,
+                  font: "Aptos (Cuerpo)",
+                }),
+              ],
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de la publicación " ${data.tituloPublicacion} ", en la revista "${data.nombreRevista}". `,
+                  size: 20,
+                  font: "Times New Roman",
+                }),
+              ],
+              spacing: { after: 300 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Se adjunta la documentación correspondiente",
+                  size: 22,
+                  font: "Aptos (Cuerpo)",
+                }),
+              ],
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Con sentimientos de distinguida consideración.",
+                  size: 20,
+                  font: "Times New Roman",
+                }),
+              ],
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Atentamente,",
+                  size: 20,
+                  font: "Times New Roman",
+                }),
+              ],
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `${director}`,
+                  size: 20,
+                  bold: true,
+                  font: "Times New Roman",
+                }),
+              ],
+              spacing: { after: 100 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: `${dirCargo}`,
+                  size: 20,
+                  font: "Times New Roman",
+                }),
+              ],
+            }),
+          ],
+        },
+      ],
+    });
+
+    Packer.toBlob(doc).then((blob) => {
+      saveAs(
+        blob,
+        `Memorando para Pago de Publicación ${formulario} ${codigoP}.docx`
+      );
+    });
+  
+}
+
 // Nueva función para generar el Anexo A en PDF
 export async function generateAnexoA(data) {
   const template = {
@@ -1890,6 +2079,107 @@ export async function generateAnexo5InscriptionPayment(data) {
     blob,
     `Anexo 5 - Formulario Pago Inscripción ${formulario} ${codigoP} EPN.pdf`
   );
+}
+
+export async function generateAnexo1PublicationPaymentWithin(data) {
+  const template = {
+    basePdf: basePdfAnexo1P,
+    schemas: schemasAnexo1P,
+  };
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+
+  let valorPublicacionStr = "";
+  let fechaPagoPublicacionStr = "";
+
+  data.publicaciones.forEach((publicaciones) => {
+    if (publicaciones.valorPublicacion) {
+      valorPublicacionStr += `${publicaciones.monedaPago}${publicaciones.valorPublicacion}\n`;
+    }
+
+    if (publicaciones.limiteFecha) {
+      fechaPagoPublicacionStr += `${formatDate(
+        publicaciones.limiteFecha
+      )}\n`;
+    }
+  });
+
+  const inputs = [
+    {
+      nombresApellidos:
+        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
+      depertamento: data.departamento,
+      codigoProyecto: data.codigoProyecto,
+      tituloPublicacion: data.tituloPublicacion,
+      nombreRevista: data.nombreRevista,
+      autoresEPN: data.autoresEPN,
+      autoresExternos: data.autoresExternos,
+      baseDatos: data.baseDatos,
+      cuartilPublicacion: data.cuartilPublicacion,
+      valorPublicacion: valorPublicacionStr.trim(),
+      limiteFecha: fechaPagoPublicacionStr.trim(),
+      metodoPagoTransferencia: data.metodoPago === "Transferencia" ? "X" : "",
+      metodoPagoOtra: data.metodoPago === "Otra" ? "X" : "",
+      nombreDirector: data.nombreDirector.toUpperCase(),
+      codigoProyecto2: data.codigoProyecto,
+    },
+  ];
+
+  const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(blob, `Anexo 1 - Formulario Pago Publicación Dentro del Proyecto-${data.codigoProyecto}  EPN.pdf`);
+}
+
+
+export async function generateAnexo2PublicationPaymentOutside(data){
+  const template = {
+    basePdf: basePdfAnexo2P,
+    schemas: schemasAnexo2P,
+  };
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+
+  let valorPublicacionStr = "";
+  let fechaPagoPublicacionStr = "";
+
+  data.publicaciones.forEach((publicaciones) => {
+    if (publicaciones.valorPublicacion) {
+      valorPublicacionStr += `${publicaciones.monedaPago}${publicaciones.valorPublicacion}\n`;
+    }
+
+    if (publicaciones.limiteFecha) {
+      fechaPagoPublicacionStr += `${formatDate(
+        publicaciones.limiteFecha
+      )}\n`;
+    }
+  });
+
+
+  const inputs = [
+  {
+    "nombresApellidos":           data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase(),
+    "departamento":               data.departamento,
+    "tituloPublicacion":          data.tituloPublicacion,
+    "nombreRevista":              data.nombreRevista,
+    "autoresEPN":                 data.autoresEPN,
+    "autoresExternos":            data.autoresExternos,
+    "baseDatos":                  data.baseDatos,
+    "cuartilPublicacion":         data.cuartilPublicacion,
+    "valorPublicacion":           valorPublicacionStr.trim(),
+    "limiteFecha":                fechaPagoPublicacionStr.trim(),
+    "metodoPagoTransferencia":    data.metodoPago === "Transferencia" ? "X" : "",
+    "metodoPagoOtra":             data.metodoPago === "Otra" ? "X" : "",
+    "nombresAp":                  data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase(),
+    "departament":                data.departamento
+  }
+];
+
+const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(blob, `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto EPN.pdf`);
+
 }
 
 //formatear la fecha en formato dd/mm/yyyy

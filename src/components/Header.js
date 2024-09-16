@@ -65,6 +65,10 @@ function Header() {
                 Salidas Nacionales Dentro de Proyectos
               </NavDropdown.Item>
               
+              <NavDropdown.Item as={NavLink} to="/PublicationsPayment"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Pago de Publicaciones Dentro o Fuera de Proyectos
+              </NavDropdown.Item>
             </NavDropdown>
           </Nav>
 
