@@ -53,7 +53,16 @@ function Header() {
 
               <NavDropdown.Item as={NavLink} to="/InscriptionPayment"
                 className={({ isActive }) => (isActive ? "active" : "")} >
-                Pago de Inscripción dentro o fuera de proyectos
+                Pago de Inscripción Dentro o Fuera de Proyectos
+              </NavDropdown.Item>
+              
+              <NavDropdown.Item as={NavLink} to="/NationalOutsideProject"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Participacion en Eventos Nacionales Fuera de Proyectos
+              </NavDropdown.Item>
+              <NavDropdown.Item as={NavLink} to="/NationalWithinProject"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Salidas Nacionales Dentro de Proyectos
               </NavDropdown.Item>
               
             </NavDropdown>
