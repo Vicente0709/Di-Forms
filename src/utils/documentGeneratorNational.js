@@ -644,6 +644,56 @@ export async function generateAnexo10NationalOutsideProject(data) {
     },
   ];
 
+  const PdfAnexo10= (
+    <PDFDocument>
+      <Page style={styles.page}>
+        <Text style={styles.page}></Text>
+        <Text style={styles.header}>
+        Anexo 10 – Formulario para salidas nacionales fuera de proyectos
+        </Text>
+        {/* 1. Datos Generales */}
+        <View style={styles.sectionTitle}>
+          <Text>
+          1. DATOS DEL INVESTIGADOR
+          </Text>
+        </View>
+        <View style={styles.subSectionTitle}>
+          <Text>Complete según corresponda la siguiente información</Text>
+        </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Nombres Completos:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.nombres.toUpperCase()+ " " + data.apellidos.toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Departamento / Instituto:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.departamento}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.sectionTitle}>
+          <Text>2. DATOS DEL EVENTO Y REQUERIMIENTO</Text>
+        </View>
+        <View style={styles.subSectionTitle}>
+          <Text>Marque con una "X" la opción y complete la información según corresponda</Text>
+        </View>
+        
+      </View>
+      
+
+      </Page>
+    </PDFDocument>
+
+  );
+
   const pdf = await generate({ template, plugins, inputs });
   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
 
