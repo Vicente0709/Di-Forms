@@ -15,6 +15,7 @@ import InscriptionPayment from "./pages/InscriptionPayment";
 import NationalWithinProject from "./pages/NationalWithinProject";
 import NationalOutsideProject from "./pages/NationalOutsideProject";
 import PublicationsPayment from "./pages/PublicationsPayment";
+import SamplingTripWithinProject from "./pages/SamplingTripWithinProject";
 
 // Importación del archivo CSS para los estilos de la aplicación
 import "./App.css";
@@ -52,6 +53,7 @@ function App() {
             <Route path="/NationalWithinProject" element={<NationalWithinProject />} />
             <Route path ="/NationalOutsideProject" element={<NationalOutsideProject/>}/>
             <Route path="/PublicationsPayment" element={<PublicationsPayment/>}/>
+            <Route path ="/SamplingTripWithinProject" element={<SamplingTripWithinProject/>}/>
           </Routes>
         </div>
         {/* Componente de pie de página que se muestra en todas las páginas */}
