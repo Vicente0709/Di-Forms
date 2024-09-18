@@ -404,7 +404,7 @@ function NationalWithinProjectsForm() {
     <FormProvider {...methods}>
       <Container>
         <h1 className="text-center my-4">
-          Formulario para participación en viajes técnicos dentro de proyectos
+        Formulario para salidas nacionales dentro de proyectos
         </h1>
         <Form onSubmit={methods.handleSubmit(onSubmitNationalEvent)}>
           <div className="form-container">

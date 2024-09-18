@@ -2,6 +2,16 @@ import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
 import { generate } from "@pdfme/generator";
 import { text, image, barcodes } from "@pdfme/schemas";
+import { Font } from "@react-pdf/renderer";
+import {
+  Page,
+  Text,
+  View,
+  Document as PDFDocument,
+  StyleSheet,
+  PDFDownloadLink,
+  pdf,
+} from "@react-pdf/renderer";
 
 //basepdf and schemas AnexoA
 import { basePdfAnexoA } from "./basePdfAnexoA";
@@ -25,6 +35,214 @@ import { schemasAnexo1P } from "./schemasAnexo1P";
 import { basePdfAnexo2P } from "./basePdfAnexo2P";
 import { schemasAnexo2P } from "./schemasAnexo2P";
 
+// Registra la fuente Roboto desde Google Fonts
+Font.register({
+  family: "Roboto",
+  src: "https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu72xKOzY.woff2",
+  fontWeight: 900,
+});
+
+const styles = StyleSheet.create({
+  page: {
+    padding: 60,
+    fontFamily: "Roboto",
+  },
+  // Título principal
+  header: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+    color: "#2573ca",
+    fontFamily: "Roboto",
+  },
+  // Títulos (extra bold, centrado)
+  sectionTitle: {
+    fontSize: 11,
+    marginBottom: 10,
+    fontWeight: 900, // Extra bold
+    fontFamily: "Roboto",
+  },
+  // Subtítulos (bold, centrado)
+  subSectionTitle: {
+    fontSize: 10,
+    marginBottom: 10,
+    fontWeight: "bold", // Bold normal
+    fontFamily: "Roboto",
+    textAlign: "center",
+  },
+  // Texto genérico estándar
+  baseText: {
+    margin: 5,
+    fontSize: 9,
+    fontFamily: "Roboto",
+    color: "black",
+  },
+
+  // Texto genérico centrado
+  baseTextCenter: {
+    margin: 5,
+    fontSize: 9,
+    fontFamily: "Roboto",
+    color: "black",
+    textAlign: "center",
+  },
+
+  // Texto en azul, no centrado
+  textBlue: {
+    margin: 5,
+    fontSize: 10,
+    fontFamily: "Roboto",
+    color: "#2573ca",
+  },
+
+  // Texto en azul centrado
+  textBlueCenter: {
+    margin: 5,
+    fontSize: 10,
+    fontFamily: "Roboto",
+    color: "#2573ca",
+    textAlign: "center",
+  },
+  // Estilo para celdas de tabla
+  tableCellText: {
+    margin: 5,
+    fontSize: 10,
+    fontWeight: 700, // Extra bold
+    textAlign: "center",
+    fontFamily: "Roboto",
+    justifyContent: "center",
+    flexDirection: "column",
+  },
+  // Estilo para celdas de tabla
+  tableCellTextCenter: {
+    margin: 5,
+    fontSize: 10,
+    fontWeight: 700, // Extra bold
+    textAlign: "center",
+    fontFamily: "Roboto",
+  },
+
+  // Estilo para texto dentro de celdas de tabla (color azul)
+  tableCellTextBlue: {
+    margin: 5,
+    fontSize: 10,
+    color: "#2573ca",
+    fontFamily: "Roboto",
+  },
+  // Estilo para texto dentro de celdas de tabla (color azul)
+  tableCellTextBlueCenter: {
+    margin: 5,
+    fontSize: 10,
+    color: "#2573ca",
+    fontFamily: "Roboto",
+    textAlign: "center",
+  },
+
+  // Tabla general
+  table: {
+    display: "table",
+    width: "auto",
+    borderStyle: "solid",
+    borderWidth: 0.5, // Línea continua de 1/2 punto
+    borderColor: "#000000",
+    marginBottom: 10,
+  },
+
+  // Filas de la tabla
+  tableRow: {
+    flexDirection: "row",
+  },
+
+  // Columnas de tamaño variable
+  tableCol: {
+    flex: 1,
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna con ajuste automático
+  tableColAuto: {
+    flex: 1, // Ajuste automático
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna de 15%
+  tableCol15: {
+    width: "15%",
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna de 20%
+  tableCol20: {
+    width: "20%",
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna de 25%
+  tableCol25: {
+    width: "25%",
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna de 40%
+  tableCol40: {
+    width: "40%",
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna de 50%
+  tableCol50: {
+    width: "50%",
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna de 60%
+  tableCol60: {
+    width: "60%",
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna de 75%
+  tableCol75: {
+    width: "75%",
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna de 80%
+  tableCol80: {
+    width: "80%",
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    fontFamily: "Roboto",
+  },
+  // Columna que ocupa toda la fila (100%)
+  tableColFullWidth: {
+    width: "100%", // Columna de 100% del ancho total
+    borderStyle: "solid",
+    borderWidth: 0.5,
+    borderColor: "#000000",
+    backgroundColor: "#f0f0f0", // Fondo para resaltar el título o contenido
+    fontFamily: "Roboto",
+  },
+});
 //Constantes
 const today = new Date();
 const day = String(today.getDate()).padStart(2, "0");
@@ -1204,169 +1422,168 @@ export function generateMemoPublicationPaymentProject(data) {
   }
 
   let dirCargo = [];
-  
-    if (data.nombreDirector === "") {
-      dirCargo.push("Profesor");
-    } else {
-      dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
-    }
 
-    let formulario = [];
-    if (data.participacionProyecto === "fueraProyecto") {
-      formulario.push("Fuera de Proyecto");
-    } else {
-      formulario.push("Dentro de Proyecto");
-    }
+  if (data.nombreDirector === "") {
+    dirCargo.push("Profesor");
+  } else {
+    dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
+  }
 
-    let codigoP = [];
-    if (data.codigoProyecto === "") {
-      codigoP.push();
-    } else {
-      codigoP.push(`${data.codigoProyecto} `);
-    }
+  let formulario = [];
+  if (data.participacionProyecto === "fueraProyecto") {
+    formulario.push("Fuera de Proyecto");
+  } else {
+    formulario.push("Dentro de Proyecto");
+  }
 
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Formato de memorando para pago de inscripción ${formulario}`,
-                  bold: true,
-                  size: 24,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 300 },
-              alignment: "start",
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "PARA:\t\t",
-                  bold: true,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-                new TextRun({
-                  text: "Dr. Marco Santorum",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "\t\tVicerector de Investigación, Innovación y Vinculación",
-                  size: 22,
-                  bold: true,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "ASUNTO:\t",
-                  bold: true,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-                new TextRun({
-                  text: `Solicitud para pago de publicación ${codigo}`,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "De mi consideración:",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de la publicación " ${data.tituloPublicacion} ", en la revista "${data.nombreRevista}". `,
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 300 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Se adjunta la documentación correspondiente",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Con sentimientos de distinguida consideración.",
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Atentamente,",
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${director}`,
-                  size: 20,
-                  bold: true,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${dirCargo}`,
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-            }),
-          ],
-        },
-      ],
-    });
+  let codigoP = [];
+  if (data.codigoProyecto === "") {
+    codigoP.push();
+  } else {
+    codigoP.push(`${data.codigoProyecto} `);
+  }
 
-    Packer.toBlob(doc).then((blob) => {
-      saveAs(
-        blob,
-        `Memorando para Pago de Publicación ${formulario} ${codigoP}.docx`
-      );
-    });
-  
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Formato de memorando para pago de inscripción ${formulario}`,
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Solicitud para pago de publicación ${codigo}`,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de la publicación " ${data.tituloPublicacion} ", en la revista "${data.nombreRevista}". `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${director}`,
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${dirCargo}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(
+      blob,
+      `Memorando para Pago de Publicación ${formulario} ${codigoP}.docx`
+    );
+  });
 }
 
 // Nueva función para generar el Anexo A en PDF
@@ -1995,15 +2212,282 @@ export async function generateAnexoB2WithinProject(data) {
         diferencia,
     },
   ];
-  const pdf = await generate({ template, plugins, inputs });
+  const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+        {/* Título del formulario */}
+        <Text style={styles.header}>
+          Anexo 2 – Formulario para salidas nacionales dentro de proyectos
+        </Text>
+        {/* 1. Datos Generales */}
 
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(
-    blob,
-    "Anexo 2b-Participación en VIAJE TECNICO dentro de Proyect/ " +
-      data.codigoProyecto +
-      ".pdf"
+        <Text style={styles.sectionTitle}>
+          1. DATOS DEL PROYECTO Y DEL INVESTIGADOR PARTICIPANTE
+        </Text>
+
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.codigoProyecto || "_________"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Título de Proyecto:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloProyecto || "_________"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>
+                Nombres Completo del Participante:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {(data.apellidos ? data.apellidos.toUpperCase() : "_________") +
+                  " " +
+                  (data.nombres ? data.nombres.toUpperCase() : "_________")}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Rol en el Proyecto:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.rolEnProyecto || "_________"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.departamento || "_________"}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* 1. Datos del evento*/}
+
+        <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO</Text>
+
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Nombre de la institución de acogida:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.nombreIntitucionAcogida || "_________"}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Lugar del Evento:</Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>Ciudad:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.ciudadEvento.toUpperCase() || "_________"}
+              </Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>País:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.ciudadEvento.toUpperCase() || "_________"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Fechas del viaje técnico:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.textBlueCenter}>
+                {"Desde el  "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.fechaInicioEvento || "_________"}
+                  <Text style={styles.textBlueCenter}>
+                    {" hasta el "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.fechaFinEvento || "_________"}
+                    </Text>
+                  </Text>
+                </Text>
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Solicita para el viaje técnico:
+              </Text>
+            </View>
+
+            <View style={styles.tableCol}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>- Pasajes aéreos:</Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.pasajesAereos === "SI" ? "X" : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>
+                    - Viáticos y subsistencias:
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.viaticosSubsistencias === "SI" ? "X" : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* 1. Datos De la Salida de Campo*/}
+
+        <Text style={styles.sectionTitle}>
+          3. JUSTIFICACIÓN DEL VIAJE TÉCNICO{" "}
+        </Text>
+
+        <Text style={styles.baseText}>
+          3.1 Objetivo, resultado o producto del proyecto al que aporta el viaje
+          técnico.
+        </Text>
+        <Text style={styles.textBlue}>{data.objetivoProyecto}</Text>
+        <Text style={styles.baseText}>
+          3.2 Relevancia del viaje técnico para el desarrollo del proyecto.
+        </Text>
+        <Text style={styles.textBlue}>{data.relevanciaViajeTecnico}</Text>
+        <Text style={styles.sectionTitle}>
+          4. CRONOGRAMA DE ACTIVIDADES A REALIZAR EN EL VIAJE TÉCNICO{" "}
+        </Text>
+
+        <Text style={styles.baseText}>4.1 Cronograma</Text>
+
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellTextCenter}>N°</Text>
+            </View>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellTextCenter}>Fecha</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextCenter}>
+                Descripcion de la actividad a realizar
+              </Text>
+            </View>
+          </View>
+          {data.actividadesInmutables.map((actividad, index) => (
+            <View key={index} style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellTextBlueCenter}>
+                  {(index + 1).toString()}
+                </Text>
+              </View>
+              <View style={styles.tableCol25}>
+                <Text style={styles.tableCellTextBlueCenter}>
+                  {actividad.fecha}
+                </Text>
+              </View>
+              <View style={styles.tableColAuto}>
+                <Text style={styles.tableCellTextBlue}>
+                  {actividad.descripcion}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+            <Text style={styles.baseText}>
+              4.2 Justificar la necesidad de la comisión de servicios mayor a 15
+              días{" "}
+            </Text>
+            <Text style={styles.textBlue}>
+              {data.justificacionComision || "No Aplica"}
+            </Text>
+          
+         <Text style={styles.sectionTitle}>
+          5. CALCULO REFERENCIAL DE DÍAS DE LA COMISIÓN DE SERVICIOS{" "}
+        </Text>
+        <Text style={styles.textBlue}>
+          {'Calculo dias de comision entre las fechas de salida y de regreso al pais: '+ data.actividadesInmutables.length }
+        </Text>
+
+        {/* Etiqueta de Firma */}
+        <Text style={styles.baseText}>Firma del Solicitante:</Text>
+
+        {/* Espacio en blanco para la firma */}
+        <Text>{"\n\n\n"}</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.baseText}>________________________</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.tableCellTextBlue}>
+          {`${data.rolEnProyecto === "Director"
+              ? "Director " +data.nombres + " " + data.apellidos
+              : data.nombreDirector}`}
+        </Text>
+
+        {/* Nombre del director y código de proyecto */}
+        <Text style={styles.tableCellTextBlue}>
+          {`${ "Director del Proyecto " + data.codigoProyecto}`}
+        </Text>
+      </Page>
+    </PDFDocument>
   );
+
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
+
+  // Descargar automáticamente el archivo PDF
+  saveAs(blob, "Anexo2B_Formulario para viajes tecnicos.pdf");
 }
 
 export async function generateAnexo5InscriptionPayment(data) {
@@ -2098,9 +2582,7 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
     }
 
     if (publicaciones.limiteFecha) {
-      fechaPagoPublicacionStr += `${formatDate(
-        publicaciones.limiteFecha
-      )}\n`;
+      fechaPagoPublicacionStr += `${formatDate(publicaciones.limiteFecha)}\n`;
     }
   });
 
@@ -2128,11 +2610,13 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
   const pdf = await generate({ template, plugins, inputs });
 
   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(blob, `Anexo 1 - Formulario Pago Publicación Dentro del Proyecto-${data.codigoProyecto}  EPN.pdf`);
+  saveAs(
+    blob,
+    `Anexo 1 - Formulario Pago Publicación Dentro del Proyecto-${data.codigoProyecto}  EPN.pdf`
+  );
 }
 
-
-export async function generateAnexo2PublicationPaymentOutside(data){
+export async function generateAnexo2PublicationPaymentOutside(data) {
   const template = {
     basePdf: basePdfAnexo2P,
     schemas: schemasAnexo2P,
@@ -2149,37 +2633,38 @@ export async function generateAnexo2PublicationPaymentOutside(data){
     }
 
     if (publicaciones.limiteFecha) {
-      fechaPagoPublicacionStr += `${formatDate(
-        publicaciones.limiteFecha
-      )}\n`;
+      fechaPagoPublicacionStr += `${formatDate(publicaciones.limiteFecha)}\n`;
     }
   });
 
-
   const inputs = [
-  {
-    "nombresApellidos":           data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase(),
-    "departamento":               data.departamento,
-    "tituloPublicacion":          data.tituloPublicacion,
-    "nombreRevista":              data.nombreRevista,
-    "autoresEPN":                 data.autoresEPN,
-    "autoresExternos":            data.autoresExternos,
-    "baseDatos":                  data.baseDatos,
-    "cuartilPublicacion":         data.cuartilPublicacion,
-    "valorPublicacion":           valorPublicacionStr.trim(),
-    "limiteFecha":                fechaPagoPublicacionStr.trim(),
-    "metodoPagoTransferencia":    data.metodoPago === "Transferencia" ? "X" : "",
-    "metodoPagoOtra":             data.metodoPago === "Otra" ? "X" : "",
-    "nombresAp":                  data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase(),
-    "departament":                data.departamento
-  }
-];
+    {
+      nombresApellidos:
+        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
+      departamento: data.departamento,
+      tituloPublicacion: data.tituloPublicacion,
+      nombreRevista: data.nombreRevista,
+      autoresEPN: data.autoresEPN,
+      autoresExternos: data.autoresExternos,
+      baseDatos: data.baseDatos,
+      cuartilPublicacion: data.cuartilPublicacion,
+      valorPublicacion: valorPublicacionStr.trim(),
+      limiteFecha: fechaPagoPublicacionStr.trim(),
+      metodoPagoTransferencia: data.metodoPago === "Transferencia" ? "X" : "",
+      metodoPagoOtra: data.metodoPago === "Otra" ? "X" : "",
+      nombresAp:
+        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
+      departament: data.departamento,
+    },
+  ];
 
-const pdf = await generate({ template, plugins, inputs });
+  const pdf = await generate({ template, plugins, inputs });
 
   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(blob, `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto EPN.pdf`);
-
+  saveAs(
+    blob,
+    `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto EPN.pdf`
+  );
 }
 
 //formatear la fecha en formato dd/mm/yyyy

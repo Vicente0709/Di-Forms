@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontWeight: 900, // Extra bold
     fontFamily: "Roboto",
-    textAlign: "center",
   },
   // Subtítulos (bold, centrado)
   subSectionTitle: {
@@ -1491,6 +1490,122 @@ export async function generateAnexo2WithinProject(data) {
         </Text>
         <Text style={styles.textBlue}>{data.relevanciaEvento}</Text>
 
+        <View>
+          <Text style={styles.sectionTitle}>
+            4. INFORMACIÓN DEL PAGO DE INSCRIPCIÓN{" "}
+          </Text>
+
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Valor de la Inscripción:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.inscripciones.map((inscripcion, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {inscripcion.monedaPago && data.inscripcion === "SI"
+                        ? inscripcion.monedaPago +
+                          " " +
+                          (inscripcion.valorInscripcion || " ")
+                        : ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Fechas de pago de inscripción:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.inscripciones.map((inscripcion, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {data.inscripciones.map((inscripcion, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {inscripcion.pagoLimite && data.inscripcion === "SI"
+                              ? inscripcion.pagoLimite +
+                                " " +
+                                (inscripcion.limiteFecha || " ")
+                              : ""}
+                          </Text>
+                        </View>
+                      ))}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Método de pago:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Transferencia:
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Transferencia" &&
+                          data.inscripcion === "SI"
+                            ? "X"
+                            : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a)Formulariodepagosalexterior, ,segunelcaso(Anexo4)
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b) Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Otra(tarjetadecrédito,efectivo,etc...):
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Otra" &&
+                          data.inscripcion === "SI"
+                            ? "X"
+                            : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a) Solicitud de REEMBOLSO. Incluir texto con justificación
+                      en el mismo memorando del requerimiento.
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b)Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
         {/* Etiqueta de Firma */}
         <Text style={styles.baseText}>Firma del Solicitante:</Text>
 
@@ -1509,9 +1624,11 @@ export async function generateAnexo2WithinProject(data) {
 
         {/* Nombre del director y código de proyecto */}
         <Text style={styles.tableCellTextBlueCenter}>
-          {`${data.nombreDirector || "Director de prueba"} - ${
-            data.codigoProyecto || "Código de prueba"
-          }`}
+          {`${
+            data.rolEnProyecto === "Director"
+              ? "Director " +data.nombres + " " + data.apellidos
+              : data.nombreDirector.toUpperCase()
+          } - ${data.codigoProyecto || "Código de prueba"}`}
         </Text>
       </Page>
     </PDFDocument>
@@ -1770,21 +1887,20 @@ export async function generateAnexo7WithinProject(data) {
         <Text>{"\n\n\n"}</Text>
 
         {/* Nombre completo */}
-        <Text style={styles.baseTextCenter}>________________________</Text>
+        <Text style={styles.baseText}>________________________</Text>
 
         {/* Nombre completo */}
-        <Text style={styles.tableCellTextBlueCenter}>
-          {`${data.nombres || "Nombre de prueba"} ${
-            data.apellidos || "Apellido de prueba"
-          }`}
+        <Text style={styles.tableCellTextBlue}>
+          {`${data.rolEnProyecto === "Director"
+              ? "Director " +data.nombres + " " + data.apellidos
+              : data.nombreDirector}`}
         </Text>
 
         {/* Nombre del director y código de proyecto */}
-        <Text style={styles.tableCellTextBlueCenter}>
-          {`${data.nombreDirector || "Director de prueba"} - ${
-            data.codigoProyecto || "Código de prueba"
-          }`}
+        <Text style={styles.tableCellTextBlue}>
+          {`${ "Director del Proyecto " + data.codigoProyecto}`}
         </Text>
+
       </Page>
     </PDFDocument>
   );
