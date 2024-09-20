@@ -36,10 +36,7 @@ function MainApp() {
       page: location.pathname + location.search,
       title: document.title || 'Página sin título',
     };
-
-    // Mostrar los datos en la consola para verificar
-    console.log('Datos enviados a Google Analytics:', pageViewData);
-
+    
     // Envía la vista de página a Google Analytics
     ReactGA.send(pageViewData);
   }, [location]); // Se ejecuta cada vez que cambie la ruta
