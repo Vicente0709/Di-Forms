@@ -23,9 +23,6 @@ import { schemasAnexoA2 } from "./schemasAnexoA2";
 import { basepdfAnexo8 } from "./basepdfAnexo8";
 import { schemaAnexo8 } from "./schemaAnexo8";
 
-import { basePdfAnexoB2 } from "./basePdfAnexoB2";
-import { schemasAnexoB2 } from "./schemasAnexoB2";
-
 import { basePdfAnexo5 } from "./basePdfAnexo5";
 import { schemasAnexo5 } from "./schemasAnexo5";
 
@@ -243,6 +240,7 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto",
   },
 });
+
 //Constantes
 const today = new Date();
 const day = String(today.getDate()).padStart(2, "0");
@@ -2147,77 +2145,12 @@ export async function generateAnexo8OutsideProject(data) {
 }
 
 export async function generateAnexoB2WithinProject(data) {
-  const template = {
-    schemas: schemasAnexoB2,
-    basePdf: basePdfAnexoB2,
-  };
-
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-  const diferencia =
-    JSON.parse(localStorage.getItem("diferenciaDiasViajeTecnicoDeProyectos"))
-      ?.diferencia || 0;
-
-  const actividades = {};
-  // Genera dinámicamente las propiedades para activN, activFecha, y activDescripcion
-  for (let i = 0; i < 22; i++) {
-    actividades[`activN${i + 1}`] = data.actividadesInmutables[i]
-      ? (i + 1).toString()
-      : "";
-    actividades[`activFecha${i + 1}`] =
-      data.actividadesInmutables[i]?.fecha || "";
-    actividades[`activDescripcion${i + 1}`] =
-      data.actividadesInmutables[i]?.descripcion || "";
-  }
-
-  const inputs = [
-    {
-      fechaPag1: formattedDate,
-      codigoProyecto: data.codigoProyecto,
-      tituloProyecto: data.tituloProyecto,
-      nombresParticipante:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      rolProyecto: data.rolEnProyecto,
-      departamento: data.departamento,
-      nombreInstitucionAcogida: data.nombreIntitucionAcogida,
-      ciudad: data.ciudadEvento,
-      pais: data.paisEvento,
-      fechasEvento:
-        "Desde el " +
-        data.fechaInicioEvento +
-        " hasta el " +
-        data.fechaFinEvento,
-
-      pasajesS: data.pasajesAereos === "SI" ? "X" : "",
-      viaticosS: data.viaticosSubsistencias === "SI" ? "X" : "",
-      pasajesN: data.pasajesAereos === "NO" ? "X" : "",
-      viaticosN: data.viaticosSubsistencias === "NO" ? "X" : "",
-
-      objetivoEvento: data.objetivoProyecto,
-      relevanciaEvento: data.relevanciaViajeTecnico,
-
-      fechaPag2: formattedDate,
-
-      ...actividades,
-
-      justificacionMas15:
-        diferencia < 16 ? "No aplica" : data.justificacionComision,
-      nombreDirector: data.nombreDirector
-        ? data.nombreDirector
-        : data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      codigoProyecto2: data.codigoProyecto,
-
-      fechaPag3: formattedDate,
-      calculo:
-        "Calculo dias de comision entre las fechas de salida y de regreso al pais: " +
-        diferencia,
-    },
-  ];
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
         {/* Título del formulario */}
         <Text style={styles.header}>
-          Anexo 2 – Formulario para salidas nacionales dentro de proyectos
+        Anexo 2B - FORMULARIO PARA SALIDAS AL EXTERIOR DENTRO DE PROYECTOS VIAJES TÉCNICOS
         </Text>
         {/* 1. Datos Generales */}
 

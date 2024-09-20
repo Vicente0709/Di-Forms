@@ -13,6 +13,7 @@ import InputDate from "./Inputs/InputDate";
 import RadioGroup from "./Inputs/RadioGroup";
 import ActionButton from "./Buttons/ActionButton";
 import DownloadButton from "./Buttons/DownloadButton";
+import today from "../utils/date";
 
 // Importación de los componentes del formulario
 import Transportation from "./ComponentTripWithinProjects/Transportation";
@@ -26,144 +27,100 @@ import {
   generateAnexoB2WithinProject,
 } from "../utils/documentGenerator";
 
-// Validaciones personalizadas
-const validarCedulaEcuatoriana = (cedula) => {
-  if (cedula.length !== 10) return false;
-  const provincia = parseInt(cedula.slice(0, 2), 10);
-  if (provincia < 1 || provincia > 24) return false;
-
-  let suma = 0;
-  for (let i = 0; i < 9; i++) {
-    let digito = parseInt(cedula[i], 10);
-    if (i % 2 === 0) {
-      digito *= 2;
-      if (digito > 9) digito -= 9;
-    }
-    suma += digito;
-  }
-
-  const digitoVerificador = (10 - (suma % 10)) % 10;
-  return digitoVerificador === parseInt(cedula[9], 10);
-};
-
-// Validación personalizada para la fecha de fin del evento
-const validateFechaFin = (fechaFin, fechaInicioEvento) => {
-  if (!fechaInicioEvento) {
-    return "Primero seleccione la fecha de inicio del evento.";
-  } else if (!fechaFin) {
-    return (
-      fechaFin >= fechaInicioEvento ||
-      "La fecha de fin debe ser mayor o igual a la fecha de inicio."
-    );
-  }
-  return (
-    fechaFin >= fechaInicioEvento ||
-    "La fecha de fin debe ser mayor o igual a la fecha de inicio."
-  );
-};
-const todayValidate = (fecha, todayDay) => {
-  return (
-    fecha >= todayDay || "La fecha debe ser mayor o igual a la fecha actual."
-  );
-};
-
-function TechnicalTripWithinProjectsForm() {
+function TechnicalTripWithinProjects() {
+  const formStorageKey = "formTechnicalTripWithinProjects";
+  const daysStorageKey = "diferenciaDiasViajeTecnicoDeProyectos";
+  const formTechnicalTripWithinProjects = JSON.parse(localStorage.getItem(formStorageKey)) || {};
+  
+  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues:
-      JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects")) || {},
+    defaultValues: formTechnicalTripWithinProjects,
   });
+  
+  const { watch, setValue, reset, clearErrors, formState: { errors },} = methods;
+  
+  // Función para calcular y almacenar la diferencia de días
+  const calcularDiferenciaEnDias = (fechaInicioString, fechaFinString) => {
+    const fechaInicio = new Date(fechaInicioString);
+    const fechaFin = new Date(fechaFinString);
+    if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
+      setDiferenciaEnDias(0);
+      localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: 0 }));
+      return;
+    }
+    const diferenciaEnDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+    setDiferenciaEnDias(diferenciaEnDias);
+    localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: diferenciaEnDias }));
+  };
 
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [
-    diferenciaDiasViajeTecnicoDeProyectos,
-    setDiferenciaDiasViajeTecnicoDeProyectos,
-  ] = useState(0);
+  // Función para extraer y calcular las fechas del formulario
+  const extraerYCalcularFechas = (formData) => {
+    const { transporteIda = [], transporteRegreso = [] } = formData;
+    const fechaInicio = transporteIda[0]?.fechaSalida || "";
+    const fechaFin = transporteRegreso[transporteRegreso.length - 1]?.fechaLlegada || "";
+    calcularDiferenciaEnDias(fechaInicio, fechaFin);
+  };
 
-  const {
-    watch,
-    setValue,
-    reset,
-    clearErrors,
-    formState: { errors },
-  } = methods;
-
-  const now = new Date();
-  const localOffset = now.getTimezoneOffset() * 60000;
-  const adjustedNow = new Date(now.getTime() - localOffset)
-    .toISOString()
-    .split("T")[0];
-
-  // Efecto para sincronizar con localStorage y manejar cálculos de fechas
+  // Efecto para sincronizar con localStorage
   useEffect(() => {
-    const calculateAndSetDiferenciaDiasViajeTecnico = (
-      primeraFechaSalida,
-      ultimaFechaLlegada
-    ) => {
-      if (ultimaFechaLlegada && primeraFechaSalida) {
-        const fechaInicio = new Date(primeraFechaSalida);
-        const fechaFinal = new Date(ultimaFechaLlegada);
-        const diferenciaDias =
-          Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+    reset(formTechnicalTripWithinProjects);
+    extraerYCalcularFechas(formTechnicalTripWithinProjects);
 
-        localStorage.setItem(
-          "diferenciaDiasViajeTecnicoDeProyectos",
-          JSON.stringify({ diferencia: diferenciaDias })
-        );
-        setDiferenciaDiasViajeTecnicoDeProyectos(diferenciaDias);
-      } else {
-        localStorage.setItem(
-          "diferenciaDiasViajeTecnicoDeProyectos",
-          JSON.stringify({ diferencia: 0 })
-        );
-        setDiferenciaDiasViajeTecnicoDeProyectos(0);
-      }
-    };
-
-    const initializeFromLocalStorage = () => {
-      const formTechnicalTripWithinProjects =
-        JSON.parse(localStorage.getItem("formTechnicalTripWithinProjects")) ||
-        {};
-      reset(formTechnicalTripWithinProjects);
-
-      const primeraFechaSalida =
-        formTechnicalTripWithinProjects.transporteIda?.[0]?.fechaSalida || "";
-      const ultimaFechaLlegada =
-        formTechnicalTripWithinProjects.transporteRegreso?.[
-          formTechnicalTripWithinProjects.transporteRegreso.length - 1
-        ]?.fechaLlegada || "";
-      calculateAndSetDiferenciaDiasViajeTecnico(
-        primeraFechaSalida,
-        ultimaFechaLlegada
-      );
-    };
-
-    initializeFromLocalStorage();
-
+    // Suscribirse a los cambios en el formulario en tiempo real.
     const subscription = watch((data) => {
-      localStorage.setItem(
-        "formTechnicalTripWithinProjects",
-        JSON.stringify(data)
-      );
-
-      const primeraFechaSalida = data.transporteIda?.[0]?.fechaSalida || "";
-      const ultimaFechaLlegada =
-        data.transporteRegreso?.[data.transporteRegreso.length - 1]
-          ?.fechaLlegada || "";
-      calculateAndSetDiferenciaDiasViajeTecnico(
-        primeraFechaSalida,
-        ultimaFechaLlegada
-      );
+      localStorage.setItem(formStorageKey, JSON.stringify(data));
+      extraerYCalcularFechas(data);
     });
 
     return () => subscription.unsubscribe();
   }, [watch, reset]);
 
-  // Función que se ejecuta cuando se envía el formulario
+  // A partir de aqui los handleButtons
   const onSubmitTechnicalTrip = (data) => {
     console.log(data);
     setShowDownloadSection(true);
+  };
+
+  // Función para descargar el formulario como JSON
+  const handleDownloadJson = () => {
+    const data = methods.getValues(); // Obtiene los datos actuales del formulario
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Viajes Técnicos Dentro de Proyectos.json"; // Nombre del archivo
+    link.click();
+  };
+
+  // Función para cargar un archivo JSON y rellenar el formulario
+  const handleUploadJson = (event) => {
+    const file = event.target.files[0];  // Verificar si hay archivo
+    if (file) {
+      const reader = new FileReader();  // Inicializa el FileReader para leer el archivo
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target.result);  // Parsear el archivo JSON
+  
+          // Reset del formulario con los datos del JSON
+          reset(json, {
+            keepErrors: false,
+            keepDirty: false,
+            keepValues: false,
+            keepTouched: false,
+            keepIsSubmitted: false,
+          });
+  
+          // Actualizar localStorage con los datos cargados
+          localStorage.setItem(formStorageKey, JSON.stringify(json));
+        } catch (err) {
+          console.error("Error al cargar el archivo JSON:", err);
+        }
+      };
+      reader.readAsText(file);  // Leer el archivo como texto
+    }
   };
 
   const handleGenerateDocx = () => {
@@ -195,39 +152,51 @@ function TechnicalTripWithinProjectsForm() {
 
   const handleDownloadAll = () => {};
 
-  // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formTechnicalTripWithinProjects");
-    localStorage.removeItem("diferenciaDiasViajeTecnicoDeProyectos");
-    setDiferenciaDiasViajeTecnicoDeProyectos(0);
+    localStorage.removeItem(formStorageKey);
+    localStorage.removeItem(daysStorageKey);
+    setShowDownloadSection(false);
     window.location.reload();
   };
 
-  //Prueba de conceptro como vamso a manejar el formualrio
+  // A partir de aqui los visualizadores de las varibales (watch)
   const rolEnProyecto = watch("rolEnProyecto");
   const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
+
+  // Estados derivados de las observaciones
   const habilitarCampos = seleccionViaticosSubsistencias === "SI";
 
+  // Manejadores de estado para showSections
   const [showInputDirector, setShowInputDirector] = useState(false);
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
 
+  //aqui el use efect donde van todo a el control de las validaciones entre los imputs
   useEffect(() => {
+    // Mostrar el campo 'nombreDirector' solo para ciertos roles en el proyecto
     if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
       setShowInputDirector(true);
     } else {
       setShowInputDirector(false);
-      setValue("nombreDirector", "");
+      setValue("nombreDirector", ""); // Limpiar campo 'nombreDirector' cuando no aplica
     }
 
+    // Limpiar los campos de cuenta bancaria si no se requieren viáticos
     if (!habilitarCampos) {
-      // Limpiar valores de los campos cuando se selecciona "NO"
       setValue("nombreBanco", "");
       setValue("tipoCuenta", "");
       setValue("numeroCuenta", "");
 
-      // Limpiar errores asociados a estos campos
+      // Limpiar errores asociados a los campos de cuenta bancaria
       clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
     }
-  }, [rolEnProyecto, setValue, habilitarCampos, clearErrors]);
+  }, [
+    rolEnProyecto,
+    habilitarCampos,
+    setShowInputDirector,
+    setValue,
+    clearErrors,
+  ]);
 
   const rolesOptions = [
     { value: "Director", label: "Director" },
@@ -334,6 +303,23 @@ function TechnicalTripWithinProjectsForm() {
         <h1 className="text-center my-4">
           Formulario para participación en viajes técnicos dentro de proyectos
         </h1>
+        <div className="form-container">
+          <Label text="Descargar datos actuales en (.json)"/>
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+          <Label text="Cargar datos desde archivo (.json)"/>
+          {/* Input nativo para cargar un archivo JSON */}
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleUploadJson}  // Conectar con la función
+            style={{ marginTop: '20px' }}  // Estilos opcionales
+          />
+        </div>
         <Form onSubmit={methods.handleSubmit(onSubmitTechnicalTrip)}>
           <div className="form-container">
             {/* Datos del proyecto */}
@@ -488,7 +474,7 @@ function TechnicalTripWithinProjectsForm() {
                 required: "La fecha de inicio del evento es requerida",
                 validate: (value) => {
                   return (
-                    value >= adjustedNow ||
+                    value >= today() ||
                     "La fecha de inicio no puede ser anterior a la fecha actual."
                   );
                 },
@@ -672,4 +658,39 @@ function TechnicalTripWithinProjectsForm() {
   );
 }
 
-export default TechnicalTripWithinProjectsForm;
+export default TechnicalTripWithinProjects;
+
+// Validaciones personalizadas
+const validarCedulaEcuatoriana = (cedula) => {
+  if (cedula.length !== 10) return false;
+  const provincia = parseInt(cedula.slice(0, 2), 10);
+  if (provincia < 1 || provincia > 24) return false;
+
+  let suma = 0;
+  for (let i = 0; i < 9; i++) {
+    let digito = parseInt(cedula[i], 10);
+    if (i % 2 === 0) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    suma += digito;
+  }
+
+  const digitoVerificador = (10 - (suma % 10)) % 10;
+  return digitoVerificador === parseInt(cedula[9], 10);
+};
+// Validación personalizada para la fecha de fin del evento
+const validateFechaFin = (fechaFin, fechaInicioEvento) => {
+  if (!fechaInicioEvento) {
+    return "Primero seleccione la fecha de inicio del evento.";
+  } else if (!fechaFin) {
+    return (
+      fechaFin >= fechaInicioEvento ||
+      "La fecha de fin debe ser mayor o igual a la fecha de inicio."
+    );
+  }
+  return (
+    fechaFin >= fechaInicioEvento ||
+    "La fecha de fin debe ser mayor o igual a la fecha de inicio."
+  );
+};

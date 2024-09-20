@@ -17,12 +17,9 @@ import { text, image, barcodes } from "@pdfme/schemas";
 import { basePdfAnexo10 } from "../utilsNational/basePdfAnexo10";
 import { schemasAnexo10 } from "../utilsNational/schemasAnexo10";
 
-import { basePdfAnexo2 } from "./basePdfAnexo2";
-import { schemasAnexo2 } from "./schemasAnexo2";
-
 import { basePdfAnexoANational } from "../utilsNational/basePdfAnexoANational";
 import { schemasAnexoANational } from "../utilsNational/schemasAnexoANational";
-import TechnicalTripWithinProjects from "../pages/TechnicalTripWithinProjects";
+
 
 // Registra la fuente Roboto desde Google Fonts
 Font.register({
@@ -1066,91 +1063,6 @@ export async function generateAnexoAWithinProject(data) {
 }
 
 export async function generateAnexo2WithinProject(data) {
-  const template = {
-    schemas: schemasAnexo2,
-    basePdf: basePdfAnexo2,
-  };
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-  let valorInscripcionStr = "";
-  let fechaPagoInscripcionStr = "";
-  // Iteramos sobre cada inscripción en el array 'inscripciones'
-  data.inscripciones.forEach((inscripcion) => {
-    // Concatenamos el valor de inscripción con un '$' y un salto de línea
-    if (data.inscripcion === "SI" && inscripcion.valorInscripcion) {
-      valorInscripcionStr += `${inscripcion.monedaPago}${inscripcion.valorInscripcion}\n`;
-    }
-
-    // Construimos la cadena de la fecha de pago dependiendo de cuál campo tiene valor
-    if (
-      data.inscripcion === "SI" &&
-      inscripcion.pagoLimite &&
-      inscripcion.limiteFecha
-    ) {
-      fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
-    }
-  });
-
-  const inputs = [
-    {
-      fechaPag1: formattedDate,
-      codigoProyecto: data.codigoProyecto,
-      tituloProyecto: data.tituloProyecto,
-      rolProyecto: data.rolEnProyecto,
-      departamento: data.departamento,
-      nombresParticipante:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      tituloEvento: data.tituloEvento,
-      fechasEvento:
-        "Desde el " +
-        data.fechaInicioEvento +
-        " hasta el " +
-        data.fechaFinEvento,
-      ciudad: data.ciudadEvento.toUpperCase(),
-      pais: "ECUADOR",
-      tipoEvento1: data.tipoEvento === "Conferencia o congreso" ? "X" : "",
-      tipoEvento2: data.tipoEvento === "Taller" ? "X" : "",
-      tipoEvento3: data.tipoEvento === "Otro evento académico" ? "X" : "",
-      tipoEvento3otro: data.otroEventoEspecificar,
-      participacion1:
-        data.participacionEvento === "Presentación de artículo indexado"
-          ? "X"
-          : "",
-      participacion2:
-        data.participacionEvento ===
-        "Presentación de póster, abstract, charla magistral u otros"
-          ? "X"
-          : "",
-      participacion3: data.participacionEvento === "Asistencia" ? "X" : "",
-      ponencia: data.tituloPonencia,
-
-      pasajesS: data.pasajesAereos === "SI" ? "X" : "",
-      viaticosS: data.viaticosSubsistencias === "SI" ? "X" : "",
-      inscripcionS: data.inscripcion === "SI" ? "X" : "",
-      pasajesN: data.pasajesAereos === "NO" ? "X" : "",
-      viaticosN: data.viaticosSubsistencias === "NO" ? "X" : "",
-      inscripciónN: data.inscripcion === "NO" ? "X" : "",
-
-      objetivoEvento: data.objetivoProyecto,
-      relevanciaEvento: data.relevanciaEvento,
-
-      valorInscripcion: valorInscripcionStr.trim(), // Removemos el último salto de línea
-      fechaPagoInscripcion: fechaPagoInscripcionStr.trim(), // Removemos el último salto de línea
-
-      transferencia:
-        data.metodoPago === "Transferencia" && data.inscripcion === "SI"
-          ? "X"
-          : "",
-      otroPago:
-        data.metodoPago === "Otra" && data.inscripcion === "SI" ? "X" : "",
-
-      nombreDirector:
-        data.rolEnProyecto === "Director"
-          ? data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()
-          : data.nombreDirector.toUpperCase(),
-      codigoProyecto2: data.codigoProyecto,
-    },
-  ];
-
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>

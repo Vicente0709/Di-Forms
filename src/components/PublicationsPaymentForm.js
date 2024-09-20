@@ -21,68 +21,43 @@ import {
   generateAnexo2PublicationPaymentOutside,
 } from "../utils/documentGenerator.js";
 
-//Funciones Validación
-
-const validarCedulaEcuatoriana = (cedula) => {
-  if (cedula.length !== 10) return false;
-
-  const provincia = parseInt(cedula.slice(0, 2), 10);
-  if (provincia < 1 || provincia > 24) return false;
-
-  let suma = 0;
-  for (let i = 0; i < 9; i++) {
-    let digito = parseInt(cedula[i], 10);
-    if (i % 2 === 0) {
-      digito *= 2;
-      if (digito > 9) digito -= 9;
-    }
-    suma += digito;
-  }
-
-  const digitoVerificador = (10 - (suma % 10)) % 10;
-  return digitoVerificador === parseInt(cedula[9], 10);
-};
-
 function PublicationsPaymentForm() {
-  // Estado para manejar la visibilidad de secciones y descarga de documentos
+  const formStorageKey = "formPublicationsPayment"; // Clave para almacenar el formulario en localStorage
+  const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [showInputParticipacion, setShowInputParticipacion] = useState(false);
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showInputFueraProyecto, setShowInputFueraProyecto] = useState(false);
 
-  // Configuración de react-hook-form con valores predeterminados desde localStorage
+  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues:
-      JSON.parse(localStorage.getItem("formPublicationsPayment")) || {},
+    defaultValues: formData,
   });
 
-  const { watch, setValue, reset } = methods;
+  const { watch, setValue, reset, clearErrors, formState: { errors },} = methods;
 
   // Observadores para campos clave
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
   const seleccionArticulo = watch("articuloPublicado");
 
-  // Obtener la fecha actual ajustada por zona horaria
-  const now = new Date();
-  const localOffset = now.getTimezoneOffset() * 60000;
-  const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
-
-  
+  // Efecto para sincronizar con localStorage y manejar la visibilidad de secciones
   useEffect(() => {
-    // Función para inicializar los valores desde localStorage
-    const initializeFromLocalStorage = () => {
-      const formPublicationsPayment =
-        JSON.parse(localStorage.getItem("formPublicationsPayment")) || {};
-      reset(formPublicationsPayment);
-    };
-    initializeFromLocalStorage();
+    reset(formData); // Rellenar el formulario con los datos almacenados
+
     // Suscribirse a los cambios en el formulario para guardar en localStorage
     const subscription = watch((data) => {
-      localStorage.setItem("formPublicationsPayment", JSON.stringify(data));
+      localStorage.setItem(formStorageKey, JSON.stringify(data));
+
+      // Lógica para mostrar u ocultar campos basados en los valores del formulario
+      setShowInputParticipacion(data.participacionProyecto === "Sí");
+      setShowInputDirector(data.rolEnProyecto === "Director");
+      setShowInputFueraProyecto(data.articuloPublicado === "Fuera del proyecto");
     });
+
     // Limpiar la suscripción al desmontar el componente
     return () => subscription.unsubscribe();
   }, [watch, reset]);
@@ -130,7 +105,45 @@ function PublicationsPaymentForm() {
     console.log(methods.getValues());
   };
 
-  // Funciones para manejar la generación de documentos
+  // Función para descargar el formulario como JSON
+  const handleDownloadJson = () => {
+    const data = methods.getValues(); // Obtiene los datos actuales del formulario
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Pago de Publicaciones.json"; // Nombre del archivo
+    link.click();
+  };
+
+  // Función para cargar un archivo JSON y rellenar el formulario
+  const handleUploadJson = (event) => {
+    const file = event.target.files[0];  // Verificar si hay archivo
+    if (file) {
+      const reader = new FileReader();  // Inicializa el FileReader para leer el archivo
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target.result);  // Parsear el archivo JSON
+  
+          // Reset del formulario con los datos del JSON
+          reset(json, {
+            keepErrors: false,
+            keepDirty: false,
+            keepValues: false,
+            keepTouched: false,
+            keepIsSubmitted: false,
+          });
+  
+          // Actualizar localStorage con los datos cargados
+          localStorage.setItem(formStorageKey, JSON.stringify(json));
+        } catch (err) {
+          console.error("Error al cargar el archivo JSON:", err);
+        }
+      };
+      reader.readAsText(file);  // Leer el archivo como texto
+    }
+  };
 
   const handleGenerateMemo1 = () => {
     const formPublicationsPayment = methods.getValues();
@@ -170,7 +183,7 @@ function PublicationsPaymentForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formPublicationsPayment");
+    localStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
@@ -311,6 +324,23 @@ function PublicationsPaymentForm() {
         <h1 className="text-center my-4">
           Formulario para Pago de Publicación Dentro o Fuera de Proyectos
         </h1>
+        <div className="form-container">
+          <Label text="Descargar datos actuales en (.json)"/>
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+          <Label text="Cargar datos desde archivo (.json)"/>
+          {/* Input nativo para cargar un archivo JSON */}
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleUploadJson}  // Conectar con la función
+            style={{ marginTop: '20px' }}  // Estilos opcionales
+          />
+        </div>
         <Form onSubmit={methods.handleSubmit(onSubmitPublicationsPayment)}>
           {/* Formulario con diferentes secciones */}
           <div className="form-container">
@@ -556,3 +586,24 @@ function PublicationsPaymentForm() {
   );
 }
 export default PublicationsPaymentForm;
+
+//Funciones Validación
+const validarCedulaEcuatoriana = (cedula) => {
+  if (cedula.length !== 10) return false;
+
+  const provincia = parseInt(cedula.slice(0, 2), 10);
+  if (provincia < 1 || provincia > 24) return false;
+
+  let suma = 0;
+  for (let i = 0; i < 9; i++) {
+    let digito = parseInt(cedula[i], 10);
+    if (i % 2 === 0) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    suma += digito;
+  }
+
+  const digitoVerificador = (10 - (suma % 10)) % 10;
+  return digitoVerificador === parseInt(cedula[9], 10);
+};

@@ -15,62 +15,37 @@ import InputDate from "./Inputs/InputDate";
 import RadioGroup from "./Inputs/RadioGroup";
 import ActionButton from "./Buttons/ActionButton";
 import DownloadButton from "./Buttons/DownloadButton";
-// Importación de las funciones para generar documentos
+import today from "../utils/date";
 
+// Importación de las funciones para generar documentos
 import {
   generateMemoInscriptionPaymentOutProyect1,
   generateAnexo5InscriptionPayment,
 } from "../utils/documentGenerator.js";
 
-//Funciones Validación
-
-const validarCedulaEcuatoriana = (cedula) => {
-  if (cedula.length !== 10) return false;
-
-  const provincia = parseInt(cedula.slice(0, 2), 10);
-  if (provincia < 1 || provincia > 24) return false;
-
-  let suma = 0;
-  for (let i = 0; i < 9; i++) {
-    let digito = parseInt(cedula[i], 10);
-    if (i % 2 === 0) {
-      digito *= 2;
-      if (digito > 9) digito -= 9;
-    }
-    suma += digito;
-  }
-
-  const digitoVerificador = (10 - (suma % 10)) % 10;
-  return digitoVerificador === parseInt(cedula[9], 10);
-};
-
 function InscriptionPaymentForm() {
-  // Estado para manejar la visibilidad de secciones y descarga de documentos
+  const formStorageKey = "formInscriptionPayment"; // Clave para almacenar el formulario en localStorage
+  const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [showInputParticipacion, setShowInputParticipacion] = useState(false);
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showInputArticulo, setShowInputArticulo] = useState(false);
 
-  // Configuración de react-hook-form con valores predeterminados desde localStorage
+  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues:
-      JSON.parse(localStorage.getItem("formInscriptionPayment")) || {},
+    defaultValues: formData,
   });
 
-  const { watch, setValue, reset } = methods;
+  const { watch, setValue, reset, clearErrors, formState: { errors },} = methods;
 
   // Observadores para campos clave
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
   const seleccionArticulo = watch("articuloPublicado");
   const fechaInicioEvento = watch("fechaInicioEvento");
-
-  // Obtener la fecha actual ajustada por zona horaria
-  const now = new Date();
-  const localOffset = now.getTimezoneOffset() * 60000;
-  const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
 
   // Validación personalizada para la fecha de fin
   const validateFechaFin = (fechaFin) => {
@@ -83,19 +58,19 @@ function InscriptionPaymentForm() {
     );
   };
 
-  
+  // Efecto para sincronizar con localStorage 
   useEffect(() => {
-    // Función para inicializar los valores desde localStorage
-    const initializeFromLocalStorage = () => {
-      const formInscriptionPayment =
-        JSON.parse(localStorage.getItem("formInscriptionPayment")) || {};
-      reset(formInscriptionPayment);
-    };
-    initializeFromLocalStorage();
-    // Suscribirse a los cambios en el formulario para guardar en localStorage
+    reset(formData);
+    // Suscribirse a los cambios en el formulario para guardar en localStorage y actualizar las secciones visibles
     const subscription = watch((data) => {
-      localStorage.setItem("formInscriptionPayment", JSON.stringify(data));
+      localStorage.setItem(formStorageKey, JSON.stringify(data));
+
+      // Lógica para mostrar u ocultar campos basados en los valores del formulario
+      setShowInputParticipacion(data.participacionProyecto === "Sí");
+      setShowInputDirector(data.rolEnProyecto === "Director");
+      setShowInputArticulo(data.articuloPublicado === "Sí");
     });
+
     // Limpiar la suscripción al desmontar el componente
     return () => subscription.unsubscribe();
   }, [watch, reset]);
@@ -144,7 +119,45 @@ function InscriptionPaymentForm() {
     console.log(methods.getValues());
   };
 
-  // Funciones para manejar la generación de documentos
+  // Función para descargar el formulario como JSON
+  const handleDownloadJson = () => {
+    const data = methods.getValues(); // Obtiene los datos actuales del formulario
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Pago de Inscripción.json"; // Nombre del archivo
+    link.click();
+  };
+
+  // Función para cargar un archivo JSON y rellenar el formulario
+  const handleUploadJson = (event) => {
+    const file = event.target.files[0];  // Verificar si hay archivo
+    if (file) {
+      const reader = new FileReader();  // Inicializa el FileReader para leer el archivo
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target.result);  // Parsear el archivo JSON
+  
+          // Reset del formulario con los datos del JSON
+          reset(json, {
+            keepErrors: false,
+            keepDirty: false,
+            keepValues: false,
+            keepTouched: false,
+            keepIsSubmitted: false,
+          });
+  
+          // Actualizar localStorage con los datos cargados
+          localStorage.setItem(formStorageKey, JSON.stringify(json));
+        } catch (err) {
+          console.error("Error al cargar el archivo JSON:", err);
+        }
+      };
+      reader.readAsText(file);  // Leer el archivo como texto
+    }
+  };
 
   const handleGenerateMemo1 = () => {
     const formInscriptionPayment = methods.getValues();
@@ -169,7 +182,7 @@ function InscriptionPaymentForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formInscriptionPayment");
+    localStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
@@ -310,6 +323,23 @@ function InscriptionPaymentForm() {
         <h1 className="text-center my-4">
           Formulario para Pago de Inscripción Dentro o Fuera de Proyectos
         </h1>
+        <div className="form-container">
+          <Label text="Descargar datos actuales en (.json)"/>
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+          <Label text="Cargar datos desde archivo (.json)"/>
+          {/* Input nativo para cargar un archivo JSON */}
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleUploadJson}  // Conectar con la función
+            style={{ marginTop: '20px' }}  // Estilos opcionales
+          />
+        </div>        
         <Form onSubmit={methods.handleSubmit(onSubmitInscriptionPayment)}>
           {/* Formulario con diferentes secciones */}
           <div className="form-container">
@@ -428,9 +458,8 @@ function InscriptionPaymentForm() {
               rules={{
                 required: "La fecha de inicio del evento es requerida",
                 validate: (value) => {
-                  const today = new Date(now.getTime() - localOffset).toISOString().split("T")[0];
                   return (
-                    value >= today ||
+                    value >= today() ||
                     "La fecha de inicio no puede ser anterior a la fecha actual."
                   );
                 },
@@ -566,3 +595,24 @@ function InscriptionPaymentForm() {
   );
 }
 export default InscriptionPaymentForm;
+
+//Funciones Validación
+const validarCedulaEcuatoriana = (cedula) => {
+  if (cedula.length !== 10) return false;
+
+  const provincia = parseInt(cedula.slice(0, 2), 10);
+  if (provincia < 1 || provincia > 24) return false;
+
+  let suma = 0;
+  for (let i = 0; i < 9; i++) {
+    let digito = parseInt(cedula[i], 10);
+    if (i % 2 === 0) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    suma += digito;
+  }
+
+  const digitoVerificador = (10 - (suma % 10)) % 10;
+  return digitoVerificador === parseInt(cedula[9], 10);
+};
