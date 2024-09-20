@@ -3,7 +3,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
-import PaymentDetail from "./ComponentInscriptionPayment/PaymentDetail.js";
+import PaymentDetail from "./ComponentPublicationsPayment/PaymentDetail.js";
 
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
@@ -11,26 +11,24 @@ import LabelText from "./Labels/LabelText.js";
 import InputSelect from "./Inputs/InputSelect";
 import InputText from "./Inputs/InputText";
 import InputTextArea from "./Inputs/InputTextArea";
-import InputDate from "./Inputs/InputDate";
-import RadioGroup from "./Inputs/RadioGroup";
 import ActionButton from "./Buttons/ActionButton";
 import DownloadButton from "./Buttons/DownloadButton";
-import today from "../utils/date";
-
 // Importación de las funciones para generar documentos
+
 import {
-  generateMemoInscriptionPaymentOutProyect1,
-  generateAnexo5InscriptionPayment,
+    generateMemoPublicationPaymentProject,
+  generateAnexo1PublicationPaymentWithin,
+  generateAnexo2PublicationPaymentOutside,
 } from "../utils/documentGenerator.js";
 
-function InscriptionPaymentForm() {
-  const formStorageKey = "formInscriptionPayment"; // Clave para almacenar el formulario en localStorage
+function PublicationsPaymentForm() {
+  const formStorageKey = "formPublicationsPayment"; // Clave para almacenar el formulario en localStorage
   const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [showInputParticipacion, setShowInputParticipacion] = useState(false);
   const [showInputDirector, setShowInputDirector] = useState(false);
-  const [showInputArticulo, setShowInputArticulo] = useState(false);
+  const [showInputFueraProyecto, setShowInputFueraProyecto] = useState(false);
 
   // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
@@ -45,30 +43,19 @@ function InscriptionPaymentForm() {
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
   const seleccionArticulo = watch("articuloPublicado");
-  const fechaInicioEvento = watch("fechaInicioEvento");
 
-  // Validación personalizada para la fecha de fin
-  const validateFechaFin = (fechaFin) => {
-    if (!fechaInicioEvento) {
-      return "Primero seleccione la fecha de inicio.";
-    }
-    return (
-      fechaFin >= fechaInicioEvento ||
-      "La fecha de finalización no puede ser anterior a la fecha de inicio."
-    );
-  };
-
-  // Efecto para sincronizar con localStorage 
+  // Efecto para sincronizar con localStorage y manejar la visibilidad de secciones
   useEffect(() => {
-    reset(formData);
-    // Suscribirse a los cambios en el formulario para guardar en localStorage y actualizar las secciones visibles
+    reset(formData); // Rellenar el formulario con los datos almacenados
+
+    // Suscribirse a los cambios en el formulario para guardar en localStorage
     const subscription = watch((data) => {
       localStorage.setItem(formStorageKey, JSON.stringify(data));
 
       // Lógica para mostrar u ocultar campos basados en los valores del formulario
       setShowInputParticipacion(data.participacionProyecto === "Sí");
       setShowInputDirector(data.rolEnProyecto === "Director");
-      setShowInputArticulo(data.articuloPublicado === "Sí");
+      setShowInputFueraProyecto(data.articuloPublicado === "Fuera del proyecto");
     });
 
     // Limpiar la suscripción al desmontar el componente
@@ -88,19 +75,18 @@ function InscriptionPaymentForm() {
       setValue("cargoDirector", "");
     }
 
+    if(participacionProyecto==="fueraProyecto"){
+      setShowInputFueraProyecto(true);
+    }else{
+       setShowInputFueraProyecto(false);
+    }
+
     if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
       setShowInputDirector(true);
     } else {
       setShowInputDirector(false);
       setValue("nombreDirector", "");
       setValue("cargoDirector", "");
-    }
-
-    if (seleccionArticulo === "SI") {
-      setShowInputArticulo(true);
-    } else {
-      setShowInputArticulo(false);
-      setValue("detalleArticuloSI", "");
     }
 
   }, [
@@ -113,7 +99,7 @@ function InscriptionPaymentForm() {
   ]);
 
   // Función que se ejecuta al enviar el formulario
-  const onSubmitInscriptionPayment = (data) => {
+  const onSubmitPublicationsPayment = (data) => {
     console.log(data);
     setShowDownloadSection(true);
     console.log(methods.getValues());
@@ -127,7 +113,7 @@ function InscriptionPaymentForm() {
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "Pago de Inscripción.json"; // Nombre del archivo
+    link.download = "Pago de Publicaciones.json"; // Nombre del archivo
     link.click();
   };
 
@@ -160,23 +146,38 @@ function InscriptionPaymentForm() {
   };
 
   const handleGenerateMemo1 = () => {
-    const formInscriptionPayment = methods.getValues();
-    generateMemoInscriptionPaymentOutProyect1(formInscriptionPayment);
+    const formPublicationsPayment = methods.getValues();
+    generateMemoPublicationPaymentProject(formPublicationsPayment);
     setShowDownloadSection(false);
   };
 
   const handleGeneratePdf = () => {
-    const formInscriptionPayment = methods.getValues();
-    generateAnexo5InscriptionPayment(formInscriptionPayment);
+    const formPublicationsPayment = methods.getValues();
+    generateAnexo1PublicationPaymentWithin(formPublicationsPayment);
+    setShowInputParticipacion(true);
     setShowDownloadSection(false);
   };
 
 
-  // Función para descargar todos los documentos
+  const handleGeneratePdf2 = () => {
+    const formPublicationsPayment = methods.getValues();
+    generateAnexo2PublicationPaymentOutside(formPublicationsPayment);
+    setShowInputFueraProyecto(true);
+    setShowDownloadSection(false);
+  };
+  
 
+  // Función para descargar todos los documentos
+//Validación para descargar adecuadamente los archivos necesarios
   const handleDownloadAll = () => {
-    handleGenerateMemo1();
-    handleGeneratePdf();
+    if(participacionProyecto === "dentroProyecto"){
+        handleGenerateMemo1();
+        handleGeneratePdf();
+    }else{
+        handleGenerateMemo1();
+        handleGeneratePdf2();
+    }
+    
     setShowDownloadSection(false);
   };
 
@@ -321,7 +322,7 @@ function InscriptionPaymentForm() {
       <Container>
         {/* Título del formulario */}
         <h1 className="text-center my-4">
-          Formulario para Pago de Inscripción Dentro o Fuera de Proyectos
+          Formulario para Pago de Publicación Dentro o Fuera de Proyectos
         </h1>
         <div className="form-container">
           <Label text="Descargar datos actuales en (.json)"/>
@@ -339,8 +340,8 @@ function InscriptionPaymentForm() {
             onChange={handleUploadJson}  // Conectar con la función
             style={{ marginTop: '20px' }}  // Estilos opcionales
           />
-        </div>        
-        <Form onSubmit={methods.handleSubmit(onSubmitInscriptionPayment)}>
+        </div>
+        <Form onSubmit={methods.handleSubmit(onSubmitPublicationsPayment)}>
           {/* Formulario con diferentes secciones */}
           <div className="form-container">
             <LabelTitle text="Datos Personales" />
@@ -429,110 +430,84 @@ function InscriptionPaymentForm() {
               </>
             )}
 
-            <LabelTitle text="Detalles del Evento" />
+            <LabelTitle text="Datos de la Publicación" />
 
             <InputText
-              name="tituloEvento"
-              label="Título del Evento"
-              rules={{ required: "El título del evento es requerido" }}
-              disable={false}
-            />
-
-            <InputText
-              name="ciudadEvento"
-              label="Ciudad"
-              rules={{ required: "La ciudad del evento es requerida" }}
+              name="tituloPublicacion"
+              label="Título de la Publicación"
+              rules={{ required: "El título de la publicación es requerido" }}
               disable={false}
             />
 
             <InputText
-              name="paisEvento"
-              label="País"
-              rules={{ required: "El país del evento es requerido" }}
-              disable={false}
-            />
-            <Label text="Fechas del evento" />
-            <InputDate
-              name="fechaInicioEvento"
-              label="Desde:"
-              rules={{
-                required: "La fecha de inicio del evento es requerida",
-                validate: (value) => {
-                  return (
-                    value >= today() ||
-                    "La fecha de inicio no puede ser anterior a la fecha actual."
-                  );
-                },
-              }}
-              disable={false}
-            />
-
-            <InputDate
-              name="fechaFinEvento"
-              label="Hasta:"
-              rules={{
-                required: "La fecha de finalización es requerida",
-                validate: validateFechaFin,
-              }}
+              name="nombreRevista"
+              label="Nombre de la Revista"
+              rules={{ required: "El nombre de la revista es requerida" }}
               disable={false}
             />
 
             <InputTextArea
-              name="RelevanciaAcademica"
-              label="Relevancia Académica del evento"
-              rules={{
-                required: "La relevancia académica del evento es requerida",
-              }}
+              name="autoresEPN"
+              label="Autores de la EPN"
+              infoText="(Titulares, Ocasionales, otros)"
+              placeholder="Escriba aquí los nombres de los autores separados por comas (,)"
+              rules={{ required: "Los autores son requeridos" }}
+              disable={false}
+            />
+
+            <InputTextArea
+              name="autoresExternos"
+              label="Autores Externos"
+              placeholder="Escriba aquí los nombres de los autores separados por comas (,)"
+              rules={{ required: "Los autores son requeridos" }}
+              disable={false}
+            />
+            <InputText
+              name="baseDatos"
+              label="Base de Datos de Indexación"
+              rules={{ required: "La base de datos de indexación es requeridos" }}
               disable={false}
             />
 
             <InputText
-              name="tituloPonencia"
-              label="Título de la Ponencia"
+              name="cuartilPublicacion"
+              label="Cuartil de la Publicación"
+              rules={{ required: "El cuartil de la publicación es requeridos" }}
               disable={false}
             />
-
-            <InputText
-              name="tituloArticulo"
-              label="Título del Artículo"
-              rules={{ required: "El título del artículo es requerido" }}
-              disable={false}
-            />
-
-            <RadioGroup
-              label="¿El Artículo será publicado?"
-              name="articuloPublicado"
-              options={articuloOptions}
-              rules={{ required: "Indique si el artículo será publicado" }}
-              disable={false}
-            />
-
-            {showInputArticulo && (
-              <InputText
-                name="detalleArticuloSI"
-                label="Detalle"
-                infoText="Por favor, ingrese el nombre de la revista y base de datos indexadas, 
-                el número especial de revista o memorias del evento, 
-                la revista o memorias en las cuales se publicará el artículo."
-                placeholder="Especifique"
-                rules={{
-                  required: "Por favor el detalle del artículo es requerido",
-                }}
-                disable={false}
-              />
+       
+            <PaymentDetail />
+            {showInputParticipacion && (
+                <>
+            <LabelTitle text="DOCUMENTACIÓN REQUERIDA PARA PAGO DE ARTÍCULOS CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO-DENTRO DE PROYECTOS" />
+            <Label text="REQUISITOS:" />
+            <LabelText text="• Formulario para pago de artículos científicos aceptados en revistas de alto impacto-dentro de proyectos." />
+            <LabelText text="• Copia de la carta o correo de aceptación de la publicación." />
+            <LabelText text="• Documento donde se puede verificar el costo de la publicación y la fecha máxima de pago." />
+            <LabelText text="• Formulario de registro de cuenta o formulario de giro al exterior." />
+            <LabelText text="• Copia del resumen del artículo para verificación de autores y filiación de la EPN." />
+            <LabelText text="• Quipux del Director del Proyecto al Vicerrectorado de Investigación, Innovación y Vinculación, solicitando el pago de la publicación." />
+            </>
             )}
 
-            <PaymentDetail />
-
-            <LabelTitle text="DOCUMENTACIÓN REQUERIDA PARA PAGOS DE INSCRIPCIÓN" />
-            <Label text="REQUISITOS:" />
-            <LabelText text="• Formulario para pago de inscripciones." />
-            <LabelText text="• Copia de la carta o correo de la aceptación de la ponencia y/o poster para participar en el evento." />
-            <LabelText text="• Copia del artículo, ponencia o poster aceptado para verificación de autores y afiliación de la EPN." />
-            <LabelText text="• Documento donde se pueda verificar el costo y  fechas de pago de inscripción al evento (NO factura/ NO invoice)." />
-            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda." />
-            <LabelText text="• Quipux del Director del Proyecto o Profesor solicitante dirigido al Vicerrectorado de Investigación, Innovación y Vinculación en el cual deberá solicitar el pago de la inscripción." />
-          </div>
+           {showInputFueraProyecto&& (
+                <>
+                <LabelTitle text="DOCUMENTACIÓN Y REQUISITOS REQUERIDOS PARA PAGO DE SUBVENCIONES PARA LA DIFUSIÓN DE ARTÍCULOS CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO" />
+                <Label text="REQUISITOS:" />
+                <LabelText text="• La filiación del primer autor de la publicación debe ser la Escuela Politécnica Nacional. En el caso que la aparición de los autores sea por orden alfabético se deberá presentar la documentación en la que se indique quien consta como autor principal y este debe tener la filiación de la EPN." />
+                <LabelText text="• La publicación debe tener un máximo de diez autores entre investigadores de la Escuela Politécnica Nacional y externos. Para auspiciar las publicaciones de más de cinco autores, al menos la mitad de estos debe pertenecer a la EPN." />
+                <LabelText text="• La revista debe estar ubicada en el primer cuartil (Q1) o segundo cuartil (Q2) de la especialización-Indexada en Scimago Journal Rank." />
+                <LabelText text="• El nombre de la Escuela Politécnica Nacional debe estar sin traducciones en la filiación de los autores según corresponda." />
+                <LabelText text="• Formulario para el pago de subvenciones para la difusión de artículos científicos aceptados en revistas de alto impacto." />
+                <LabelText text="• Copia de la carta o correo de aceptación de la publicación." />
+                <LabelText text="• Documento donde se puede verificar el costo de la publicación y la fecha máxima de pago." />
+                <LabelText text="• Formulario de registro de cuenta o formulario de giro al exterior." />
+                <LabelText text="• Copia del resumen del artículo para verificación de autores y filiación de la EPN." />
+                <LabelText text="• Quipux del profesor al Vicerrectorado de Investigación, Innovación y Vinculación, solicitando el auspicio para el pago de subvención de la publicación." />
+                </>
+           )}
+         
+            </div>
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
@@ -552,18 +527,34 @@ function InscriptionPaymentForm() {
                     onClick={handleGenerateMemo1}
                     icon="IconWord.png"
                     altText="Word Icon"
-                    label="Descargar Memorando Pago de Inscripcion"
+                    label="Descargar Memorando Pago de Publicación"
                   />
                 </Col>
-
+                {showInputParticipacion && (
+              <>
                 <Col md={4} className="text-center">
                   <DownloadButton
                     onClick={handleGeneratePdf}
                     icon="IconPdf.png"
                     altText="PDF Icon"
-                    label="Descargar Anexo 5"
+                    label="Descargar Anexo 1"
                   />
                 </Col>
+                </>
+                )}
+
+                {showInputFueraProyecto&& (
+                <>
+                <Col md={4} className="text-center">
+                  <DownloadButton
+                    onClick={handleGeneratePdf2}
+                    icon="IconPdf.png"
+                    altText="PDF Icon"
+                    label="Descargar Anexo 2"
+                  />
+                </Col>
+                </>
+                )}
               </Row>
 
               {/* Botón para descargar todos los documentos */}
@@ -594,7 +585,7 @@ function InscriptionPaymentForm() {
     </FormProvider>
   );
 }
-export default InscriptionPaymentForm;
+export default PublicationsPaymentForm;
 
 //Funciones Validación
 const validarCedulaEcuatoriana = (cedula) => {

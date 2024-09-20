@@ -34,37 +34,57 @@ function Header() {
             <Nav.Link as={NavLink} to="/about" className={({ isActive }) => (isActive ? "active" : "")} > About </Nav.Link>
 
             {/* Dropdown (menú desplegable) para las opciones de formularios */}
-            <NavDropdown title="Formularios" id="basic-nav-dropdown">
-
+            <NavDropdown title="Formularios al Exterior" id="basic-nav-dropdown">
+            
               <NavDropdown.Item as={NavLink} to="/EventParticipationWithinProjects" 
-              className={({ isActive }) => (isActive ? "active" : "")} > 
-              Participación en Eventos Dentro de Proyectos
+                className={({ isActive }) => (isActive ? "active" : "")} > 
+                Participación en Eventos Dentro de Proyectos
               </NavDropdown.Item>
 
               <NavDropdown.Item as={NavLink} to="/EventParticipationOutsideProjects"
                 className={({ isActive }) => (isActive ? "active" : "")} >
                 Participación en Eventos Fuera de Proyectos
               </NavDropdown.Item>
+
               
               <NavDropdown.Item as={NavLink} to="/TechnicalTripWithinProjects"
                 className={({ isActive }) => (isActive ? "active" : "")} >
                 Participación en Viajes Técnicos Dentro de Proyectos
               </NavDropdown.Item>
 
-              <NavDropdown.Item as={NavLink} to="/InscriptionPayment"
-                className={({ isActive }) => (isActive ? "active" : "")} >
-                Pago de Inscripción Dentro o Fuera de Proyectos
-              </NavDropdown.Item>
+            </NavDropdown>
+
+            <NavDropdown title="Formularios Nacionales" id="basic-nav-dropdown">
               
               <NavDropdown.Item as={NavLink} to="/NationalOutsideProject"
                 className={({ isActive }) => (isActive ? "active" : "")} >
-                Participacion en Eventos Nacionales Fuera de Proyectos
+                Participacion en Eventos Fuera de Proyectos
               </NavDropdown.Item>
+
               <NavDropdown.Item as={NavLink} to="/NationalWithinProject"
                 className={({ isActive }) => (isActive ? "active" : "")} >
-                Salidas Nacionales Dentro de Proyectos
+                Participación en Eventos Dentro de Proyectos
+              </NavDropdown.Item>
+
+              <NavDropdown.Item as={NavLink} to="/SamplingTripWithinProject"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Salidas de campo y de muestreo y/o viajes técnicos dentro de proyectos
+              </NavDropdown.Item>
+
+            </NavDropdown>
+
+            <NavDropdown title="Pagos y Otros Formularios" id="basic-nav-dropdown">
+
+              <NavDropdown.Item as={NavLink} to="/InscriptionPayment"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Pago de Inscripción
               </NavDropdown.Item>
               
+              <NavDropdown.Item as={NavLink} to="/PublicationsPayment"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Pago de Publicaciones
+              </NavDropdown.Item>
+
             </NavDropdown>
           </Nav>
 

@@ -13,6 +13,7 @@ import InputDate from "./Inputs/InputDate";
 import RadioGroup from "./Inputs/RadioGroup";
 import ActionButton from "./Buttons/ActionButton";
 import DownloadButton from "./Buttons/DownloadButton";
+import today from "../utils/date";
 
 // Importación de los componentes del formulario
 import ActivitySchedule from "./ComponentNationalWithinProject/ActivitySchedule";
@@ -25,133 +26,110 @@ import {
   generateMemoWithinProject,
   generateAnexo2WithinProject,
 } from "../utils/documentGeneratorNational";
-// Validaciones personalizadas
-const validarCedulaEcuatoriana = (cedula) => {
-  if (cedula.length !== 10) return false;
-  const provincia = parseInt(cedula.slice(0, 2), 10);
-  if (provincia < 1 || provincia > 24) return false;
-
-  let suma = 0;
-  for (let i = 0; i < 9; i++) {
-    let digito = parseInt(cedula[i], 10);
-    if (i % 2 === 0) {
-      digito *= 2;
-      if (digito > 9) digito -= 9;
-    }
-    suma += digito;
-  }
-
-  const digitoVerificador = (10 - (suma % 10)) % 10;
-  return digitoVerificador === parseInt(cedula[9], 10);
-};
-// Validación personalizada para la fecha de fin del evento
-const validateFechaFin = (fechaFin, fechaInicioEvento) => {
-  if (!fechaInicioEvento) {
-    return "Primero seleccione la fecha de inicio del evento.";
-  } else if (!fechaFin) {
-    return (
-      fechaFin >= fechaInicioEvento ||
-      "La fecha de fin debe ser mayor o igual a la fecha de inicio."
-    );
-  }
-  return (
-    fechaFin >= fechaInicioEvento ||
-    "La fecha de fin debe ser mayor o igual a la fecha de inicio."
-  );
-};
 
 function NationalWithinProjectsForm() {
+  const formStorageKey = "formNationalWithinProjects";
+  const daysStorageKey = "diasNationalWithinProjects";
+  const formNationalWithinProjects = JSON.parse(localStorage.getItem(formStorageKey)) || {};
+
   const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
   const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
 
   // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues:
-      JSON.parse(localStorage.getItem("formNationalWithinProjects")) || {},
+    defaultValues: formNationalWithinProjects,
   });
-  const { handleSubmit } = methods;
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
 
-  const {
-    watch,
-    setValue,
-    reset,
-    clearErrors,
-    formState: { errors },
-  } = methods;
+  const { watch, setValue, reset, clearErrors, formState: { errors },} = methods;
 
-  const now = new Date();
-  const localOffset = now.getTimezoneOffset() * 60000;
-  const adjustedNow = new Date(now.getTime() - localOffset)
-    .toISOString()
-    .split("T")[0];
+  // Función para calcular y almacenar la diferencia de días
+  const calcularDiferenciaEnDias = (fechaInicioString, fechaFinString) => {
+    const fechaInicio = new Date(fechaInicioString);
+    const fechaFin = new Date(fechaFinString);
+
+    if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
+      setDiferenciaEnDias(0);
+      localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: 0 }));
+      return;
+    }
+
+    const diferenciaEnDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+    setDiferenciaEnDias(diferenciaEnDias);
+    localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: diferenciaEnDias }));
+  };
+
+  // Función para extraer y calcular las fechas del formulario
+  const extraerYCalcularFechas = (formData) => {
+    const { transporteIda = [], transporteRegreso = [] } = formData;
+    const fechaInicio = transporteIda[0]?.fechaSalida || "";
+    const fechaFin = transporteRegreso[transporteRegreso.length - 1]?.fechaLlegada || "";
+    calcularDiferenciaEnDias(fechaInicio, fechaFin);
+  };
 
   // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
-    const calculateAndSetDiferenciaEnDias = (
-      primeraFechaSalida,
-      ultimaFechaLlegada
-    ) => {
-      if (primeraFechaSalida && ultimaFechaLlegada) {
-        const fechaInicio = new Date(primeraFechaSalida);
-        const fechaFinal = new Date(ultimaFechaLlegada);
-        const diferenciaEnDias =
-          Math.ceil((fechaFinal - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
+    reset(formNationalWithinProjects);
+    setSeleccionInscripcion(formNationalWithinProjects.inscripcion || "");
+    extraerYCalcularFechas(formNationalWithinProjects);
 
-        localStorage.setItem(
-          "diasNationalWithinProjects",
-          JSON.stringify({ diferencia: diferenciaEnDias })
-        );
-        setDiferenciaEnDias(diferenciaEnDias);
-      } else {
-        localStorage.setItem(
-          "diasNationalWithinProjects",
-          JSON.stringify({ diferencia: 0 })
-        );
-        setDiferenciaEnDias(0);
-      }
-    };
-    // Función para inicializar los valores desde localStorage
-    const initializeFromLocalStorage = () => {
-      const formNationalWithinProjects =
-        JSON.parse(localStorage.getItem("formNationalWithinProjects")) || {};
-      reset(formNationalWithinProjects);
-      setSeleccionInscripcion(formNationalWithinProjects.inscripcion || "");
-
-      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
-      const primeraFechaSalida =
-        formNationalWithinProjects.transporteIda?.[0]?.fechaSalida || "";
-      const ultimaFechaLlegada =
-        formNationalWithinProjects.transporteRegreso?.[
-          formNationalWithinProjects.transporteRegreso.length - 1
-        ]?.fechaLlegada || "";
-      calculateAndSetDiferenciaEnDias(primeraFechaSalida, ultimaFechaLlegada);
-    };
-    initializeFromLocalStorage();
-    // Suscribirse a los cambios en el formulario para guardar en localStorage
+    // Suscribirse a los cambios en el formulario en tiempo real
     const subscription = watch((data) => {
-      localStorage.setItem("formNationalWithinProjects", JSON.stringify(data));
-      // Actualizar selección de inscripción
-      setSeleccionInscripcion(data.inscripcion);
-
-      // Calcular y actualizar diferencia en días entre las fechas seleccionadas
-      const primeraFechaSalida = data.transporteIda?.[0]?.fechaSalida || "";
-      const ultimaFechaLlegada =
-        data.transporteRegreso?.[data.transporteRegreso.length - 1]
-          ?.fechaLlegada || "";
-      calculateAndSetDiferenciaEnDias(primeraFechaSalida, ultimaFechaLlegada);
+      localStorage.setItem(formStorageKey, JSON.stringify(data));
+      setSeleccionInscripcion(data.inscripcion || "");
+      extraerYCalcularFechas(data);
     });
-    // Limpiar la suscripción al desmontar el componente
-    return () => subscription.unsubscribe();
-  }, [watch, reset, setSeleccionInscripcion, setDiferenciaEnDias]);
-  // A partir de aqui los handleButtons
 
+    return () => subscription.unsubscribe();
+  }, [watch, reset]);
+
+  // A partir de aqui los handleButtons
   const onSubmitNationalEvent = (data) => {
     setShowDownloadSection(true);
   };
 
+  // Función para descargar el formulario como JSON
+  const handleDownloadJson = () => {
+    const data = methods.getValues(); // Obtiene los datos actuales del formulario
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Participación Nacional Dentro de Proyectos.json"; // Nombre del archivo
+    link.click();
+  };
+
+  // Función para cargar un archivo JSON y rellenar el formulario
+  const handleUploadJson = (event) => {
+    const file = event.target.files[0];  // Verificar si hay archivo
+    if (file) {
+      const reader = new FileReader();  // Inicializa el FileReader para leer el archivo
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target.result);  // Parsear el archivo JSON
+  
+          // Reset del formulario con los datos del JSON
+          reset(json, {
+            keepErrors: false,
+            keepDirty: false,
+            keepValues: false,
+            keepTouched: false,
+            keepIsSubmitted: false,
+          });
+  
+          // Actualizar localStorage con los datos cargados
+          localStorage.setItem(formStorageKey, JSON.stringify(json));
+        } catch (err) {
+          console.error("Error al cargar el archivo JSON:", err);
+        }
+      };
+      reader.readAsText(file);  // Leer el archivo como texto
+    }
+  };
+  
   const handleGenerateDocx = () => {
     const formNationalWithinProjects = methods.getValues();
     generateMemoWithinProject(formNationalWithinProjects);
@@ -180,7 +158,8 @@ function NationalWithinProjectsForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formNationalWithinProjects");
+    localStorage.removeItem(formStorageKey);
+    localStorage.removeItem(daysStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
@@ -404,8 +383,25 @@ function NationalWithinProjectsForm() {
     <FormProvider {...methods}>
       <Container>
         <h1 className="text-center my-4">
-          Formulario para participación en viajes técnicos dentro de proyectos
+        Formulario para salidas nacionales dentro de proyectos
         </h1>
+        <div className="form-container">
+          <Label text="Descargar datos actuales en (.json)"/>
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+          <Label text="Cargar datos desde archivo (.json)"/>
+          {/* Input nativo para cargar un archivo JSON */}
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleUploadJson}  // Conectar con la función
+            style={{ marginTop: '20px' }}  // Estilos opcionales
+          />
+        </div>
         <Form onSubmit={methods.handleSubmit(onSubmitNationalEvent)}>
           <div className="form-container">
             <LabelTitle text="Detalles del Proyecto" disabled={false} />
@@ -569,7 +565,7 @@ function NationalWithinProjectsForm() {
                 required: "La fecha de inicio del evento es requerida",
                 validate: (value) => {
                   return (
-                    value >= adjustedNow ||
+                    value >= today() ||
                     "La fecha de inicio no puede ser anterior a la fecha actual."
                   );
                 },
@@ -861,3 +857,38 @@ function NationalWithinProjectsForm() {
 }
 
 export default NationalWithinProjectsForm;
+
+// Validaciones personalizadas
+const validarCedulaEcuatoriana = (cedula) => {
+  if (cedula.length !== 10) return false;
+  const provincia = parseInt(cedula.slice(0, 2), 10);
+  if (provincia < 1 || provincia > 24) return false;
+
+  let suma = 0;
+  for (let i = 0; i < 9; i++) {
+    let digito = parseInt(cedula[i], 10);
+    if (i % 2 === 0) {
+      digito *= 2;
+      if (digito > 9) digito -= 9;
+    }
+    suma += digito;
+  }
+
+  const digitoVerificador = (10 - (suma % 10)) % 10;
+  return digitoVerificador === parseInt(cedula[9], 10);
+};
+// Validación personalizada para la fecha de fin del evento
+const validateFechaFin = (fechaFin, fechaInicioEvento) => {
+  if (!fechaInicioEvento) {
+    return "Primero seleccione la fecha de inicio del evento.";
+  } else if (!fechaFin) {
+    return (
+      fechaFin >= fechaInicioEvento ||
+      "La fecha de fin debe ser mayor o igual a la fecha de inicio."
+    );
+  }
+  return (
+    fechaFin >= fechaInicioEvento ||
+    "La fecha de fin debe ser mayor o igual a la fecha de inicio."
+  );
+};
