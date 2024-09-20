@@ -5,18 +5,17 @@ import { NavLink } from "react-router-dom";
 // Componente Header que representa la barra de navegación superior
 function Header() {
   return (
-    <Navbar bg="dark" variant="dark" expand="lg"> {/* El componente Navbar de React-Bootstrap para crear una barra de navegación */}
+    <Navbar style={{ backgroundColor: "#001F3E" }} variant="dark" expand="lg" fixed="top" sticky="top" > {/* El componente Navbar de React-Bootstrap para crear una barra de navegación */}
         {/* Contenedor para centrar y alinear el contenido dentro de la barra de navegación */}
       <Container>
         {/* Marca de la barra de navegación que incluye un logo y un texto */}
         <Navbar.Brand href="/">
           <img
-            src="logo.png"
+            src="logo-epn.svg"
             alt="Logo"
-            width="30"
-            height="30"
-            className="d-inline-block align-top"
-            style={{ marginRight: "10px" }}
+            width="50"
+            height="50"
+            
           />
           Dirección de Investigación
         </Navbar.Brand>
@@ -73,7 +72,7 @@ function Header() {
 
             </NavDropdown>
 
-            <NavDropdown title="Pagos y Otros Formularios" id="basic-nav-dropdown">
+            <NavDropdown title="Inscripción y otros" id="basic-nav-dropdown">
 
               <NavDropdown.Item as={NavLink} to="/InscriptionPayment"
                 className={({ isActive }) => (isActive ? "active" : "")} >
@@ -82,7 +81,7 @@ function Header() {
               
               <NavDropdown.Item as={NavLink} to="/PublicationsPayment"
                 className={({ isActive }) => (isActive ? "active" : "")} >
-                Pago de Publicaciones
+                Pago de Revista
               </NavDropdown.Item>
 
             </NavDropdown>

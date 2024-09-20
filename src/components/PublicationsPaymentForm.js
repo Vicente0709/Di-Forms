@@ -316,6 +316,19 @@ function PublicationsPaymentForm() {
       label: "NO",
     },
   ];
+  const optionsBD = [
+    { value: "Scopus (SJR)", label: "Scopus (SJR)" },
+    { value: "Web of Science (JCR)", label: "Web of Science (JCR)" },
+    { value: "Latindex", label: "Latindex" },
+    { value: "Scielo", label: "Scielo" }
+  ];
+  const optionsCuartil = [
+    { value: "Q1", label: "Q1" },
+    { value: "Q2", label: "Q2" },
+    { value: "Q3", label: "Q3" },
+    { value: "Q4", label: "Q4" },
+    { value: "Sin cuartil", label: "Sin cuartil" }
+  ];  
 
   return (
     <FormProvider {...methods}>
@@ -462,18 +475,22 @@ function PublicationsPaymentForm() {
               rules={{ required: "Los autores son requeridos" }}
               disable={false}
             />
-            <InputText
+            <InputSelect
               name="baseDatos"
               label="Base de Datos de Indexación"
-              rules={{ required: "La base de datos de indexación es requeridos" }}
-              disable={false}
+              infoText="El auspicio estará sujeto a lo indicado en el correspondiente procedimiento."
+              options={optionsBD}
+              rules={{ required: "La base de datos de indexación es requerida" }}
+              disabled={false}
             />
 
-            <InputText
+            <InputSelect
               name="cuartilPublicacion"
               label="Cuartil de la Publicación"
-              rules={{ required: "El cuartil de la publicación es requeridos" }}
-              disable={false}
+              infoText="El auspicio estará sujeto a lo indicado en el correspondiente procedimiento."
+              options={optionsCuartil}
+              rules={{ required: "El cuartil de la publicación es requerido" }}
+              disabled={false}
             />
        
             <PaymentDetail />
