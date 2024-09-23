@@ -53,8 +53,8 @@ function PublicationsPaymentForm() {
       localStorage.setItem(formStorageKey, JSON.stringify(data));
 
       // Lógica para mostrar u ocultar campos basados en los valores del formulario
-      setShowInputParticipacion(data.participacionProyecto === "Sí");
-      setShowInputDirector(data.rolEnProyecto === "Director");
+      setShowInputParticipacion(data.participacionProyecto === "dentroProyecto");
+      setShowInputDirector(data.rolEnProyecto === "Colaborador"||data.rolEnProyecto === "Codirector");
       setShowInputFueraProyecto(data.articuloPublicado === "Fuera del proyecto");
     });
 
@@ -72,7 +72,6 @@ function PublicationsPaymentForm() {
       setShowInputParticipacion(false);
       setValue("codigoProyecto", "");
       setValue("nombreDirector", "");
-      setValue("cargoDirector", "");
     }
 
     if(participacionProyecto==="fueraProyecto"){

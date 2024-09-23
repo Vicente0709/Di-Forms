@@ -574,79 +574,375 @@ export async function generateMemoNationalOutsideProject2(data) {
 }
 
 export async function generateAnexo10NationalOutsideProject(data) {
-  const template = {
-    schemas: schemasAnexo10,
-    basePdf: basePdfAnexo10,
-  };
+    const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+      <Text style={styles.header}>
+      Anexo 10 – Formulario para salidas nacionales fuera de proyectos 
+      </Text>
 
-  const plugins = { text, image, qrcode: barcodes.qrcode };
+      <Text style={styles.sectionTitle}>
+        1. DATOS DEL INVESTIGADOR 
+        </Text>
 
-  let valorInscripcionStr = "";
-  let fechaPagoInscripcionStr = "";
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+            <Text style={styles.tableCellText}>Nombres Completos:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+            <Text style={styles.tableCellText}>Departamento / Instituto:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.departamento}
+              </Text>
+            </View>
+          </View>  
+        </View>
 
-  if (data && data.inscripciones && Array.isArray(data.inscripciones)) {
-    data.inscripciones.forEach((inscripcion) => {
-      if (data.inscripcion === "SI") {
-        if (inscripcion.valorInscripcion) {
-          valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
-        }
 
-        if (inscripcion.pagoLimite && inscripcion.limiteFecha) {
-          fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${formatDate(
-            inscripcion.limiteFecha
-          )}\n`;
-        }
-      } else if (data.inscripcion === "NO") {
-        // Manejo del caso en que data.inscripcion es "NO"
-        valorInscripcionStr += "\n";
-        fechaPagoInscripcionStr += "\n";
-      }
-    });
-  }
+      {/* 2. Datos del evento*/}
 
-  const inputs = [
-    {
-      nombresApellidos:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      fechaPedido: formattedDate,
-      departamento: data.departamento,
-      tituloEvento: data.tituloEvento,
-      ciudadPaisEvento: data.ciudadEvento + ", Ecuador",
-      fechaInicioEvento: formatDate(data.fechaInicioEvento),
-      fechaFinEvento: formatDate(data.fechaFinEvento),
-      RelevanciaAcademica: data.RelevanciaAcademica,
-      tituloPonencia: data.tituloPonencia,
-      tipoPonencia: data.tipoPonencia,
-      detalleArticuloSI: data.detalleArticuloSI,
-      articuloPublicadoSi: data.articuloPublicado === "SI" ? "X" : "",
-      articuloPublicadoNo: data.articuloPublicado === "NO" ? "X" : "",
-      pasajesAereosSi: data.pasajesAereos === "SI" ? "X" : "",
-      pasajesAereosNo: data.pasajesAereos === "NO" ? "X" : "",
-      viaticosSubsistenciasSi: data.viaticosSubsistencias === "SI" ? "X" : "",
-      viaticosSubsistenciasNo: data.viaticosSubsistencias === "NO" ? "X" : "",
-      inscripcionSi: data.inscripcion === "SI" ? "X" : "",
-      inscripcionNo: data.inscripcion === "NO" ? "X" : "",
-      valorInscripcion: valorInscripcionStr.trim(),
-      pagoLimiteFecha: fechaPagoInscripcionStr.trim(),
-      metodoPagoTransferencia:
-        data.metodoPago === "Transferencia" && data.inscripcion === "SI"
-          ? "X"
-          : "",
-      metodoPagoOtra:
-        data.metodoPago === "Otra" && data.inscripcion === "SI" ? "X" : "",
-      nombresAp:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      departament: data.puesto.toUpperCase(),
-    },
-  ];
+      <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO Y REQUERIMIENTO </Text>
 
-  const pdf = await generate({ template, plugins, inputs });
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  <View style={styles.table}>
+  <View style={styles.tableRow}>
+    <View style={styles.tableCol25}>
+      <Text style={styles.tableCellText}>Titulo del Evento:</Text>
+    </View>
+    <View style={styles.tableCol}>
+      <Text style={styles.tableCellTextBlue}>
+        {data.tituloEvento}
+      </Text>
+    </View>
+  </View>
 
-  saveAs(
-    blob,
-    "Anexo 10 - Formulario salidas nacionales fuera de proyecto EPN.pdf"
+  <View style={styles.tableRow}>
+    <View style={styles.tableCol25}>
+      <Text style={styles.tableCellText}>Lugar del Evento:</Text>
+    </View>
+    <View style={styles.tableCol15}>
+      <Text style={styles.tableCellText}>Ciudad:</Text>
+    </View>
+    <View style={styles.tableCol}>
+      <Text style={styles.tableCellTextBlue}>
+        {data.ciudadEvento.toUpperCase()}
+      </Text>
+    </View>
+    <View style={styles.tableCol15}>
+      <Text style={styles.tableCellText}>País:</Text>
+    </View>
+    <View style={styles.tableCol}>
+      <Text style={styles.tableCellTextBlue}>
+        {"Ecuador" }
+      </Text>
+    </View>
+    </View>
+    <View style={styles.tableRow}>
+    <View style={styles.tableCol25}>
+      <Text style={styles.tableCellText}>Fecha del evento:</Text>
+    </View>
+    <View style={styles.tableCol}>
+      <Text style={styles.textBlueCenter}>
+        {"Desde el  "}
+        <Text style={styles.tableCellTextBlue}>
+          {data.fechaInicioEvento}
+          <Text style={styles.textBlueCenter}>
+            {" hasta el "}
+            <Text style={styles.tableCellTextBlue}>
+              {data.fechaFinEvento}
+            </Text>
+          </Text>
+        </Text>
+      </Text>
+    </View>
+    </View>
+  
+    
+
+    <View style={styles.tableRow}>
+      <View style={styles.tableCol25}>
+        <Text style={styles.tableCellText}>Relevancia académica del evento:</Text>
+      </View>
+      <View style={styles.tableCol}>
+        <Text style={styles.tableCellTextBlue}>
+        {data.RelevanciaAcademica}
+        </Text>
+      </View>
+    </View>
+
+    <View style={styles.tableRow}>
+      <View style={styles.tableCol25}>
+        <Text style={styles.tableCellText}>Título de la Ponencia: </Text>
+      </View>
+      <View style={styles.tableCol}>
+        <Text style={styles.tableCellTextBlue}>
+        {data.tituloPonencia}
+        </Text>
+      </View>
+    </View>
+
+    <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Tipo de ponencia: </Text>
+        </View>
+        <View style={styles.tableCol}>
+        <Text style={styles.tableCellTextBlue}>
+          {data.tipoPonencia}
+        </Text>
+    </View>
+    </View>
+    
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>
+          ¿El artículo será publicado?
+          </Text>
+          <Text style={styles.baseText}>
+            {"SI ( "}
+            <Text style={styles.tableCellTextBlue}>
+              {data.articuloPublicado === "SI" ? "X" : ""}
+              <Text style={styles.baseText}>{" )"}</Text>
+            </Text>
+          </Text>
+          <Text style={styles.baseText}>
+            {"NO ( "}
+            <Text style={styles.tableCellTextBlue}>
+              {data.articuloPublicado === "NO" ? "X" : ""}
+              <Text style={styles.baseText}>{" )"}</Text>
+            </Text>
+          </Text>
+        </View>
+        <View style={styles.tableCol}>
+        <Text style={styles.tableCellTextBlue}>
+          {data.detalleArticuloSI}
+        </Text>
+        </View>
+        </View>
+      
+
+      <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Solicita:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellText}>Pasajes aéreos:</Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.baseText}>
+                {"SI( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.pasajesAereos === "SI" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.baseText}>
+                {"NO( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.pasajesAereos === "NO" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>
+                Viáticos y subsistencias:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.baseText}>
+                {"SI( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.viaticosSubsistencias === "SI" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.baseText}>
+                {"NO( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.viaticosSubsistencias === "NO" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>Inscripción:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.baseText}>
+                {"SI( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.inscripcion === "SI" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.baseText}>
+                {"NO( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.inscripcion === "NO" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+            </View>
+          </View>
+          </View>
+    
+    
+    <View>
+          <Text style={styles.sectionTitle}>
+            3. INFORMACIÓN DEL PAGO DE INSCRIPCIÓN{" "}
+          </Text>
+
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Valor de la Inscripción:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.inscripciones.map((inscripcion, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {inscripcion.valorInscripcion
+                        ?  "$ " +
+                          (inscripcion.valorInscripcion || " ")
+                        : ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Fechas de pago de inscripción:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.inscripciones.map((inscripcion, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {data.inscripciones.map((inscripcion, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {inscripcion.pagoLimite
+                              ? inscripcion.pagoLimite +
+                                " " +
+                                (inscripcion.limiteFecha || " ")
+                              : ""}
+                          </Text>
+                        </View>
+                      ))}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Método de pago:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Transferencia:
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Transferencia" 
+                            ? "X"
+                            : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                    a) Formulario de pagos al exterior, de ser el caso, (Anexo 4)
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b) Documento donde se puede verificar el costo y fechas de la inscripción al evento
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Otra(tarjetadecrédito,efectivo,etc...):
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Otra"
+                            ? "X"
+                            : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a) Solicitud de REEMBOLSO. Incluir texto con justificación en el mismo memorando del requerimiento.
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b)Documento donde se puede verificar el costo y fechas de la inscripción al evento
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+    
+
+        {/* Etiqueta de Firma */}
+        <Text style={styles.baseText}>Firma del Solicitante:</Text>
+
+
+       {/* Espacio en blanco para la firma */}
+       <Text>{"\n\n\n"}</Text>
+
+{/* Nombre completo */}
+<Text style={styles.baseTextCenter}>________________________</Text>
+
+{/* Nombre completo */}
+<Text style={styles.tableCellTextBlueCenter}>
+  {`${data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()}`}
+</Text>
+
+{/* Nombre del director y código de proyecto */}
+<Text style={styles.tableCellTextBlueCenter}>
+  {`${data.puesto.toUpperCase()}`}
+</Text>
+
+
+   <Text style={styles.tableCellText}>
+   *A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, 
+   mismos que deberán justificar el 70% del valor del viatico, caso contrario la diferencia deberá ser reintegrada a la cuenta de la 
+    EOD-UGIPS. (Norma Técnica para el pago de viáticos Artículo 15 Control y liquidación)
+     </Text>
+
+      </Page>
+    </PDFDocument>
   );
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
+
+  // Descargar automáticamente el archivo PDF
+  saveAs(blob, `Anexo 10 - Formulario salidas nacionales fuera de proyecto.pdf`);
 }
 
 export async function generateAnexoANationalOutsideProject(data) {

@@ -66,9 +66,9 @@ function InscriptionPaymentForm() {
       localStorage.setItem(formStorageKey, JSON.stringify(data));
 
       // Lógica para mostrar u ocultar campos basados en los valores del formulario
-      setShowInputParticipacion(data.participacionProyecto === "Sí");
-      setShowInputDirector(data.rolEnProyecto === "Director");
-      setShowInputArticulo(data.articuloPublicado === "Sí");
+      setShowInputParticipacion(data.participacionProyecto === "dentroProyecto");
+      setShowInputDirector(data.rolEnProyecto === "Codirector"||data.rolEnProyecto === "Colaborador");
+      setShowInputArticulo(data.articuloPublicado === "SI");
     });
 
     // Limpiar la suscripción al desmontar el componente
@@ -85,7 +85,6 @@ function InscriptionPaymentForm() {
       setShowInputParticipacion(false);
       setValue("codigoProyecto", "");
       setValue("nombreDirector", "");
-      setValue("cargoDirector", "");
     }
 
     if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
