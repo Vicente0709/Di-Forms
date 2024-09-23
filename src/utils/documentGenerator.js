@@ -248,30 +248,39 @@ const month = String(today.getMonth() + 1).padStart(2, "0"); // Los meses son 0-
 const year = today.getFullYear();
 const formattedDate = `${day}/${month}/${year}`;
 
-export function generateMemoWithinProjec1(data) {
-  let solicitudOracion = "Para lo cual solicito ";
-  // Array para almacenar las solicitudes
-  let solicitudes = [];
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push("la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push("la asignación de viáticos y subsistencias");
-  }
-  // Verificar si se debe incluir "pago de inscripción"
-  if (data.inscripcion === "SI") {
-    solicitudes.push("el pago de inscripción");
-  }
+export function generateMemoWithinProject(data) {
+  const nombresApellidos = capitalizeWords(
+    (data.nombres + " " + data.apellidos).toLowerCase()
+  );
+  
+  // Función interna para generar solicitudes dentro de generateMemoWithinProject
+  const generarSolicitudes = () => {
+    let solicitudes = [];
+    
+    if (data.pasajesAereos === "SI") {
+      solicitudes.push("la compra de pasajes aéreos");
+    }
+    if (data.viaticosSubsistencias === "SI") {
+      solicitudes.push("la asignación de viáticos y subsistencias");
+    }
+    if (data.inscripcion === "SI") {
+      solicitudes.push("el pago de inscripción");
+    }
 
-  // Construir la oración final
-  if (solicitudes.length > 0) {
-    solicitudOracion += solicitudes.join(", ") + ".";
-  } else {
-    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
-  }
+    if (solicitudes.length > 0) {
+      return `Para lo cual solicito ${solicitudes.join(", ")}.`;
+    }
+    return ""; // No se solicita nada
+  };
 
+  const solicitudOracion = generarSolicitudes();
+
+  // Determina el contenido del cuerpo del memorando basado en el rol
+  const cuerpoMemorando = data.rolEnProyecto === "Director"
+    ? `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`
+    : `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr./Sra. "${nombresApellidos}", ${data.rolEnProyecto} del proyecto, pueda participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`;
+
+  // Generación del documento Word
   const doc = new Document({
     sections: [
       {
@@ -280,7 +289,7 @@ export function generateMemoWithinProjec1(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: "Formato de memorando PARTICIPACION EN EVENTO DENTRO DE PROYECTO ",
+                text: "Formato de memorando PARTICIPACION EN EVENTO DENTRO DE PROYECTO",
                 bold: true,
                 size: 24,
                 font: "Aptos (Cuerpo)",
@@ -335,7 +344,7 @@ export function generateMemoWithinProjec1(data) {
           new Paragraph({
             children: [
               new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. Para lo cual, adjunto los correspondientes documentos.`,
+                text: cuerpoMemorando,
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -376,9 +385,11 @@ export function generateMemoWithinProjec1(data) {
             children: [
               new TextRun({
                 text:
-                  data.nombres.toUpperCase() +
-                  " " +
-                  data.apellidos.toUpperCase(),
+                  data.rolEnProyecto === "Director"
+                    ? data.nombres.toUpperCase() +
+                      " " +
+                      data.apellidos.toUpperCase()
+                    : data.nombreDirector.toUpperCase(),
                 size: 20,
                 bold: true,
                 font: "Times New Roman",
@@ -403,174 +414,11 @@ export function generateMemoWithinProjec1(data) {
   Packer.toBlob(doc).then((blob) => {
     saveAs(
       blob,
-      "Memorando solicitud para participar en evento académico " +
-        data.codigoProyecto +
-        ".docx"
+      `Memorando solicitud para participar en evento académico ${data.codigoProyecto}.docx`
     );
   });
 }
-export function generateMemoWithinProjec2(data) {
-  const nombresApellidos = capitalizeWords(
-    (data.nombres + " " + data.apellidos).toLowerCase()
-  );
-  let solicitudOracion = "Para lo cual solicito ";
 
-  // Array para almacenar las solicitudes
-  let solicitudes = [];
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push("la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push("la asignación de viáticos y subsistencias");
-  }
-  // Verificar si se debe incluir "pago de inscripción"
-  if (data.inscripcion === "SI") {
-    solicitudes.push("el pago de inscripción");
-  }
-
-  // Construir la oración final
-  if (solicitudes.length > 0) {
-    solicitudOracion += solicitudes.join(", ") + ".";
-  } else {
-    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
-  }
-
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Formato de memorando PARTICIPACION EN EVENTO DENTRO DE PROYECTO ",
-                bold: true,
-                size: 24,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 300 },
-            alignment: "start",
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PARA:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Dr. Marco Santorum",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "ASUNTO:\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: `Solicitud para participar en evento académico/${data.codigoProyecto} `,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr."${nombresApellidos}", ${data.rolEnProyecto} del proyecto pueda participar en el evento titulado "${data.tituloProyecto}", a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Se adjunta la documentación correspondiente",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Con sentimientos de distinguida consideración.",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Atentamente,",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: data.nombreDirector.toUpperCase(),
-                size: 20,
-                bold: true,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
-    saveAs(
-      blob,
-      "Memorando solicitud para participar en evento académico " +
-        data.codigoProyecto +
-        ".docx"
-    );
-  });
-}
 export function generateMemoOutsideProject1(data) {
   const departament = capitalizeWords(data.departamento.toLowerCase());
   // Array para almacenar las solicitudes
