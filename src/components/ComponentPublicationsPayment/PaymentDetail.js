@@ -48,6 +48,7 @@ function PaymentDetail() {
       </p>
 
       {/* Tabla Dinámica */}
+      <div className="scroll-table-container">
       <table className="payment-table">
         <thead>
         <tr>
@@ -150,6 +151,7 @@ function PaymentDetail() {
       >
         Agregar Inscripción
       </button>
+      </div>
 
       {/* Método de pago */}
       <div className="form-group">

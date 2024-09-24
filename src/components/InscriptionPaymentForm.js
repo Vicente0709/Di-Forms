@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray  } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
-import PaymentDetail from "./ComponentInscriptionPayment/PaymentDetail.js";
 
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
@@ -22,16 +21,13 @@ import {
   generateMemoInscriptionPaymentOutProyect1,
   generateAnexo5InscriptionPayment,
 } from "../utils/documentGenerator.js";
+import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
+
+const formStorageKey = "formInscriptionPayment"; // Clave para almacenar el formulario en localStorage
+const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
 function InscriptionPaymentForm() {
-  const formStorageKey = "formInscriptionPayment"; // Clave para almacenar el formulario en localStorage
-  const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
-
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [showInputParticipacion, setShowInputParticipacion] = useState(false);
-  const [showInputDirector, setShowInputDirector] = useState(false);
-  const [showInputArticulo, setShowInputArticulo] = useState(false);
-
+  
   // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
@@ -39,24 +35,23 @@ function InscriptionPaymentForm() {
     defaultValues: formData,
   });
 
-  const { watch, setValue, reset, clearErrors, formState: { errors },} = methods;
+  const { register, control, watch, reset, setValue, clearErrors, formState:{errors} } = methods;
+
+  const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
+  const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
+  const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
 
   // Observadores para campos clave
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
   const seleccionArticulo = watch("articuloPublicado");
   const fechaInicioEvento = watch("fechaInicioEvento");
-
-  // Validación personalizada para la fecha de fin
-  const validateFechaFin = (fechaFin) => {
-    if (!fechaInicioEvento) {
-      return "Primero seleccione la fecha de inicio.";
-    }
-    return (
-      fechaFin >= fechaInicioEvento ||
-      "La fecha de finalización no puede ser anterior a la fecha de inicio."
-    );
-  };
+  const fechaFinEvento = watch("fechaFinEvento");
+  const metodoPago = watch("metodoPago");
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const [showInputParticipacion, setShowInputParticipacion] = useState(false);
+  const [showInputDirector, setShowInputDirector] = useState(false);
+  const [showInputArticulo, setShowInputArticulo] = useState(false);
 
   // Efecto para sincronizar con localStorage 
   useEffect(() => {
@@ -186,134 +181,16 @@ function InscriptionPaymentForm() {
     window.location.reload();
   };
 
-  const departamentoOptions = [
-    {
-      value: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
-      label: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
-    },
-    {
-      value: "DEPARTAMENTO DE BIOLOGÍA",
-      label: "DEPARTAMENTO DE BIOLOGÍA",
-    },
-    {
-      value: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
-      label: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
-    },
-    {
-      value: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
-      label: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
-    },
-    {
-      value: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
-      label: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
-    },
-    {
-      value: "DEPARTAMENTO DE CIENCIAS SOCIALES",
-      label: "DEPARTAMENTO DE CIENCIAS SOCIALES",
-    },
-    {
-      value: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
-      label: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
-    },
-    {
-      value:
-        "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
-      label:
-        "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
-    },
-    {
-      value: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
-      label: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
-    },
-    {
-      value: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
-      label: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
-    },
-    {
-      value: "DEPARTAMENTO DE FÍSICA",
-      label: "DEPARTAMENTO DE FÍSICA",
-    },
-    {
-      value: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
-      label: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
-    },
-    {
-      value: "DEPARTAMENTO DE GEOLOGÍA",
-      label: "DEPARTAMENTO DE GEOLOGÍA",
-    },
-    {
-      value: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
-      label: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
-    },
-    {
-      value: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
-      label: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
-    },
-    {
-      value: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
-      label: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
-    },
-    {
-      value: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
-      label: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
-    },
-    {
-      value: "DEPARTAMENTO DE MATERIALES",
-      label: "DEPARTAMENTO DE MATERIALES",
-    },
-    {
-      value: "DEPARTAMENTO DE MATEMÁTICA",
-      label: "DEPARTAMENTO DE MATEMÁTICA",
-    },
-    {
-      value: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
-      label: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
-    },
-    {
-      value: "DEPARTAMENTO DE PETRÓLEOS",
-      label: "DEPARTAMENTO DE PETRÓLEOS",
-    },
-    {
-      value: "INSTITUTO GEOFISICO",
-      label: "INSTITUTO GEOFISICO",
-    },
-  ];
-  const participacionOptions = [
-    {
-      value: "fueraProyecto",
-      label: "Fuera de Proyecto",
-    },
-    {
-      value: "dentroProyecto",
-      label: "Dentro de Proyecto",
-    },
-  ];
-
-  const rolOptions = [
-    {
-      value: "Director",
-      label: "Director",
-    },
-    {
-      value: "Codirector",
-      label: "Codirector",
-    },
-    {
-      value: "Colaborador",
-      label: "Colaborador",
-    },
-  ];
-
-  const articuloOptions = [
-    {
-      value: "SI",
-      label: "SI",
-    },
-    {
-      value: "NO",
-      label: "NO",
-    },
-  ];
+  const validarFechaLimiteInscripcion = (index) => {
+    const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
+  
+    if (limiteFecha && fechaFinEvento && limiteFecha > fechaFinEvento) {
+      return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
+    }
+  
+    return true;
+  };
+  
 
   return (
     <FormProvider {...methods}>
@@ -471,7 +348,8 @@ function InscriptionPaymentForm() {
               label="Hasta:"
               rules={{
                 required: "La fecha de finalización es requerida",
-                validate: validateFechaFin,
+                validate: (value) =>
+                  validarFechaFin(value, watch("fechaInicioEvento")),
               }}
               disable={false}
             />
@@ -521,7 +399,201 @@ function InscriptionPaymentForm() {
               />
             )}
 
-            <PaymentDetail />
+<div >
+             <h3>• Valor de la inscripción</h3>
+             <p>
+               Por favor, ingrese las fechas máximas de pago según la información
+               proporcionada en la página oficial del evento. Recuerde que solo se debe
+               seleccionar una de las tres opciones disponibles para la fecha de pago,
+               y asegúrese de que la fecha seleccionada no sea posterior a la fecha de
+               inicio del evento.
+             </p>
+       
+             {/* Tabla Dinámica */}
+             <div className="scroll-table-container">
+             <table className="payment-table">
+               <thead>
+               <tr>
+                   <th>Nro.</th>
+                   <th>Moneda</th>
+                   <th>Valor de inscripción</th>
+                   <th>Pago a realizarse</th>
+                   <th>Fecha</th>
+                   <th>Acciones</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 {fields.map((field, index) => (
+                   <tr key={field.id}>
+                     <td>
+                       <input
+                         type="number"
+                         value={index + 1} // Auto-incrementa el número basado en el índice
+                         readOnly
+                         className="form-input"
+                       />
+                     </td>
+                     <td>
+                       <select
+                         id="monedaPago"
+                         {...register(`inscripciones[${index}].monedaPago`, {
+                           required: "La moneda es requerida",
+                         })}
+                         className="form-select"
+                       >
+                         <option value="">Seleccione</option>
+                         <option value="$ ">Dólares</option>
+                         <option value="€ ">Euros</option>
+                         <option value="CHF ">
+                           Francos Suizos
+                         </option>
+                       </select>
+                       {errors.monedaPago && (
+                         <span className="error-text">
+                           {errors.monedaPago.message}
+                         </span>
+                       )}
+                     </td>
+       
+                     <td>
+                       <input
+                         type="number"
+                         step="0.01"
+                         id={`valorInscripcion-${index}`}
+                         placeholder="100.00"
+                         className="form-input"
+                         {...register(`inscripciones[${index}].valorInscripcion`, {
+                           required: "Este campo es requerido",
+                         })}
+                       />
+                       {errors.inscripciones &&
+                         errors.inscripciones[index]?.valorInscripcion && (
+                           <span className="error-text">
+                             {errors.inscripciones[index].valorInscripcion.message}
+                           </span>
+                         )}
+                     </td>
+                     <td>
+                       <select
+                         id="pagoLimite"
+                         {...register(`inscripciones[${index}].pagoLimite`, {
+                           required: "El pago limite es requerido",
+                         })}
+                         className="form-select"
+                       >
+                         <option value="">Seleccione</option>
+                         <option value="Antes del ">Antes</option>
+                         <option value="Despues del ">Despues</option>
+                         <option value="Hasta el ">
+                           Fecha maxima de pago
+                         </option>
+                       </select>
+                       {errors.pagoLimite && (
+                         <span className="error-text">
+                           {errors.pagoLimite.message}
+                         </span>
+                       )}
+                     </td>
+       
+                     <td>
+                       <input
+                         type="date"
+                         id={`limiteFecha-${index}`}
+                         className="form-input"
+                         {...register(`inscripciones[${index}].limiteFecha`, {
+                           validate: () => validarFechaLimiteInscripcion(index),
+                         })}
+                       />
+                       {errors.inscripciones &&
+                         errors.inscripciones[index]?.limiteFecha && (
+                           <span className="error-text">
+                             {errors.inscripciones[index].limiteFecha.message}
+                           </span>
+                         )}
+                     </td>
+                     <td>
+                      <ActionButton
+                        onClick={() => remove(index)}
+                        label="Eliminar"
+                        variant="danger"
+                      />
+                     </td>
+                   </tr>
+                 ))}
+               </tbody>
+             </table>
+             <ActionButton
+                onClick={() =>
+                  append({
+                    valorInscripcion: "",
+                    pagoLimite: "",
+                    limiteFecha: "",
+                  })
+                }
+                label="Agregar"
+                variant="success"
+              />
+            </div>
+            <LabelText text=" Considere que si el pago de inscripción es una moneda diferente a la
+               moneda legal del país se requiere un banco intermediario , por lo que se
+               solicita se comunique con la organización del evento para obtener esta
+               información." />
+            <LabelText text="En el caso que no exista banco intermediario se podrá solicitar un pago
+               por reembolso siempre y cuando se tenga la contestación oficial de la
+               organización de no tener un banco intermediario." />
+       
+             {/* Método de pago */}
+             <div className="form-group">
+               <h3>Método de pago:</h3>
+       
+               <div>
+                 <input
+                   type="radio"
+                   id="transferencia"
+                   value="Transferencia"
+                   {...register("metodoPago", {
+                     required: "Seleccione un método de pago",
+                   })}
+                 />
+                 <label htmlFor="transferencia">
+                   1. Transferencia ("El pago es realizado por la EOD-UGIPS del VIIV")
+                 </label>
+               </div>
+               {metodoPago === "Transferencia" && (
+                 <div className="sub-group">
+                    <LabelText text="En la solicitud se debe adjuntar los siguientes documentos:" />
+                    <LabelText text="Formulario de pagos al exterior (Anexo 6)" />
+                    <LabelText text="Documento donde se puede verificar el costo y fechas de la inscripción al evento" />
+                 </div>
+               )}
+               <div>
+                 <input
+                   type="radio"
+                   id="otra"
+                   value="Otra"
+                   {...register("metodoPago", {
+                     required: "Seleccione un método de pago",
+                   })}
+                 />
+                 <label htmlFor="otra">
+                   2. Otra (tarjeta de crédito, efectivo, etc.)
+                 </label>
+               </div>
+               {metodoPago === "Otra" && (
+                 <div className="sub-group">
+                   
+                  <Label text="Incluir la siguiente información y documentos:" />
+                  <LabelText text="Solicitud de REEMBOLSO. Incluir en el texto del memorando la justificación de por qué se solicita este método de pago." />
+                  <LabelText text="Documento donde se puede verificar el costo y fechas de la inscripción al evento" />
+                  <LabelText text="Documento en el cual se indique que el pago solo se puede realizar con tarjeta de crédito o efectivo o que no cuenta con banco intermediario." />
+                 </div>
+               )}
+               {errors.metodoPago && (
+                 <span className="error-text">{errors.metodoPago.message}</span>
+               )}
+             </div>
+           </div>
+            
 
             <LabelTitle text="DOCUMENTACIÓN REQUERIDA PARA PAGOS DE INSCRIPCIÓN" />
             <Label text="REQUISITOS:" />
@@ -595,23 +667,132 @@ function InscriptionPaymentForm() {
 }
 export default InscriptionPaymentForm;
 
-//Funciones Validación
-const validarCedulaEcuatoriana = (cedula) => {
-  if (cedula.length !== 10) return false;
 
-  const provincia = parseInt(cedula.slice(0, 2), 10);
-  if (provincia < 1 || provincia > 24) return false;
+const departamentoOptions = [
+  {
+    value: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
+    label: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
+  },
+  {
+    value: "DEPARTAMENTO DE BIOLOGÍA",
+    label: "DEPARTAMENTO DE BIOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
+    label: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
+    label: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
+    label: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS SOCIALES",
+    label: "DEPARTAMENTO DE CIENCIAS SOCIALES",
+  },
+  {
+    value: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
+    label: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
+  },
+  {
+    value:
+      "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
+    label:
+      "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
+  },
+  {
+    value: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
+    label: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
+  },
+  {
+    value: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
+    label: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
+  },
+  {
+    value: "DEPARTAMENTO DE FÍSICA",
+    label: "DEPARTAMENTO DE FÍSICA",
+  },
+  {
+    value: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
+    label: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
+  },
+  {
+    value: "DEPARTAMENTO DE GEOLOGÍA",
+    label: "DEPARTAMENTO DE GEOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
+    label: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
+    label: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
+    label: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
+    label: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
+  },
+  {
+    value: "DEPARTAMENTO DE MATERIALES",
+    label: "DEPARTAMENTO DE MATERIALES",
+  },
+  {
+    value: "DEPARTAMENTO DE MATEMÁTICA",
+    label: "DEPARTAMENTO DE MATEMÁTICA",
+  },
+  {
+    value: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
+    label: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
+  },
+  {
+    value: "DEPARTAMENTO DE PETRÓLEOS",
+    label: "DEPARTAMENTO DE PETRÓLEOS",
+  },
+  {
+    value: "INSTITUTO GEOFISICO",
+    label: "INSTITUTO GEOFISICO",
+  },
+];
+const participacionOptions = [
+  {
+    value: "fueraProyecto",
+    label: "Fuera de Proyecto",
+  },
+  {
+    value: "dentroProyecto",
+    label: "Dentro de Proyecto",
+  },
+];
 
-  let suma = 0;
-  for (let i = 0; i < 9; i++) {
-    let digito = parseInt(cedula[i], 10);
-    if (i % 2 === 0) {
-      digito *= 2;
-      if (digito > 9) digito -= 9;
-    }
-    suma += digito;
-  }
+const rolOptions = [
+  {
+    value: "Director",
+    label: "Director",
+  },
+  {
+    value: "Codirector",
+    label: "Codirector",
+  },
+  {
+    value: "Colaborador",
+    label: "Colaborador",
+  },
+];
 
-  const digitoVerificador = (10 - (suma % 10)) % 10;
-  return digitoVerificador === parseInt(cedula[9], 10);
-};
+const articuloOptions = [
+  {
+    value: "SI",
+    label: "SI",
+  },
+  {
+    value: "NO",
+    label: "NO",
+  },
+];
