@@ -99,15 +99,9 @@ function NationalOutsideProjectForm() {
     }
 
 
-  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, setValue, clearErrors]);
+  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, fields.length, setValue, clearErrors]);
 
-  // Validación personalizada para la fecha de fin del evento
-  const validateFechaFin = (fechaFin) => {
-    if (!fechaInicioEvento) {
-      return "Primero seleccione la fecha de inicio.";
-    }
-    return fechaFin >= fechaInicioEvento || "La fecha de finalización no puede ser anterior a la fecha de inicio.";
-  };
+  
 
   // Función que se ejecuta al enviar el formulario
   const onSubmitNationalOutside = (data) => {
@@ -896,6 +890,7 @@ function NationalOutsideProjectForm() {
               />
             </div>
              
+
             {seleccionInscripcion  && (
              <div >
              <h3>• Valor de la inscripción</h3>

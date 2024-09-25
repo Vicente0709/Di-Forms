@@ -19,7 +19,7 @@ import {
   generateAnexo1PublicationPaymentWithin,
   generateAnexo2PublicationPaymentOutside,
 } from "../utils/documentGenerator.js";
-import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
+import { validarCedulaEcuatoriana } from "../utils/validaciones.js";
 const formStorageKey = "formPublicationsPayment"; // Clave para almacenar el formulario en localStorage
 const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
@@ -32,10 +32,8 @@ function PublicationsPaymentForm() {
     defaultValues: formData,
   });
 
-  const { register, control, watch, reset, setValue, clearErrors, formState:{errors} } = methods;
+  const { register, control, watch, reset, setValue, formState:{errors} } = methods;
 
-  const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
-  const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
   const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
 
   // Observadores para campos clave
@@ -95,10 +93,20 @@ function PublicationsPaymentForm() {
       setValue("cargoDirector", "");
     }
 
+    if (fields.length === 0) {
+      append({
+        valorInscripcion: "",
+        pagoLimite: "",
+        limiteFecha: "",
+      });
+    }
+
   }, [
     participacionProyecto,
     rolEnProyecto,
     seleccionArticulo,
+    append,
+    fields.length,
     watch,
     reset,
     setValue,
@@ -762,17 +770,6 @@ const rolOptions = [
   {
     value: "Colaborador",
     label: "Colaborador",
-  },
-];
-
-const articuloOptions = [
-  {
-    value: "SI",
-    label: "SI",
-  },
-  {
-    value: "NO",
-    label: "NO",
   },
 ];
 const optionsBD = [

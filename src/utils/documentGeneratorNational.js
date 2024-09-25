@@ -14,9 +14,6 @@ import { saveAs } from "file-saver";
 import { generate } from "@pdfme/generator";
 import { text, image, barcodes } from "@pdfme/schemas";
 
-import { basePdfAnexo10 } from "../utilsNational/basePdfAnexo10";
-import { schemasAnexo10 } from "../utilsNational/schemasAnexo10";
-
 import { basePdfAnexoANational } from "../utilsNational/basePdfAnexoANational";
 import { schemasAnexoANational } from "../utilsNational/schemasAnexoANational";
 

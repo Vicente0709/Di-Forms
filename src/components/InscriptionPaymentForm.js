@@ -4,6 +4,7 @@ import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
 
+
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
 import LabelText from "./Labels/LabelText.js";
@@ -21,7 +22,7 @@ import {
   generateMemoInscriptionPaymentOutProyect1,
   generateAnexo5InscriptionPayment,
 } from "../utils/documentGenerator.js";
-import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
+import { validarCedulaEcuatoriana, validarFechaFin} from "../utils/validaciones.js";
 
 const formStorageKey = "formInscriptionPayment"; // Clave para almacenar el formulario en localStorage
 const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
@@ -35,17 +36,14 @@ function InscriptionPaymentForm() {
     defaultValues: formData,
   });
 
-  const { register, control, watch, reset, setValue, clearErrors, formState:{errors} } = methods;
+  const { register, control, watch, reset, setValue, formState:{errors} } = methods;
 
-  const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
-  const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
   const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
 
   // Observadores para campos clave
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
   const seleccionArticulo = watch("articuloPublicado");
-  const fechaInicioEvento = watch("fechaInicioEvento");
   const fechaFinEvento = watch("fechaFinEvento");
   const metodoPago = watch("metodoPago");
   const [showDownloadSection, setShowDownloadSection] = useState(false);
@@ -97,10 +95,20 @@ function InscriptionPaymentForm() {
       setValue("detalleArticuloSI", "");
     }
 
+    if (fields.length === 0) {
+      append({
+        valorInscripcion: "",
+        pagoLimite: "",
+        limiteFecha: "",
+      });
+    }
+
   }, [
     participacionProyecto,
     rolEnProyecto,
     seleccionArticulo,
+    append,
+    fields.length,
     watch,
     reset,
     setValue,

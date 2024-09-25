@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
+
 // Importación de los componentes del formulario
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
@@ -102,7 +103,7 @@ function EventParticipationOutsideProjectsForm() {
         limiteFecha: "",
       });
     }
-  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, setValue, clearErrors]);
+  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, fields.length, setValue, clearErrors]);
 
   // Función que se ejecuta al enviar el formulario
   const onSubmitEventParticipationOutside = (data) => {

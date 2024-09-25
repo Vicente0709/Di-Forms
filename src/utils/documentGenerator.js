@@ -19,18 +19,6 @@ import { schemasAnexoA } from "./schemasAnexoA";
 //basepdf and schemas AnexoA2
 import { basePdfAnexoA2 } from "./basePdfAnexoA2";
 import { schemasAnexoA2 } from "./schemasAnexoA2";
-//basepdf and schemas Anexo8
-import { basepdfAnexo8 } from "./basepdfAnexo8";
-import { schemaAnexo8 } from "./schemaAnexo8";
-
-import { basePdfAnexo5 } from "./basePdfAnexo5";
-import { schemasAnexo5 } from "./schemasAnexo5";
-
-import { basePdfAnexo1P } from "./basePdfAnexo1P";
-import { schemasAnexo1P } from "./schemasAnexo1P";
-
-import { basePdfAnexo2P } from "./basePdfAnexo2P";
-import { schemasAnexo2P } from "./schemasAnexo2P";
 
 // Registra la fuente Roboto desde Google Fonts
 Font.register({
@@ -1084,8 +1072,8 @@ export function generateMemoInscriptionPaymentOutProyect1(data) {
   }
 
   let dirCargo = [];
-  if (data.nombreDirector === "") {
-    if (data.nombreDirector === "") {
+
+    if (data.nombreDirector === "" && data.participacionProyecto === "fueraProyecto") {
       dirCargo.push("Profesor");
     } else {
       dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
@@ -1179,7 +1167,6 @@ export function generateMemoInscriptionPaymentOutProyect1(data) {
               children: [
                 new TextRun({
                   text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
-                  text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
                   size: 20,
                   font: "Times New Roman",
                 }),
@@ -1247,7 +1234,7 @@ export function generateMemoInscriptionPaymentOutProyect1(data) {
         `Memorando para Pago de Inscripción ${formulario} ${codigoP}.docx`
       );
     });
-  }
+  
 }
 
 export function generateMemoPublicationPaymentProject(data) {
@@ -1269,7 +1256,7 @@ export function generateMemoPublicationPaymentProject(data) {
 
   let dirCargo = [];
 
-  if (data.nombreDirector === "") {
+  if (data.nombreDirector === "" && data.participacionProyecto==="fueraProyecto") {
     dirCargo.push("Profesor");
   } else {
     dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
@@ -2663,7 +2650,6 @@ export async function generateAnexo5InscriptionPayment(data) {
 
   const formulario = (data.participacionProyecto === "fueraProyecto") ? "Fuera de Proyecto" :"Dentro de Proyecto";
   
-
   let codigoP = (data.codigoProyecto === "") ? "" :`${data.codigoProyecto} `;
   
   const MyPDFDocument = (
