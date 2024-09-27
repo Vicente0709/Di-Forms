@@ -108,6 +108,20 @@ function Home() {
             ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
           />
         </Col>
+
+
+        <Col md={4}>
+          <FormCard
+            title="Informe de servicios institucionales"
+            description="Este formulario está diseñado para realizar informe de servicios institucionales con el fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud."
+            imageSrc="form.png"
+            altText="Formulario"
+            buttonText="Ir al formulario"
+            path="/InstitutionalServices"
+            ariaLabel="Ir al formulario para informe de servicios institucionales"
+          />
+        </Col>
+
       </Row>
 
 

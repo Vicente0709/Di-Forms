@@ -84,6 +84,11 @@ function Header() {
                 Pago de Revista
               </NavDropdown.Item>
 
+              <NavDropdown.Item as={NavLink} to="/InstitutionalServices"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Servicios Institucionales
+              </NavDropdown.Item>
+
             </NavDropdown>
           </Nav>
 
