@@ -3478,6 +3478,376 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
    saveAs(blob, `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto.pdf`);
 }
 
+
+export async function generateAnexo4InstitutionalServices(data) {
+  
+  const ultimaFechaLlegada =
+    data.transporte.length > 0
+      ? data.transporte[data.transporte.length - 1]?.fechaLlegada
+      : "";
+  const ultimaHoraLlegada =
+    data.transporte.length > 0 ? data.transporte[data.transporte.length - 1]?.horaLlegada : "";
+
+  const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+        <Text style={styles.header}>Anexo 4 - Formato informe de viáticos EPN</Text>
+
+        <Text style={styles.sectionTitle}>INFORME DE SERVICIOS INSTITUCIONALES</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>Nro. SOLICITUD DE AUTORIZACIÓN PARA CUMPLIMIENTO DE SERVICIOS INSTITUCIONALES: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>FECHA DE INFORME  (dd-mmm-aaaa): </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}> </Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.today()}
+              </Text>
+            </View>
+          </View>
+        </View>
+      
+        <Text style={styles.sectionTitle}>DATOS GENERALES</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>APELLIDOS - NOMBRES DE LA O EL SERVIDOR: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>PUESTO QUE OCUPA: </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellTextBlue}> {data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()} </Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.puesto}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>CIUDAD – PROVINCIA DEL SERVICIO INSTITUCIONAL: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>NOMBRE DE LA UNIDAD A LA QUE PERTENECE LA O EL SERVIDOR: </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}> {data.ciudadServicio+","+data.provinciaServicio}</Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.nombreUnidad}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCellText}>SERVIDORES QUE INTEGRAN EL SERVICIO INSTITUCIONAL:</Text>
+          </View>
+
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.servidores}
+              </Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>
+        INFORME DE ACTIVIDADES Y PRODUCTOS ALCANZADOS
+        </Text>
+
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Actividades:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.actividad}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Productos Alcanzados:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.productos}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Otras tareas realizadas para la EPN durante la comisión de servicios:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.otrasTareas}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellText}>ITINERARIO</Text>
+               </View>
+               <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellText}>SALIDA</Text>
+               </View>
+               <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellText}>LLEGADA</Text>
+               </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellTextBlue}>FECHA (dd-mmm-aaa)</Text>
+               </View>
+               <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellTextBlue}>{data.transporteIda[0]?.fechaSalida}</Text>
+               </View>
+               <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellTextBlue}>{ultimaFechaLlegada}</Text>
+               </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellTextBlue}>HORA (hh:mm)</Text>
+               </View>
+               <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellTextBlue}>{data.transporteIda[0]?.horaSalida}</Text>
+               </View>
+               <View style={styles.tableCol25}>
+                  <Text style={styles.tableCellTextBlue}>{ultimaHoraLlegada}</Text>
+               </View>
+              </View>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>NOTA: Estos datos se refieren al tiempo efectivamente utilizado en el cumplimiento del servicio institucional, desde la salida del lugar de residencia o trabajo habituales o del cumplimiento del servicio institucional según sea el caso, hasta su llegada de estos sitios.</Text>
+            </View>
+          </View>
+
+        </View>
+
+        <Text style={styles.sectionTitle}>
+        TRANSPORTE
+        </Text>
+
+        <View style={styles.table}>
+
+        <View style={styles.tableRow}>
+                <View style={styles.tableCol15}>
+                  <Text style={styles.tableCellText}>
+                  TIPO DE TRANSPORTE (Aéreo, terrestre, marítimo,  otros): 
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                {data.transporteIda.map((transporteIda, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {transporteIda.tipoTransporte
+                        ? transporteIda.tipoTransporte: ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                NOMBRE DE TRANSPORTE 
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.transporteIda.map((transporteIda, index) => (
+                   <View key={index} style={styles.tableRow}>
+                   <Text style={styles.tableCellTextBlueCenter}>
+                     {transporteIda.nombreTransporte
+                       ? transporteIda.nombreTransporte: ""}
+                   </Text>
+                 </View>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.tableCol15}>
+                  <Text style={styles.tableCellText}>
+                  RUTA: 
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                {data.transporteIda.map((transporteIda, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {transporteIda.ruta
+                        ? transporteIda.ruta: ""}
+                    </Text>
+                  </View>
+                ))}
+               </View>
+               </View>
+                <View style={styles.tableCol}>
+                  <View style={styles.tableCol50}>
+                    <Text style={styles.tableCellText}>
+                    SALIDA:  
+                    </Text>
+                    <View style={styles.tableRow}>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>FECHA (dd-mmm-aaaa)</Text>                
+                      </View>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>HORA (hh:mm)</Text>
+                      </View>
+                    </View>
+                    <View style={styles.tableRow}>
+                      <View style={styles.tableCol50}>
+                      {data.transporteIda.map((transporteIda, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {transporteIda.fechaSalida
+                        ? transporteIda.fechaSalida: ""}
+                    </Text>
+                  </View>
+                  ))}
+                      </View>
+                      <View style={styles.tableCol50}>
+                      {data.transporteIda.map((transporteIda, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {transporteIda.horaSalida
+                        ? transporteIda.horaSalida: ""}
+                    </Text>
+                  </View>
+                  ))}
+                      </View>
+                    </View>
+
+                    <View style={styles.tableCol50}>
+                    <Text style={styles.tableCellText}>
+                    REGRESO:  
+                    </Text>
+                    <View style={styles.tableRow}>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>FECHA (dd-mmm-aaaa)</Text>                
+                      </View>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>HORA (hh:mm)</Text>
+                      </View>
+                    </View>
+                    <View style={styles.tableRow}>
+                      <View style={styles.tableCol50}>
+                      {data.transporteIda.map((transporteIda, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {transporteIda.fechaLlegada
+                        ? transporteIda.fechaLlegada: ""}
+                    </Text>
+                  </View>
+                  ))}
+                      </View>
+                      <View style={styles.tableCol50}>
+                      {data.transporteIda.map((transporteIda, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {transporteIda.horaLlegada
+                        ? transporteIda.horaLlegada: ""}
+                    </Text>
+                  </View>
+                  ))}
+                      </View>
+                    
+                      </View>
+                      </View>
+                    
+                </View>
+                  
+
+        </View>
+
+        <Text style={styles.sectionTitle}>OBSERVACIONES</Text>
+       
+
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>FIRMA DE LA O EL SERVIDOR COMISIONADO:</Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}> </Text>
+                 </View>
+            </View>
+            <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextBlue}>{data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()} </Text>
+                  <Text style={styles.tableCellTextBlue}>{data.puesto.toUpperCase()} </Text>
+                  <Text style={styles.tableCellTextBlue}>{data.cedula} </Text>
+                 </View>
+          </View>
+          <View style={styles.tableCol}>
+            <Text style={styles.tableCellText}>NOTA: El presente informe deberá presentarse dentro del término de 4 días del cumplimiento de servicios institucionales, caso contrario la liquidación se demorará e incluso de no presentarlo tendría que restituir los valores percibidos. Cuando el cumplimiento de servicios institucionales sea superior al número de días autorizados, se deberá adjuntar la autorización por escrito de la Máxima Autoridad o su Delegado</Text>
+          </View>
+
+        </View>
+
+
+        <Text style={styles.sectionTitle}>FIRMAS DE APROBACIÓN</Text>
+       
+       
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>FIRMA DEL JEFE INMEDIATO:</Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>  </Text>
+                 </View>
+            </View>
+            <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextBlue}>{data.nombresJefeInmediato.toUpperCase()} </Text>
+                  <Text style={styles.tableCellTextBlue}>{data.cargoJefeInmediato.toUpperCase()} </Text>
+                 </View>
+          </View>
+          <View style={styles.tableCol}>
+           
+          <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>FIRMA DE LA MAXIMA AUTORIDAD DE INVESTIGACIÓN:</Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>  </Text>
+                 </View>
+            </View>
+            <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>PhD. Alexandra Alvarado </Text>
+                  <Text style={styles.tableCellText}>Vicerrectora de Investigación, Innovación y Vinculación</Text>
+                 </View>
+           
+           </View>
+
+      
+      </Page>
+    </PDFDocument>
+  )
+}
+
+
 //formatear la fecha en formato dd/mm/yyyy
 function formatDate(dateString) {
   if (!dateString) return "";
