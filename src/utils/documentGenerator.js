@@ -9,7 +9,6 @@ import {
   View,
   Document as PDFDocument,
   StyleSheet,
-  PDFDownloadLink,
   pdf,
 } from "@react-pdf/renderer";
 
@@ -240,11 +239,11 @@ export function generateMemoWithinProject(data) {
   const nombresApellidos = capitalizeWords(
     (data.nombres + " " + data.apellidos).toLowerCase()
   );
-  
+
   // Función interna para generar solicitudes dentro de generateMemoWithinProject
   const generarSolicitudes = () => {
     let solicitudes = [];
-    
+
     if (data.pasajesAereos === "SI") {
       solicitudes.push("la compra de pasajes aéreos");
     }
@@ -264,9 +263,10 @@ export function generateMemoWithinProject(data) {
   const solicitudOracion = generarSolicitudes();
 
   // Determina el contenido del cuerpo del memorando basado en el rol
-  const cuerpoMemorando = data.rolEnProyecto === "Director"
-    ? `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`
-    : `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr./Sra. "${nombresApellidos}", ${data.rolEnProyecto} del proyecto, pueda participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`;
+  const cuerpoMemorando =
+    data.rolEnProyecto === "Director"
+      ? `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`
+      : `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr./Sra. "${nombresApellidos}", ${data.rolEnProyecto} del proyecto, pueda participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`;
 
   // Generación del documento Word
   const doc = new Document({
@@ -1073,168 +1073,170 @@ export function generateMemoInscriptionPaymentOutProyect1(data) {
 
   let dirCargo = [];
 
-    if (data.nombreDirector === "" && data.participacionProyecto === "fueraProyecto") {
-      dirCargo.push("Profesor");
-    } else {
-      dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
-    }
+  if (
+    data.nombreDirector === "" &&
+    data.participacionProyecto === "fueraProyecto"
+  ) {
+    dirCargo.push("Profesor");
+  } else {
+    dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
+  }
 
-    let formulario = [];
-    if (data.participacionProyecto === "fueraProyecto") {
-      formulario.push("Fuera de Proyecto");
-    } else {
-      formulario.push("Dentro de Proyecto");
-    }
+  let formulario = [];
+  if (data.participacionProyecto === "fueraProyecto") {
+    formulario.push("Fuera de Proyecto");
+  } else {
+    formulario.push("Dentro de Proyecto");
+  }
 
-    let codigoP = [];
-    if (data.codigoProyecto === "") {
-      codigoP.push();
-    } else {
-      codigoP.push(`${data.codigoProyecto} `);
-    }
+  let codigoP = [];
+  if (data.codigoProyecto === "") {
+    codigoP.push();
+  } else {
+    codigoP.push(`${data.codigoProyecto} `);
+  }
 
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Formato de memorando para pago de inscripción ${formulario}`,
-                  bold: true,
-                  size: 24,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 300 },
-              alignment: "start",
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "PARA:\t\t",
-                  bold: true,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-                new TextRun({
-                  text: "Dr. Marco Santorum",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "\t\tVicerector de Investigación, Innovación y Vinculación",
-                  size: 22,
-                  bold: true,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "ASUNTO:\t",
-                  bold: true,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-                new TextRun({
-                  text: `Solicitud para pago de inscripción ${codigo}`,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "De mi consideración:",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 300 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Se adjunta la documentación correspondiente",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Con sentimientos de distinguida consideración.",
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Atentamente,",
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${director}`,
-                  size: 20,
-                  bold: true,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${dirCargo}`,
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-            }),
-          ],
-        },
-      ],
-    });
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Formato de memorando para pago de inscripción ${formulario}`,
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Solicitud para pago de inscripción ${codigo}`,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${director}`,
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${dirCargo}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
 
-    Packer.toBlob(doc).then((blob) => {
-      saveAs(
-        blob,
-        `Memorando para Pago de Inscripción ${formulario} ${codigoP}.docx`
-      );
-    });
-  
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(
+      blob,
+      `Memorando para Pago de Inscripción ${formulario} ${codigoP}.docx`
+    );
+  });
 }
 
 export function generateMemoPublicationPaymentProject(data) {
@@ -1256,7 +1258,10 @@ export function generateMemoPublicationPaymentProject(data) {
 
   let dirCargo = [];
 
-  if (data.nombreDirector === "" && data.participacionProyecto==="fueraProyecto") {
+  if (
+    data.nombreDirector === "" &&
+    data.participacionProyecto === "fueraProyecto"
+  ) {
     dirCargo.push("Profesor");
   } else {
     dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
@@ -1656,129 +1661,669 @@ export async function generateAnexoA2(data) {
     schemas: schemasAnexoA2,
     basePdf: basePdfAnexoA2,
   };
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-  const diferencia =
-    JSON.parse(localStorage.getItem("diferenciaDias"))?.diferencia || 0;
-  const actividades = {};
 
-  // Genera dinámicamente las propiedades para activN, activFecha, y activDescripcion
-  for (let i = 0; i < 22; i++) {
-    actividades[`activN${i + 1}`] =
-      data.actividadesInmutables[i] && diferencia > 15
-        ? (i + 1).toString()
-        : "";
-    actividades[`activFecha${i + 1}`] =
-      diferencia < 16 ? "" : data.actividadesInmutables[i]?.fecha || "";
-    actividades[`activDescripcion${i + 1}`] =
-      diferencia < 16 ? "" : data.actividadesInmutables[i]?.descripcion || "";
-  }
-  let valorInscripcionStr = "";
-  let fechaPagoInscripcionStr = "";
+  const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+        {/* Título del formulario */}
+        <Text style={styles.header}>
+          Anexo 2A – Formulario para participacion en eventos
+        </Text>
+        {/* 1. Datos Generales */}
 
-  // Iteramos sobre cada inscripción en el array 'inscripciones'
-  data.inscripciones.forEach((inscripcion) => {
-    // Concatenamos el valor de inscripción con un '$' y un salto de línea
-    if (data.inscripcion === "SI" && inscripcion.valorInscripcion) {
-      valorInscripcionStr += `${inscripcion.monedaPago}${inscripcion.valorInscripcion}\n`;
-    }
+        <Text style={styles.sectionTitle}>
+          1. DATOS DEL PROYECTO Y DEL INVESTIGADOR PARTICIPANTE
+        </Text>
 
-    // Construimos la cadena de la fecha de pago dependiendo de cuál campo tiene valor
-    if (
-      data.inscripcion === "SI" &&
-      inscripcion.pagoLimite &&
-      inscripcion.limiteFecha
-    ) {
-      fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
-    }
-  });
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.codigoProyecto || "_________"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Título de Proyecto:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloProyecto || "_________"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>
+                Nombres Completo del Participante:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {(data.apellidos ? data.apellidos.toUpperCase() : "_________") +
+                  " " +
+                  (data.nombres ? data.nombres.toUpperCase() : "_________")}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Rol en el Proyecto:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.rolEnProyecto || "_________"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.departamento || "_________"}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-  const inputs = [
-    {
-      fechaPag1: formattedDate,
-      codigoProyecto: data.codigoProyecto,
-      tituloProyecto: data.tituloProyecto,
-      nombresParticipante:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      rolProyecto: data.rolEnProyecto,
-      departamento: data.departamento,
-      tituloEvento: data.tituloEvento,
-      ciudad: data.ciudadEvento.toUpperCase(),
-      pais: data.paisEvento.toUpperCase(),
-      fechasEvento:
-        "Desde el " +
-        data.fechaInicioEvento +
-        " hasta el " +
-        data.fechaFinEvento,
-      tipoEvento1: data.tipoEvento === "Conferencia o congreso" ? "X" : "",
-      tipoEvento2: data.tipoEvento === "Taller" ? "X" : "",
-      tipoEvento3: data.tipoEvento === "Otro evento académico" ? "X" : "",
-      tipoEvento3otro: data.otroEventoEspecificar,
-      participacion1:
-        data.participacionEvento === "Presentación de artículo indexado"
-          ? "X"
-          : "",
-      participacion2:
-        data.participacionEvento ===
-        "Presentación de póster, abstract, charla magistral u otros"
-          ? "X"
-          : "",
-      participacion3: data.participacionEvento === "Asistencia" ? "X" : "",
-      ponencia: data.tituloPonencia,
-      pasajesS: data.pasajesAereos === "SI" ? "X" : "",
-      viaticosS: data.viaticosSubsistencias === "SI" ? "X" : "",
-      inscripcionS: data.inscripcion === "SI" ? "X" : "",
-      pasajesN: data.pasajesAereos === "NO" ? "X" : "",
-      viaticosN: data.viaticosSubsistencias === "NO" ? "X" : "",
-      inscripciónN: data.inscripcion === "NO" ? "X" : "",
+        {/* 1. Datos del evento*/}
 
-      fechaPag2: formattedDate,
-      objetivoEvento: data.objetivoProyecto,
-      relevanciaEvento: data.relevanciaEvento,
+        <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO</Text>
 
-      valorInscripcion: valorInscripcionStr.trim(), // Removemos el último salto de línea
-      fechaPagoInscripcion: fechaPagoInscripcionStr.trim(), // Removemos el último salto de línea
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Titulo del Evento:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloEvento || "_________"}
+              </Text>
+            </View>
+          </View>
 
-      transferencia:
-        data.metodoPago === "Transferencia" && data.inscripcion === "SI"
-          ? "X"
-          : "",
-      otroPago:
-        data.metodoPago === "Otra" && data.inscripcion === "SI" ? "X" : "",
-      hospedajeS: data.hospedaje === "SI" ? "X" : "",
-      hospedajeN: data.hospedaje === "NO" ? "X" : "",
-      movS: data.movilizacion === "SI" ? "X" : "",
-      movN: data.movilizacion === "NO" ? "X" : "",
-      alimentacionS: data.alimentacion === "SI" ? "X" : "",
-      alimentacionN: data.alimentacion === "NO" ? "X" : "",
-      declaraciónN: data.seleccionDeclaracion === "noCubre" ? "X" : "",
-      declaracioneS: data.seleccionDeclaracion === "siCubre" ? "X" : "",
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Lugar del Evento:</Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>Ciudad:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.ciudadEvento.toUpperCase() || "_________"}
+              </Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>País:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.paisEvento.toUpperCase() || "_________"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Fecha del evento:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.textBlueCenter}>
+                {"Desde el  "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.fechaInicioEvento || "_________"}
+                  <Text style={styles.textBlueCenter}>
+                    {" hasta el "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.fechaFinEvento || "_________"}
+                    </Text>
+                  </Text>
+                </Text>
+              </Text>
+            </View>
+          </View>
 
-      fechaPag3: formattedDate,
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Tipo de Evento:</Text>
+            </View>
 
-      ...actividades,
+            <View style={styles.tableCol}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>
+                    - Conferencia o congreso:
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.tipoEvento === "Conferencia o congreso" ? "X" : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
 
-      justificacionMas15:
-        diferencia < 16 ? "No aplica" : data.justificacionComision,
-      fechaSolicitud: formattedDate,
-      nombreDirector:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      codigoProyecto2: data.codigoProyecto,
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>- Taller:</Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.tipoEvento === "Taller" ? "X" : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
 
-      fechaPag4: formattedDate,
-      calculo:
-        "Calculo dias de comision entre las fechas de salida y de regreso: " +
-        diferencia,
-    },
-  ];
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>
+                    - Otro evento académico::
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.tipoEvento === "Otro evento académico" ? "X" : ""}
+                      <Text style={styles.baseText}>
+                        {" ) "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.otroEventoEspecificar
+                            ? data.otroEventoEspecificar
+                            : " "}
+                        </Text>
+                      </Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Participación en el evento:
+              </Text>
+            </View>
 
-  const pdf = await generate({ template, plugins, inputs });
+            <View style={styles.tableCol}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>
+                    - Presentación de artículo indexado
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.participacionEvento ===
+                      "Presentación de artículo indexado"
+                        ? "X"
+                        : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
 
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>
+                    - Presentación de póster, abstract, charla magistral u otros
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.participacionEvento ===
+                      "Presentación de póster, abstract, charla magistral u otros"
+                        ? "X"
+                        : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>- asistencia:</Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.participacionEvento === "Asistencia" ? "X" : ""}
+                      <Text style={styles.baseText}>{" ) "}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Título de la Ponencia:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloPonencia ? data.tituloPonencia : "No Aplica"}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Solicita para participar en el evento:
+              </Text>
+            </View>
+
+            <View style={styles.tableCol}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>- Pasajes aéreos:</Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.participacionEvento ===
+                      "Presentación de artículo indexado"
+                        ? "X"
+                        : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>
+                    - Viáticos y subsistencias:
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.participacionEvento ===
+                      "Presentación de póster, abstract, charla magistral u otros"
+                        ? "X"
+                        : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>- Inscripción:</Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.participacionEvento === "Asistencia" ? "X" : ""}
+                      <Text style={styles.baseText}>{" ) "}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* 1. Datos De la Salida de Campo*/}
+
+        <Text style={styles.sectionTitle}>
+          3. JUSTIFICACIÓN Y RELEVANCIA DE LA PARTICIPACIÓN{" "}
+        </Text>
+
+        <Text style={styles.baseText}>
+          3.1 Objetivo, resultado o producto del proyecto al que aporta la
+          participación en el evento
+        </Text>
+        <Text style={styles.textBlue}>{data.objetivoProyecto}</Text>
+        <Text style={styles.baseText}>
+          3.2 Relevancia del evento para su proyecto
+        </Text>
+        <Text style={styles.textBlue}>{data.relevanciaEvento}</Text>
+
+        <View>
+          <Text style={styles.sectionTitle}>
+            4. INFORMACIÓN DEL PAGO DE INSCRIPCIÓN{" "}
+          </Text>
+
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Valor de la Inscripción:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.inscripciones.map((inscripcion, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {inscripcion.monedaPago && data.inscripcion === "SI"
+                        ? inscripcion.monedaPago +
+                          " " +
+                          (inscripcion.valorInscripcion || " ")
+                        : ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Fechas de pago de inscripción:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.inscripciones.map((inscripcion, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {inscripcion.pagoLimite && data.inscripcion === "SI"
+                        ? inscripcion.pagoLimite +
+                          " " +
+                          (inscripcion.limiteFecha || " ")
+                        : ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Método de pago:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      1. Transferencia:
+                      <Text style={styles.baseText}>
+                        {" ( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Transferencia" &&
+                          data.inscripcion === "SI"
+                            ? "X"
+                            : ""}
+                          <Text style={styles.baseText}>{" )  “El pago es realizado por la EOD-UGIPS del VIIV”"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a)Formulariodepagosalexterior, ,segunelcaso(Anexo 6)
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b) Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      2. Otra(tarjetadecrédito,efectivo,etc...):
+                      <Text style={styles.baseText}>
+                        {" ( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Otra" &&
+                          data.inscripcion === "SI"
+                            ? "X"
+                            : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a) Solicitud de REEMBOLSO. Incluir en el texto del
+                      memorando la justificación de porque se solicita este
+                      método de pago.
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b)Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>
+          5. DECLARACIÓN DE GASTOS, CONFORME REGLAMENTO DE VIÁTICOS AL EXTERIOR{" "}
+        </Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                La organización del evento cubre los siguientes rubros:
+              </Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.baseText}>
+                {"a) Hospedaje SI("}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.hospedaje === "SI" ? "X" : " "}
+                  <Text style={styles.baseText}>
+                    {" )  NO("}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.hospedaje === "NO" ? "X" : " "}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </Text>
+              </Text>
+              <Text style={styles.baseText}>
+                {"b) Movilización interna SI("}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.movilizacion === "SI" ? "X" : ""}
+                  <Text style={styles.baseText}>
+                    {" )  NO("}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.movilizacion === "NO" ? "X" : " "}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </Text>
+              </Text>
+              <Text style={styles.baseText}>
+                {"c) Alimentación* SI("}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.alimentacion === "SI" ? "X" : " "}
+                  <Text style={styles.baseText}>
+                    {" )  NO("}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.alimentacion === "NO" ? "X" : " "}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </Text>
+              </Text>
+              <Text style={styles.textBlue}>
+                *Verificar si el pago de inscripción o la organización del
+                evento cubre alimentación por desayuno, almuerzo (lunch) o cena.
+                Se debe marcar SI, en caso de que cubra alguna alimentación.
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Declaración si la organización NO cubre ningún rubro
+              </Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.baseText}>
+                {
+                  "En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento NO cubre ningún gasto, por lo que solicito se gestione la asignación de viáticos conforme se establece en el artículo 7 del Reglamento de Viáticos al Exterior.("
+                }
+                <Text style={styles.tableCellTextBlue}>
+                  {data.seleccionDeclaracion === "noCubre" ? "X" : " "}
+                  <Text style={styles.baseText}>{")"}</Text>
+                </Text>
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Declaración si la organización SI cubre algún rubro
+              </Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.baseText}>
+                {
+                  "En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento SI cubre gastos, por lo que solicito se gestione la asignación viáticos conforme se establece en el artículo 13 del Reglamento de Viáticos al Exterior. ("
+                }
+                <Text style={styles.tableCellTextBlue}>
+                  {data.seleccionDeclaracion === "siCubre" ? "X" : " "}
+                  <Text style={styles.baseText}>{")"}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.textBlue}>
+                **A su regreso el investigador(a) deberá presentar la factura o
+                nota de venta de los gastos de hospedaje y/o alimentación, o de
+                los establecidos en el artículo 9 del Reglamento de Viáticos al
+                Exterior, que no hayan sido cubiertos por estas instituciones u
+                organismos, para el reconocimiento de estos rubros y su
+                correspondiente liquidación.
+              </Text>
+            </View>
+          </View>
+        </View>
+        <Text style={styles.sectionTitle}>6.CRONOGRAMA DE ACTIVIDADES </Text>
+
+        <Text style={styles.baseText}>6.1 Cronograma de actividades</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>N°</Text>
+            </View>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Fecha</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellText}>
+                Descripción de la actividad
+              </Text>
+            </View>
+          </View>
+          {data.actividadesInmutables.length < 16 && (
+            <View>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <View style={styles.tableRow} key={index}>
+                  <View style={styles.tableCol15}>
+                    <Text style={styles.tableCellText}> </Text>
+                  </View>
+                  <View style={styles.tableCol25}>
+                    <Text style={styles.tableCellText}> </Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCellText}> </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+          {data.actividadesInmutables.length >= 16 && (
+            <View>
+              {data.actividadesInmutables.map((actividad, index) => (
+                <View style={styles.tableRow} key={index}>
+                  <View style={styles.tableCol15}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {index + 1}
+                    </Text>
+                  </View>
+                  <View style={styles.tableCol25}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {formatDate(actividad.fecha)}
+                    </Text>
+                  </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCellTextBlue}>
+                      {actividad.descripcion}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+        <Text style={styles.baseText}>
+          6.2 Justificar la necesidad de la comisión de servicios mayor a 15
+          días
+        </Text>
+        <Text style={styles.textBlue}>{data.justificacionComision}</Text>
+        <Text style={styles.sectionTitle}>7. CALCULO REFERENCIAL DE DÍAS DE LA COMISIÓN DE SERVICIOS </Text>
+        <Text style={styles.textBlue}>
+          {"Calculo dias de comision entre las fechas de salida y de regreso: " +data.actividadesInmutables.length}
+        </Text>
+
+        {/* Etiqueta de Firma */}
+        <Text style={styles.baseText}>Firma del Solicitante:</Text>
+
+        {/* Espacio en blanco para la firma */}
+        <Text>{"\n\n\n"}</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.baseTextCenter}>________________________</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${
+            data.rolEnProyecto === "Director"
+              ? data.nombres + " " + data.apellidos
+              : data.nombreDirector.toUpperCase()
+          }`}
+        </Text>
+
+        {/* Nombre del director y código de proyecto */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {"Director del proyecto - "+ data.codigoProyecto}
+        </Text>
+      </Page>
+    </PDFDocument>
+  );
+
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
+
+  // Descargar automáticamente el archivo PDF
   saveAs(
     blob,
-    "Anexo 2a-Participación en EVENTO dentro de Proyecto " +
-      data.codigoProyecto +
-      ".pdf"
+    "Anexo 2A_Formulario para participacion en eventos dentro de proyectos.pdf"
   );
 }
 
@@ -1900,163 +2445,159 @@ export async function generateAnexoAOutsideProject(data) {
 }
 
 export async function generateAnexo8OutsideProject(data) {
- 
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
-      <Text style={styles.header}>
-      Anexo 8 – Formulario para salidas al exterior de Profesores Titulares fuera de proyectos 
-      </Text>
-
-      <Text style={styles.sectionTitle}>
-        1. DATOS DEL INVESTIGADOR 
+        <Text style={styles.header}>
+          Anexo 8 – Formulario para salidas al exterior de Profesores Titulares
+          fuera de proyectos
         </Text>
+
+        <Text style={styles.sectionTitle}>1. DATOS DEL INVESTIGADOR</Text>
 
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Nombres Completos:</Text>
+              <Text style={styles.tableCellText}>Nombres Completos:</Text>
             </View>
             <View style={styles.tableColAuto}>
               <Text style={styles.tableCellTextBlue}>
-                {data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()}
+                {data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase()}
               </Text>
             </View>
           </View>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Departamento / Instituto:</Text>
-            </View>
-            <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.departamento}
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
               </Text>
             </View>
-          </View>  
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>{data.departamento}</Text>
+            </View>
+          </View>
         </View>
 
+        {/* 2. Datos del evento*/}
 
-      {/* 2. Datos del evento*/}
-
-      <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO Y REQUERIMIENTO </Text>
-
-<View style={styles.table}>
-  <View style={styles.tableRow}>
-    <View style={styles.tableCol25}>
-      <Text style={styles.tableCellText}>Titulo del Evento:</Text>
-    </View>
-    <View style={styles.tableCol}>
-      <Text style={styles.tableCellTextBlue}>
-        {data.tituloEvento}
-      </Text>
-    </View>
-  </View>
-
-  <View style={styles.tableRow}>
-    <View style={styles.tableCol25}>
-      <Text style={styles.tableCellText}>Lugar del Evento:</Text>
-    </View>
-    <View style={styles.tableCol15}>
-      <Text style={styles.tableCellText}>Ciudad:</Text>
-    </View>
-    <View style={styles.tableCol}>
-      <Text style={styles.tableCellTextBlue}>
-        {data.ciudadEvento.toUpperCase()}
-      </Text>
-    </View>
-    <View style={styles.tableCol15}>
-      <Text style={styles.tableCellText}>País:</Text>
-    </View>
-    <View style={styles.tableCol}>
-      <Text style={styles.tableCellTextBlue}>
-        {data.paisEvento.toUpperCase() }
-      </Text>
-    </View>
-    </View>
-    <View style={styles.tableRow}>
-    <View style={styles.tableCol25}>
-      <Text style={styles.tableCellText}>Fecha del evento:</Text>
-    </View>
-    <View style={styles.tableCol}>
-      <Text style={styles.textBlueCenter}>
-        {"Desde el  "}
-        <Text style={styles.tableCellTextBlue}>
-          {data.fechaInicioEvento}
-          <Text style={styles.textBlueCenter}>
-            {" hasta el "}
-            <Text style={styles.tableCellTextBlue}>
-              {data.fechaFinEvento}
-            </Text>
-          </Text>
+        <Text style={styles.sectionTitle}>
+          2. DATOS DEL EVENTO Y REQUERIMIENTO{" "}
         </Text>
-      </Text>
-    </View>
-    </View>
-  
-    
 
-    <View style={styles.tableRow}>
-      <View style={styles.tableCol25}>
-        <Text style={styles.tableCellText}>Relevancia académica del evento:</Text>
-      </View>
-      <View style={styles.tableCol}>
-        <Text style={styles.tableCellTextBlue}>
-        {data.RelevanciaAcademica}
-        </Text>
-      </View>
-    </View>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Titulo del Evento:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.tituloEvento}</Text>
+            </View>
+          </View>
 
-    <View style={styles.tableRow}>
-      <View style={styles.tableCol25}>
-        <Text style={styles.tableCellText}>Título de la Ponencia: </Text>
-      </View>
-      <View style={styles.tableCol}>
-        <Text style={styles.tableCellTextBlue}>
-        {data.tituloPonencia}
-        </Text>
-      </View>
-    </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Lugar del Evento:</Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>Ciudad:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.ciudadEvento.toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>País:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.paisEvento.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Fecha del evento:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.textBlueCenter}>
+                {"Desde el  "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.fechaInicioEvento}
+                  <Text style={styles.textBlueCenter}>
+                    {" hasta el "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.fechaFinEvento}
+                    </Text>
+                  </Text>
+                </Text>
+              </Text>
+            </View>
+          </View>
 
-    <View style={styles.tableRow}>
-        <View style={styles.tableCol25}>
-          <Text style={styles.tableCellText}>Tipo de ponencia: </Text>
-        </View>
-        <View style={styles.tableCol}>
-        <Text style={styles.tableCellTextBlue}>
-          {data.tipoPonencia}
-        </Text>
-    </View>
-    </View>
-    
-      <View style={styles.tableRow}>
-        <View style={styles.tableCol25}>
-          <Text style={styles.tableCellText}>
-          ¿El artículo será publicado?
-          </Text>
-          <Text style={styles.baseText}>
-            {"SI ( "}
-            <Text style={styles.tableCellTextBlue}>
-              {data.articuloPublicado === "SI" ? "X" : ""}
-              <Text style={styles.baseText}>{" )"}</Text>
-            </Text>
-          </Text>
-          <Text style={styles.baseText}>
-            {"NO ( "}
-            <Text style={styles.tableCellTextBlue}>
-              {data.articuloPublicado === "NO" ? "X" : ""}
-              <Text style={styles.baseText}>{" )"}</Text>
-            </Text>
-          </Text>
-        </View>
-        <View style={styles.tableCol}>
-        <Text style={styles.tableCellTextBlue}>
-          {data.detalleArticuloSI}
-        </Text>
-        </View>
-        </View>
-      
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Relevancia académica del evento:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.RelevanciaAcademica}
+              </Text>
+            </View>
+          </View>
 
-      <View style={styles.tableRow}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Título de la Ponencia: </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloPonencia}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Tipo de ponencia: </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.tipoPonencia}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                ¿El artículo será publicado?
+              </Text>
+              <Text style={styles.baseText}>
+                {"SI ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.articuloPublicado === "SI" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.baseText}>
+                {"NO ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.articuloPublicado === "NO" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.detalleArticuloSI}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
               <Text style={styles.tableCellText}>Solicita:</Text>
             </View>
@@ -2120,10 +2661,9 @@ export async function generateAnexo8OutsideProject(data) {
               </Text>
             </View>
           </View>
-          </View>
-    
-    
-    <View>
+        </View>
+
+        <View>
           <Text style={styles.sectionTitle}>
             3. INFORMACIÓN DEL PAGO DE INSCRIPCIÓN{" "}
           </Text>
@@ -2186,9 +2726,7 @@ export async function generateAnexo8OutsideProject(data) {
                       <Text style={styles.baseText}>
                         {"( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Transferencia" 
-                            ? "X"
-                            : ""}
+                          {data.metodoPago === "Transferencia" ? "X" : ""}
                           <Text style={styles.baseText}>{" )"}</Text>
                         </Text>
                       </Text>
@@ -2197,10 +2735,11 @@ export async function generateAnexo8OutsideProject(data) {
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                    a) Formulario de pagos al exterior (Anexo 6)
+                      a) Formulario de pagos al exterior (Anexo 6)
                     </Text>
                     <Text style={styles.baseText}>
-                      b) Documento donde se puede verificar el costo y fechas de la inscripción al evento
+                      b) Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento
                     </Text>
                   </View>
                 </View>
@@ -2211,9 +2750,7 @@ export async function generateAnexo8OutsideProject(data) {
                       <Text style={styles.baseText}>
                         {"( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Otra"
-                            ? "X"
-                            : ""}
+                          {data.metodoPago === "Otra" ? "X" : ""}
                           <Text style={styles.baseText}>{" )"}</Text>
                         </Text>
                       </Text>
@@ -2222,10 +2759,12 @@ export async function generateAnexo8OutsideProject(data) {
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                      a) Solicitud de REEMBOLSO. Incluir texto con justificación en el mismo memorando del requerimiento.
+                      a) Solicitud de REEMBOLSO. Incluir texto con justificación
+                      en el mismo memorando del requerimiento.
                     </Text>
                     <Text style={styles.baseText}>
-                      b)Documento donde se puede verificar el costo y fechas de la inscripción al evento
+                      b)Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento
                     </Text>
                   </View>
                 </View>
@@ -2236,121 +2775,126 @@ export async function generateAnexo8OutsideProject(data) {
 
         <View>
           <Text style={styles.sectionTitle}>
-          4. DECLARACIÓN DE GASTOS, CONFORME REGLAMENTO DE VIÁTICOS AL EXTERIOR 
+            4. DECLARACIÓN DE GASTOS, CONFORME REGLAMENTO DE VIÁTICOS AL
+            EXTERIOR
           </Text>
           <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>La organización del evento cubre: </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellText}>Hospedaje:</Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.hospedaje === "SI" ? "X" : ""}
-                  <Text style={styles.baseText}>{" )"}</Text>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol25}>
+                <Text style={styles.tableCellText}>
+                  La organización del evento cubre:{" "}
                 </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.hospedaje === "NO" ? "X" : ""}
-                  <Text style={styles.baseText}>{" )"}</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.tableCellText}>Hospedaje:</Text>
+              </View>
+              <View style={styles.tableCol15}>
+                <Text style={styles.baseText}>
+                  {"SI( "}
+                  <Text style={styles.tableCellTextBlue}>
+                    {data.hospedaje === "SI" ? "X" : ""}
+                    <Text style={styles.baseText}>{" )"}</Text>
+                  </Text>
                 </Text>
-              </Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.tableCellText}>
-                Alimentación:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.alimentacion === "SI" ? "X" : ""}
-                  <Text style={styles.baseText}>{" )"}</Text>
+                <Text style={styles.baseText}>
+                  {"NO( "}
+                  <Text style={styles.tableCellTextBlue}>
+                    {data.hospedaje === "NO" ? "X" : ""}
+                    <Text style={styles.baseText}>{" )"}</Text>
+                  </Text>
                 </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.alimentacion === "NO" ? "X" : ""}
-                  <Text style={styles.baseText}>{" )"}</Text>
+              </View>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Alimentación:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.baseText}>
+                  {"SI( "}
+                  <Text style={styles.tableCellTextBlue}>
+                    {data.alimentacion === "SI" ? "X" : ""}
+                    <Text style={styles.baseText}>{" )"}</Text>
+                  </Text>
                 </Text>
-              </Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.tableCellText}>Movilización Interna:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.movilizacion === "SI" ? "X" : ""}
-                  <Text style={styles.baseText}>{" )"}</Text>
+                <Text style={styles.baseText}>
+                  {"NO( "}
+                  <Text style={styles.tableCellTextBlue}>
+                    {data.alimentacion === "NO" ? "X" : ""}
+                    <Text style={styles.baseText}>{" )"}</Text>
+                  </Text>
                 </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.movilizacion === "NO" ? "X" : ""}
-                  <Text style={styles.baseText}>{" )"}</Text>
+              </View>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Movilización Interna:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <Text style={styles.baseText}>
+                  {"SI( "}
+                  <Text style={styles.tableCellTextBlue}>
+                    {data.movilizacion === "SI" ? "X" : ""}
+                    <Text style={styles.baseText}>{" )"}</Text>
+                  </Text>
                 </Text>
-              </Text>
+                <Text style={styles.baseText}>
+                  {"NO( "}
+                  <Text style={styles.tableCellTextBlue}>
+                    {data.movilizacion === "NO" ? "X" : ""}
+                    <Text style={styles.baseText}>{" )"}</Text>
+                  </Text>
+                </Text>
+              </View>
             </View>
-          </View>
           </View>
         </View>
 
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <Text style={styles.tableCellText}>
-            En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento NO cubre ningún 
-            gasto, por lo que solicito se gestione la asignación de viáticos conforme se establece en el artículo 7 del 
-            Reglamento de Viáticos al Exterior.     ( {data.seleccionDeclaracion === "noCubre" ? "X" : ""} ) 
+              En mi calidad de profesor-investigador de la EPN, declaro que la
+              Organización del evento NO cubre ningún gasto, por lo que solicito
+              se gestione la asignación de viáticos conforme se establece en el
+              artículo 7 del Reglamento de Viáticos al Exterior. ({" "}
+              {data.seleccionDeclaracion === "noCubre" ? "X" : ""} )
             </Text>
-
           </View>
           <View style={styles.tableRow}>
-              <Text style={styles.tableCellText}>
-              En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento SI cubre gastos, por 
-              lo que solicito se gestione la asignación viáticos conforme se establece en el artículo 13 del Reglamento de 
-              Viáticos al Exterior. ( {data.seleccionDeclaracion === "siCubre" ? "X" : ""} )** 
-              </Text>
-              </View>
-              <View style={styles.tableRow}>
-              <Text style={styles.tableCellText}>
-              **A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, o 
-              de los establecidos en el artículo 9 del Reglamento de Viáticos al Exterior, que no hayan sido cubiertos por estas instituciones 
-              u organismos, para el reconocimiento de estos rubros y su correspondiente liquidación.
-              </Text>
+            <Text style={styles.tableCellText}>
+              En mi calidad de profesor-investigador de la EPN, declaro que la
+              Organización del evento SI cubre gastos, por lo que solicito se
+              gestione la asignación viáticos conforme se establece en el
+              artículo 13 del Reglamento de Viáticos al Exterior. ({" "}
+              {data.seleccionDeclaracion === "siCubre" ? "X" : ""} )**
+            </Text>
           </View>
-
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCellText}>
+              **A su regreso el investigador(a) deberá presentar la factura o
+              nota de venta de los gastos de hospedaje y/o alimentación, o de
+              los establecidos en el artículo 9 del Reglamento de Viáticos al
+              Exterior, que no hayan sido cubiertos por estas instituciones u
+              organismos, para el reconocimiento de estos rubros y su
+              correspondiente liquidación.
+            </Text>
+          </View>
         </View>
 
         {/* Etiqueta de Firma */}
         <Text style={styles.baseText}>Firma del Solicitante:</Text>
 
+        {/* Espacio en blanco para la firma */}
+        <Text>{"\n\n\n"}</Text>
 
-       {/* Espacio en blanco para la firma */}
-       <Text>{"\n\n\n"}</Text>
+        {/* Nombre completo */}
+        <Text style={styles.baseTextCenter}>________________________</Text>
 
-{/* Nombre completo */}
-<Text style={styles.baseTextCenter}>________________________</Text>
+        {/* Nombre completo */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()}`}
+        </Text>
 
-{/* Nombre completo */}
-<Text style={styles.tableCellTextBlueCenter}>
-  {`${data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()}`}
-</Text>
-
-{/* Nombre del director y código de proyecto */}
-<Text style={styles.tableCellTextBlueCenter}>
-  {`${data.puesto.toUpperCase()}`}
-</Text>
+        {/* Nombre del director y código de proyecto */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${data.puesto.toUpperCase()}`}
+        </Text>
       </Page>
     </PDFDocument>
   );
@@ -2359,8 +2903,6 @@ export async function generateAnexo8OutsideProject(data) {
 
   // Descargar automáticamente el archivo PDF
   saveAs(blob, `Anexo 8 - Formulario fuera de proyecto.pdf`);
-
-
 }
 
 export async function generateAnexoB2WithinProject(data) {
@@ -2369,7 +2911,8 @@ export async function generateAnexoB2WithinProject(data) {
       <Page style={styles.page}>
         {/* Título del formulario */}
         <Text style={styles.header}>
-        Anexo 2B - FORMULARIO PARA SALIDAS AL EXTERIOR DENTRO DE PROYECTOS VIAJES TÉCNICOS
+          Anexo 2B - FORMULARIO PARA SALIDAS AL EXTERIOR DENTRO DE PROYECTOS
+          VIAJES TÉCNICOS
         </Text>
         {/* 1. Datos Generales */}
 
@@ -2596,19 +3139,20 @@ export async function generateAnexoB2WithinProject(data) {
           ))}
         </View>
 
-            <Text style={styles.baseText}>
-              4.2 Justificar la necesidad de la comisión de servicios mayor a 15
-              días{" "}
-            </Text>
-            <Text style={styles.textBlue}>
-              {data.justificacionComision || "No Aplica"}
-            </Text>
-          
-         <Text style={styles.sectionTitle}>
+        <Text style={styles.baseText}>
+          4.2 Justificar la necesidad de la comisión de servicios mayor a 15
+          días{" "}
+        </Text>
+        <Text style={styles.textBlue}>
+          {data.justificacionComision || "No Aplica"}
+        </Text>
+
+        <Text style={styles.sectionTitle}>
           5. CALCULO REFERENCIAL DE DÍAS DE LA COMISIÓN DE SERVICIOS{" "}
         </Text>
         <Text style={styles.textBlue}>
-          {'Calculo dias de comision entre las fechas de salida y de regreso al pais: '+ data.actividadesInmutables.length }
+          {"Calculo dias de comision entre las fechas de salida y de regreso al pais: " +
+            data.actividadesInmutables.length}
         </Text>
 
         {/* Etiqueta de Firma */}
@@ -2622,14 +3166,16 @@ export async function generateAnexoB2WithinProject(data) {
 
         {/* Nombre completo */}
         <Text style={styles.tableCellTextBlue}>
-          {`${data.rolEnProyecto === "Director"
-              ? "Director " +data.nombres + " " + data.apellidos
-              : data.nombreDirector}`}
+          {`${
+            data.rolEnProyecto === "Director"
+              ? data.nombres + " " + data.apellidos
+              : data.nombreDirector
+          }`}
         </Text>
 
         {/* Nombre del director y código de proyecto */}
         <Text style={styles.tableCellTextBlue}>
-          {`${ "Director del Proyecto " + data.codigoProyecto}`}
+          {`${"Director del Proyecto " + data.codigoProyecto}`}
         </Text>
       </Page>
     </PDFDocument>
@@ -2643,66 +3189,72 @@ export async function generateAnexoB2WithinProject(data) {
 }
 
 export async function generateAnexo5InscriptionPayment(data) {
-  
-  const nombreCompleto = (data.rolEnProyecto === "Director" || data.participacionProyecto === "fueraProyecto") 
-  ? `${data.nombres.toUpperCase()} ${data.apellidos.toUpperCase()}` 
-  : data.nombreDirector.toUpperCase();
+  const nombreCompleto =
+    data.rolEnProyecto === "Director" ||
+    data.participacionProyecto === "fueraProyecto"
+      ? `${data.nombres.toUpperCase()} ${data.apellidos.toUpperCase()}`
+      : data.nombreDirector.toUpperCase();
 
-  const formulario = (data.participacionProyecto === "fueraProyecto") ? "Fuera de Proyecto" :"Dentro de Proyecto";
-  
-  let codigoP = (data.codigoProyecto === "") ? "" :`${data.codigoProyecto} `;
-  
+  const formulario =
+    data.participacionProyecto === "fueraProyecto"
+      ? "Fuera de Proyecto"
+      : "Dentro de Proyecto";
+
+  let codigoP = data.codigoProyecto === "" ? "" : `${data.codigoProyecto} `;
+
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
-      <Text style={styles.header}>
-      Anexo 5 - FORMULARIO PARA PAGOS DE INSCRIPCIÓN 
-      </Text>
-
-      <Text style={styles.sectionTitle}>
-        1. DATOS DEL INVESTIGADOR 
+        <Text style={styles.header}>
+          Anexo 5 - FORMULARIO PARA PAGOS DE INSCRIPCIÓN
         </Text>
+
+        <Text style={styles.sectionTitle}>1. DATOS DEL INVESTIGADOR</Text>
 
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Nombres Completos:</Text>
+              <Text style={styles.tableCellText}>Nombres Completos:</Text>
             </View>
             <View style={styles.tableColAuto}>
               <Text style={styles.tableCellTextBlue}>
-                {data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()}
+                {data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase()}
               </Text>
             </View>
           </View>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Departamento / Instituto:</Text>
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
+              </Text>
             </View>
             <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.departamento}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.departamento}</Text>
             </View>
           </View>
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-            <Text style={styles.baseText}>{"Fuera de Proyecto: ( "}
-            <Text style={styles.tableCellTextBlue}>
-                {data.participacionProyecto === "fueraProyecto" ? "X" : ""}
-                <Text style={styles.baseText}>{" )"}</Text>
+              <Text style={styles.baseText}>
+                {"Fuera de Proyecto: ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.participacionProyecto === "fueraProyecto" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
               </Text>
-            </Text>
             </View>
             <View style={styles.tableCol25}>
-            <Text style={styles.baseText}>{"Dentro de Proyecto: ( "}
-            <Text style={styles.tableCellTextBlue}>
-                {data.participacionProyecto === "dentroProyecto" ? "X" : ""}
-                <Text style={styles.baseText}>{" )"}</Text>
+              <Text style={styles.baseText}>
+                {"Dentro de Proyecto: ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.participacionProyecto === "dentroProyecto" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
               </Text>
-            </Text>
             </View>
             <View style={styles.tableCol25}>
-            <Text style={styles.tableCellText}>Código del Proyecto:</Text>
+              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
             </View>
             <View style={styles.tableColAuto}>
               <Text style={styles.tableCellTextBlue}>
@@ -2712,121 +3264,114 @@ export async function generateAnexo5InscriptionPayment(data) {
           </View>
         </View>
 
+        {/* 2. Datos del evento*/}
 
-      {/* 2. Datos del evento*/}
+        <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO</Text>
 
-      <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Titulo del Evento:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.tituloEvento}</Text>
+            </View>
+          </View>
 
-<View style={styles.table}>
-  <View style={styles.tableRow}>
-    <View style={styles.tableCol25}>
-      <Text style={styles.tableCellText}>Titulo del Evento:</Text>
-    </View>
-    <View style={styles.tableCol}>
-      <Text style={styles.tableCellTextBlue}>
-        {data.tituloEvento}
-      </Text>
-    </View>
-  </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Lugar del Evento:</Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>Ciudad:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.ciudadEvento.toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>País:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.paisEvento.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Fecha del evento:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.textBlueCenter}>
+                {"Desde el  "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.fechaInicioEvento}
+                  <Text style={styles.textBlueCenter}>
+                    {" hasta el "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.fechaFinEvento}
+                    </Text>
+                  </Text>
+                </Text>
+              </Text>
+            </View>
+          </View>
 
-  <View style={styles.tableRow}>
-    <View style={styles.tableCol25}>
-      <Text style={styles.tableCellText}>Lugar del Evento:</Text>
-    </View>
-    <View style={styles.tableCol15}>
-      <Text style={styles.tableCellText}>Ciudad:</Text>
-    </View>
-    <View style={styles.tableCol}>
-      <Text style={styles.tableCellTextBlue}>
-        {data.ciudadEvento.toUpperCase()}
-      </Text>
-    </View>
-    <View style={styles.tableCol15}>
-      <Text style={styles.tableCellText}>País:</Text>
-    </View>
-    <View style={styles.tableCol}>
-      <Text style={styles.tableCellTextBlue}>
-        {data.paisEvento.toUpperCase() }
-      </Text>
-    </View>
-    </View>
-    <View style={styles.tableRow}>
-    <View style={styles.tableCol25}>
-      <Text style={styles.tableCellText}>Fecha del evento:</Text>
-    </View>
-    <View style={styles.tableCol}>
-      <Text style={styles.textBlueCenter}>
-        {"Desde el  "}
-        <Text style={styles.tableCellTextBlue}>
-          {data.fechaInicioEvento}
-          <Text style={styles.textBlueCenter}>
-            {" hasta el "}
-            <Text style={styles.tableCellTextBlue}>
-              {data.fechaFinEvento}
-            </Text>
-          </Text>
-        </Text>
-      </Text>
-    </View>
-    </View>
-  
-    
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Relevancia académica del evento:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.RelevanciaAcademica}
+              </Text>
+            </View>
+          </View>
 
-    <View style={styles.tableRow}>
-      <View style={styles.tableCol25}>
-        <Text style={styles.tableCellText}>Relevancia académica del evento:</Text>
-      </View>
-      <View style={styles.tableCol}>
-        <Text style={styles.tableCellTextBlue}>
-        {data.RelevanciaAcademica}
-        </Text>
-      </View>
-    </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Título del artículo:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloArticulo}
+              </Text>
+            </View>
+          </View>
 
-    <View style={styles.tableRow}>
-        <View style={styles.tableCol25}>
-          <Text style={styles.tableCellText}>Título del artículo:</Text>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                ¿El artículo será publicado?
+              </Text>
+              <Text style={styles.baseText}>
+                {"SI ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.articuloPublicado === "SI" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.baseText}>
+                {"NO ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.articuloPublicado === "NO" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.detalleArticuloSI}
+              </Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.tableCol}>
-        <Text style={styles.tableCellTextBlue}>
-          {data.tituloArticulo}
-        </Text>
-    </View>
-    </View>
-    
 
-    
-      <View style={styles.tableRow}>
-        <View style={styles.tableCol25}>
-          <Text style={styles.tableCellText}>
-          ¿El artículo será publicado?
-          </Text>
-          <Text style={styles.baseText}>
-            {"SI ( "}
-            <Text style={styles.tableCellTextBlue}>
-              {data.articuloPublicado === "SI" ? "X" : ""}
-              <Text style={styles.baseText}>{" )"}</Text>
-            </Text>
-          </Text>
-          <Text style={styles.baseText}>
-            {"NO ( "}
-            <Text style={styles.tableCellTextBlue}>
-              {data.articuloPublicado === "NO" ? "X" : ""}
-              <Text style={styles.baseText}>{" )"}</Text>
-            </Text>
-          </Text>
-        </View>
-        <View style={styles.tableCol}>
-        <Text style={styles.tableCellTextBlue}>
-          {data.detalleArticuloSI}
-        </Text>
-        </View>
-        </View>
-      </View>
-
-    
-    
-    <View>
+        <View>
           <Text style={styles.sectionTitle}>
             3. INFORMACIÓN DEL PAGO DE INSCRIPCIÓN{" "}
           </Text>
@@ -2889,9 +3434,7 @@ export async function generateAnexo5InscriptionPayment(data) {
                       <Text style={styles.baseText}>
                         {"( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Transferencia" 
-                            ? "X"
-                            : ""}
+                          {data.metodoPago === "Transferencia" ? "X" : ""}
                           <Text style={styles.baseText}>{" )"}</Text>
                         </Text>
                       </Text>
@@ -2900,10 +3443,11 @@ export async function generateAnexo5InscriptionPayment(data) {
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                    a) Formulario de pagos al exterior (Anexo 6)
+                      a) Formulario de pagos al exterior (Anexo 6)
                     </Text>
                     <Text style={styles.baseText}>
-                      b) Documento donde se puede verificar el costo y fechas de la inscripción al evento
+                      b) Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento
                     </Text>
                   </View>
                 </View>
@@ -2914,9 +3458,7 @@ export async function generateAnexo5InscriptionPayment(data) {
                       <Text style={styles.baseText}>
                         {"( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Otra"
-                            ? "X"
-                            : ""}
+                          {data.metodoPago === "Otra" ? "X" : ""}
                           <Text style={styles.baseText}>{" )"}</Text>
                         </Text>
                       </Text>
@@ -2925,10 +3467,12 @@ export async function generateAnexo5InscriptionPayment(data) {
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                      a) Solicitud de REEMBOLSO. Incluir texto con justificación en el mismo memorando del requerimiento.
+                      a) Solicitud de REEMBOLSO. Incluir texto con justificación
+                      en el mismo memorando del requerimiento.
                     </Text>
                     <Text style={styles.baseText}>
-                      b)Documento donde se puede verificar el costo y fechas de la inscripción al evento
+                      b)Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento
                     </Text>
                   </View>
                 </View>
@@ -2940,22 +3484,21 @@ export async function generateAnexo5InscriptionPayment(data) {
         {/* Etiqueta de Firma */}
         <Text style={styles.baseText}>Firma del Solicitante:</Text>
 
+        {/* Espacio en blanco para la firma */}
+        <Text>{"\n\n\n"}</Text>
 
-       {/* Espacio en blanco para la firma */}
-       <Text>{"\n\n\n"}</Text>
+        {/* Nombre completo */}
+        <Text style={styles.baseTextCenter}>________________________</Text>
 
-{/* Nombre completo */}
-<Text style={styles.baseTextCenter}>________________________</Text>
+        {/* Nombre completo */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${nombreCompleto}`}
+        </Text>
 
-{/* Nombre completo */}
-<Text style={styles.tableCellTextBlueCenter}>
-  {`${nombreCompleto}`}
-</Text>
-
-{/* Nombre del director y código de proyecto */}
-<Text style={styles.tableCellTextBlueCenter}>
-  {`${data.departamento}`}
-</Text>
+        {/* Nombre del director y código de proyecto */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${data.departamento}`}
+        </Text>
       </Page>
     </PDFDocument>
   );
@@ -2963,52 +3506,53 @@ export async function generateAnexo5InscriptionPayment(data) {
   const blob = await pdf(MyPDFDocument).toBlob();
 
   // Descargar automáticamente el archivo PDF
-  saveAs(blob, `Anexo 5 - Formulario Pago Inscripción ${formulario} ${codigoP}.pdf`);
-
-
+  saveAs(
+    blob,
+    `Anexo 5 - Formulario Pago Inscripción ${formulario} ${codigoP}.pdf`
+  );
 }
 
 export async function generateAnexo1PublicationPaymentWithin(data) {
-  
- const nombreCompleto = data.rolEnProyecto === "Director" 
-  ? `${data.nombres.toUpperCase()+" "+data.apellidos.toUpperCase()}` 
-  : data.nombreDirector.toUpperCase();
+  const nombreCompleto =
+    data.rolEnProyecto === "Director"
+      ? `${data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()}`
+      : data.nombreDirector.toUpperCase();
   const MyPDFDocument = (
-    
     <PDFDocument>
       <Page style={styles.page}>
-      <Text style={styles.header}>
-      ANEXO 1 - FORMULARIO PARA EL PAGO DE ARTÍCULOS CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO-DENTRO DE PROYECTOS 
+        <Text style={styles.header}>
+          ANEXO 1 - FORMULARIO PARA EL PAGO DE ARTÍCULOS CIENTÍFICOS ACEPTADOS
+          EN REVISTAS DE ALTO IMPACTO-DENTRO DE PROYECTOS
         </Text>
 
-        <Text style={styles.sectionTitle}>
-        1. DATOS DEL INVESTIGADOR 
-        </Text>
+        <Text style={styles.sectionTitle}>1. DATOS DEL INVESTIGADOR</Text>
 
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Nombres Completos:</Text>
+              <Text style={styles.tableCellText}>Nombres Completos:</Text>
             </View>
             <View style={styles.tableColAuto}>
               <Text style={styles.tableCellTextBlue}>
-                {data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()}
+                {data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase()}
               </Text>
             </View>
           </View>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Departamento / Instituto:</Text>
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
+              </Text>
             </View>
             <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.departamento}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.departamento}</Text>
             </View>
           </View>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Código del Proyecto:</Text>
+              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
             </View>
             <View style={styles.tableColAuto}>
               <Text style={styles.tableCellTextBlue}>
@@ -3024,7 +3568,9 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Título de la publicación:</Text>
+              <Text style={styles.tableCellText}>
+                Título de la publicación:
+              </Text>
             </View>
             <View style={styles.tableCol}>
               <Text style={styles.tableCellTextBlue}>
@@ -3038,20 +3584,18 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
               <Text style={styles.tableCellText}>Nombre de la Revista:</Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.nombreRevista}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.nombreRevista}</Text>
             </View>
           </View>
 
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Autores de la EPN: (Titulares, Ocasionales, otros) </Text>
+              <Text style={styles.tableCellText}>
+                Autores de la EPN: (Titulares, Ocasionales, otros){" "}
+              </Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.autoresEPN}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.autoresEPN}</Text>
             </View>
           </View>
 
@@ -3068,18 +3612,20 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
 
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Base de datos de indexación:</Text>
+              <Text style={styles.tableCellText}>
+                Base de datos de indexación:
+              </Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.baseDatos}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.baseDatos}</Text>
             </View>
           </View>
 
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Cuartil de la publicación: </Text>
+              <Text style={styles.tableCellText}>
+                Cuartil de la publicación:{" "}
+              </Text>
             </View>
             <View style={styles.tableCol}>
               <Text style={styles.tableCellTextBlue}>
@@ -3089,17 +3635,16 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
           </View>
         </View>
 
-
         <View>
           <Text style={styles.sectionTitle}>
-          3. DETALLE DE LA FORMA DE PAGO DE PUBLICACIÓN {" "}
+            3. DETALLE DE LA FORMA DE PAGO DE PUBLICACIÓN{" "}
           </Text>
 
           <View style={styles.table}>
             <View style={styles.tableRow}>
               <View style={styles.tableCol15}>
                 <Text style={styles.tableCellText}>
-                Valor de la publicación: 
+                  Valor de la publicación:
                 </Text>
               </View>
               <View style={styles.tableCol}>
@@ -3118,7 +3663,7 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
 
               <View style={styles.tableCol15}>
                 <Text style={styles.tableCellText}>
-                Fecha máxima de pago de la publicación: 
+                  Fecha máxima de pago de la publicación:
                 </Text>
               </View>
               <View style={styles.tableCol}>
@@ -3129,7 +3674,7 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
                         <View key={index} style={styles.tableRow}>
                           <Text style={styles.tableCellTextBlueCenter}>
                             {publicaciones.limiteFecha
-                              ? (publicaciones.limiteFecha || " ")
+                              ? publicaciones.limiteFecha || " "
                               : ""}
                           </Text>
                         </View>
@@ -3151,9 +3696,7 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
                       <Text style={styles.baseText}>
                         {"( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Transferencia"
-                            ? "X"
-                            : ""}
+                          {data.metodoPago === "Transferencia" ? "X" : ""}
                           <Text style={styles.baseText}>{" )"}</Text>
                         </Text>
                       </Text>
@@ -3162,7 +3705,8 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                      a)Formulario de registro de cuenta o formulario de giro al exterior (según corresponda) 
+                      a)Formulario de registro de cuenta o formulario de giro al
+                      exterior (según corresponda)
                     </Text>
                   </View>
                 </View>
@@ -3173,8 +3717,7 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
                       <Text style={styles.baseText}>
                         {"( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Otra" ? "X"
-                            : ""}
+                          {data.metodoPago === "Otra" ? "X" : ""}
                           <Text style={styles.baseText}>{" )"}</Text>
                         </Text>
                       </Text>
@@ -3183,13 +3726,16 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                     a)Solicitud de REEMBOLSO.
+                      a)Solicitud de REEMBOLSO.
                     </Text>
                     <Text style={styles.baseText}>
-                      b)Factura del solicitante a nombre de la Unidad de Gestión de Investigación y Proyección Social, adjuntando el respaldo de la transacción. * 
+                      b)Factura del solicitante a nombre de la Unidad de Gestión
+                      de Investigación y Proyección Social, adjuntando el
+                      respaldo de la transacción. *
                     </Text>
                     <Text style={styles.baseText}>
-                    *La Factura se entregará una vez que el investigador(a) solicite el pago de reembolso. 
+                      *La Factura se entregará una vez que el investigador(a)
+                      solicite el pago de reembolso.
                     </Text>
                   </View>
                 </View>
@@ -3198,7 +3744,7 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
           </View>
         </View>
 
-         {/* Etiqueta de Firma */}
+        {/* Etiqueta de Firma */}
         <Text style={styles.baseText}>Firma del Director del Proyecto: </Text>
 
         {/* Espacio en blanco para la firma */}
@@ -3209,60 +3755,59 @@ export async function generateAnexo1PublicationPaymentWithin(data) {
 
         {/* Nombre completo */}
         <Text style={styles.tableCellTextBlueCenter}>
-          { `${nombreCompleto}`}
+          {`${nombreCompleto}`}
         </Text>
 
         {/* Nombre del director y código de proyecto */}
         <Text style={styles.tableCellTextBlueCenter}>
           {`${data.codigoProyecto || "Código de prueba"}`}
         </Text>
-
-
       </Page>
     </PDFDocument>
   );
 
-   // Convertir el documento PDF a un Blob
-   const blob = await pdf(MyPDFDocument).toBlob();
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
 
-   // Descargar automáticamente el archivo PDF
-   saveAs(blob, `Anexo 1 - Formulario Pago Publicación Dentro del Proyecto-${data.codigoProyecto} .pdf`);
-  
+  // Descargar automáticamente el archivo PDF
+  saveAs(
+    blob,
+    `Anexo 1 - Formulario Pago Publicación Dentro del Proyecto-${data.codigoProyecto} .pdf`
+  );
 }
 
 export async function generateAnexo2PublicationPaymentOutside(data) {
- 
   const MyPDFDocument = (
-  <PDFDocument>
+    <PDFDocument>
       <Page style={styles.page}>
-      <Text style={styles.header}>
-      ANEXO 2 - FORMULARIO PARA EL PAGO DE SUBVENCIONES PARA LA DIFUSIÓN DE ARTÍCULOS 
-CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
-      </Text>
-
-        <Text style={styles.sectionTitle}>
-        1. DATOS DEL INVESTIGADOR 
+        <Text style={styles.header}>
+          ANEXO 2 - FORMULARIO PARA EL PAGO DE SUBVENCIONES PARA LA DIFUSIÓN DE
+          ARTÍCULOS CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
         </Text>
+
+        <Text style={styles.sectionTitle}>1. DATOS DEL INVESTIGADOR</Text>
 
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Nombres Completos:</Text>
+              <Text style={styles.tableCellText}>Nombres Completos:</Text>
             </View>
             <View style={styles.tableColAuto}>
               <Text style={styles.tableCellTextBlue}>
-                {data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()}
+                {data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase()}
               </Text>
             </View>
           </View>
           <View style={styles.tableRow}>
             <View style={styles.tableCol40}>
-            <Text style={styles.tableCellText}>Departamento / Instituto:</Text>
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
+              </Text>
             </View>
             <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.departamento}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.departamento}</Text>
             </View>
           </View>
         </View>
@@ -3273,7 +3818,9 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
         <View style={styles.table}>
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Título de la publicación:</Text>
+              <Text style={styles.tableCellText}>
+                Título de la publicación:
+              </Text>
             </View>
             <View style={styles.tableCol}>
               <Text style={styles.tableCellTextBlue}>
@@ -3287,20 +3834,18 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
               <Text style={styles.tableCellText}>Nombre de la Revista:</Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.nombreRevista}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.nombreRevista}</Text>
             </View>
           </View>
 
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Autores de la EPN: (Titulares, Ocasionales, otros) </Text>
+              <Text style={styles.tableCellText}>
+                Autores de la EPN: (Titulares, Ocasionales, otros){" "}
+              </Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.autoresEPN}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.autoresEPN}</Text>
             </View>
           </View>
 
@@ -3317,18 +3862,20 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
 
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Base de datos de indexación:</Text>
+              <Text style={styles.tableCellText}>
+                Base de datos de indexación:
+              </Text>
             </View>
             <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.baseDatos}
-              </Text>
+              <Text style={styles.tableCellTextBlue}>{data.baseDatos}</Text>
             </View>
           </View>
 
           <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Cuartil de la publicación: </Text>
+              <Text style={styles.tableCellText}>
+                Cuartil de la publicación:{" "}
+              </Text>
             </View>
             <View style={styles.tableCol}>
               <Text style={styles.tableCellTextBlue}>
@@ -3338,17 +3885,16 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
           </View>
         </View>
 
-
         <View>
           <Text style={styles.sectionTitle}>
-          3. DETALLE DE LA FORMA DE PAGO DE PUBLICACIÓN {" "}
+            3. DETALLE DE LA FORMA DE PAGO DE PUBLICACIÓN{" "}
           </Text>
 
           <View style={styles.table}>
             <View style={styles.tableRow}>
               <View style={styles.tableCol15}>
                 <Text style={styles.tableCellText}>
-                Valor de la publicación: 
+                  Valor de la publicación:
                 </Text>
               </View>
               <View style={styles.tableCol}>
@@ -3367,7 +3913,7 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
 
               <View style={styles.tableCol15}>
                 <Text style={styles.tableCellText}>
-                Fecha máxima de pago de la publicación: 
+                  Fecha máxima de pago de la publicación:
                 </Text>
               </View>
               <View style={styles.tableCol}>
@@ -3378,7 +3924,7 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
                         <View key={index} style={styles.tableRow}>
                           <Text style={styles.tableCellTextBlueCenter}>
                             {publicaciones.limiteFecha
-                              ? (publicaciones.limiteFecha || " ")
+                              ? publicaciones.limiteFecha || " "
                               : ""}
                           </Text>
                         </View>
@@ -3400,9 +3946,7 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
                       <Text style={styles.baseText}>
                         {"( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Transferencia"
-                            ? "X"
-                            : ""}
+                          {data.metodoPago === "Transferencia" ? "X" : ""}
                           <Text style={styles.baseText}>{" )"}</Text>
                         </Text>
                       </Text>
@@ -3411,7 +3955,8 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                      a)Formulario de registro de cuenta o formulario de giro al exterior (según corresponda) 
+                      a)Formulario de registro de cuenta o formulario de giro al
+                      exterior (según corresponda)
                     </Text>
                   </View>
                 </View>
@@ -3422,8 +3967,7 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
                       <Text style={styles.baseText}>
                         {"( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Otra" ? "X"
-                            : ""}
+                          {data.metodoPago === "Otra" ? "X" : ""}
                           <Text style={styles.baseText}>{" )"}</Text>
                         </Text>
                       </Text>
@@ -3432,13 +3976,16 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                     a)Solicitud de REEMBOLSO.
+                      a)Solicitud de REEMBOLSO.
                     </Text>
                     <Text style={styles.baseText}>
-                      b)Factura del solicitante a nombre de la Unidad de Gestión de Investigación y Proyección Social, adjuntando el respaldo de la transacción. * 
+                      b)Factura del solicitante a nombre de la Unidad de Gestión
+                      de Investigación y Proyección Social, adjuntando el
+                      respaldo de la transacción. *
                     </Text>
                     <Text style={styles.baseText}>
-                    *La Factura se entregará una vez que el investigador(a) solicite el pago de reembolso. 
+                      *La Factura se entregará una vez que el investigador(a)
+                      solicite el pago de reembolso.
                     </Text>
                   </View>
                 </View>
@@ -3447,8 +3994,8 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
           </View>
         </View>
 
-         {/* Etiqueta de Firma */}
-        <Text style={styles.baseText}>Firma del solicitante:  </Text>
+        {/* Etiqueta de Firma */}
+        <Text style={styles.baseText}>Firma del solicitante: </Text>
 
         {/* Espacio en blanco para la firma */}
         <Text>{"\n\n\n"}</Text>
@@ -3458,24 +4005,22 @@ CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
 
         {/* Nombre completo */}
         <Text style={styles.tableCellTextBlueCenter}>
-          { `${data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()}`}
+          {`${data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()}`}
         </Text>
 
         {/* Nombre del director y código de proyecto */}
         <Text style={styles.tableCellTextBlueCenter}>
           {`${data.departamento || "Departamento de prueba"}`}
         </Text>
-
-
       </Page>
     </PDFDocument>
   );
 
-   // Convertir el documento PDF a un Blob
-   const blob = await pdf(MyPDFDocument).toBlob();
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
 
-   // Descargar automáticamente el archivo PDF
-   saveAs(blob, `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto.pdf`);
+  // Descargar automáticamente el archivo PDF
+  saveAs(blob, `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto.pdf`);
 }
 
 //formatear la fecha en formato dd/mm/yyyy

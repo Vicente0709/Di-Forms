@@ -255,6 +255,7 @@ function EventParticipationWithinProjectsForm() {
       if (diferenciaEnDias > 15) {
         setShowActivity(true);
         setshowInputJustificacion(true);
+        setValue("justificacionComision", "");
       } else {
         setValue("justificacionComision", "No Aplica");
         setshowInputJustificacion(false);
@@ -718,7 +719,7 @@ function EventParticipationWithinProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today ||
+                                    value >= today() ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
@@ -765,7 +766,7 @@ function EventParticipationWithinProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
                                   
@@ -948,7 +949,7 @@ function EventParticipationWithinProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
                                     value >= fechaLlegadaAnterior ||
@@ -1289,6 +1290,7 @@ function EventParticipationWithinProjectsForm() {
                          className="form-input"
                          {...register(`inscripciones[${index}].limiteFecha`, {
                            validate: () => validarFechaLimiteInscripcion(index),
+                            required: "Este campo es requerido",
                          })}
                        />
                        {errors.inscripciones &&

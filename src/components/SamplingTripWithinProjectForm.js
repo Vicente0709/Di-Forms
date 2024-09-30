@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider, useFormContext } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes Props
@@ -14,66 +14,77 @@ import RadioGroup from "./Inputs/RadioGroup";
 import ActionButton from "./Buttons/ActionButton";
 import DownloadButton from "./Buttons/DownloadButton";
 
-// Importación de los componentes del formulario
+//Importación de funciones
+import today from "../utils/date";
+import { generateDateRange } from "../utils/dataRange";
+import {validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso} from "../utils/validaciones.js";
 
 // Importación de las funciones para generar documentos
-import { generateAnexo7WithinProject } from "../utils/documentGeneratorNational";
+import { generateAnexo7WithinProject,generateMemoSamplingTripWithinProject } from "../utils/documentGeneratorNational";
+import { getValue } from "@testing-library/user-event/dist/utils";
+
+//Constantes globales
+const formStorageKey = "formSamplingTripWithinProject"; // Clave para almacenar el formulario en sessionStorage
 
 function SamplingTripWithinProjectForm() {
-  const formStorageKey = "formSamplingTripWithinProject"; // Clave para almacenar el formulario en localStorage
-  const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+  // Configuración del formulario con react-hook-form y valores predeterminados desde sessionStorage
+  const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {};
 
-  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
-  const methods = useForm({
-    mode: "onChange",
-    reValidateMode: "onChange",
-    defaultValues: formData,
-  });
+  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formData});
+  const { register, control, watch, setValue, reset, clearErrors, formState: { errors }, } = methods;
 
-  const { watch, setValue, reset, clearErrors, formState: { errors },} = methods;
+  //FieldArrays para tablas
+  const { fields: participanteFields, append: appendParticipante, remove: removeParticipante } = useFieldArray({control, name: "participante"});
+  const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
+  const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
+  const { fields: immutableFields, replace } = useFieldArray({ control, name: "actividadesInmutables" });
 
-  // Efecto para sincronizar con localStorage y manejar cálculos de fechas
-  useEffect(() => {
-    reset(formData); // Rellenar el formulario con los datos almacenados
+  //visualizadores con watch
+  const fechaInicioViaje =  watch("fechaInicioViaje");
+  const fechaFinViaje = watch("fechaFinViaje");
+  const transporteIdaValues = watch("transporteIda");
+  const transporteRegresoValues = watch("transporteRegreso");
+  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
 
-    // Suscribirse a los cambios en el formulario para guardar en localStorage
-    const subscription = watch((data) => {
-      localStorage.setItem(formStorageKey, JSON.stringify(data));
-    });
+  //Derivaciones de visualizadores 
+  const habilitarCampos = seleccionViaticosSubsistencias === "SI";
+  const fechaSalida = transporteIdaValues && transporteIdaValues.length > 0
+  ? transporteIdaValues[0].fechaSalida
+  : null;
 
-    // Limpiar la suscripción al desmontar el componente
-    return () => subscription.unsubscribe();
-  }, [watch, reset]);
+const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length > 0
+  ? transporteRegresoValues[transporteRegresoValues.length - 1].fechaLlegada
+  : null;
 
-  // Función para descargar el formulario como JSON
+  const rangoFechas = generateDateRange(fechaSalida, fechaLlegada);
+
+
+
+  //manejadores de estado
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
+
+  const onSubmitSamplingTrip = (data)=>{
+  setShowDownloadSection(true);
+  }
+
   const handleDownloadJson = () => {
-    const data = methods.getValues(); // Obtiene los datos actuales del formulario
+    const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "Viajes de Muestreo Dentro de Proyectos.json"; // Nombre del archivo
+    link.download = "Viajes de Muestreo Dentro de Proyectos.json";
     link.click();
   };
 
-  // Función para cargar un archivo JSON y rellenar el formulario
   const handleUploadJson = (event) => {
-    console.log("Inicia el proceso de carga del archivo JSON");
-
-    const file = event.target.files[0];  // Verificar si hay archivo
+    const file = event.target.files[0];
     if (file) {
-      console.log("Archivo JSON seleccionado:", file.name);
-
-      const reader = new FileReader();  // Inicializa el FileReader para leer el archivo
+      const reader = new FileReader();
       reader.onload = (e) => {
-        console.log("El archivo JSON ha sido leído exitosamente");
-
         try {
-          const json = JSON.parse(e.target.result);  // Parsear el archivo JSON
-          console.log("Archivo JSON parseado correctamente:", json);
-
-          // Reset del formulario con los datos del JSON
+          const json = JSON.parse(e.target.result);
           reset(json, {
             keepErrors: false,
             keepDirty: false,
@@ -81,118 +92,1033 @@ function SamplingTripWithinProjectForm() {
             keepTouched: false,
             keepIsSubmitted: false,
           });
-
-          console.log("Formulario reseteado con los valores del archivo JSON");
-
-          // Actualizar localStorage con los datos cargados
-          localStorage.setItem(formStorageKey, JSON.stringify(json));
-          console.log("Datos almacenados en localStorage");
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }
       };
-
-      reader.readAsText(file);  // Leer el archivo como texto
-      console.log("Lectura del archivo iniciada");
-    } else {
-      console.log("No se seleccionó ningún archivo JSON");
+      reader.readAsText(file);
     }
   };
 
-  // A partir de aqui los handleButtons
-  const handleGeneratePdf2 = () => {
-    const data = {
-      projectCode: "PRJ123",
-      projectTitle: "Estudio de Biodiversidad en Áreas Protegidas",
-      department: "Departamento de Ciencias Ambientales",
-      personnelData: [
-        { name: "Juan Pérez", role: "Investigador Principal" },
-        { name: "María López", role: "Asistente de Investigación" },
-        { name: "Carlos Méndez", role: "Coordinador de Campo" },
-        { name: "Ana García", role: "Especialista en Fauna" },
-        { name: "Pedro Rodríguez", role: "Técnico de Laboratorio" },
-        { name: "María López", role: "Asistente de Investigación" },
-        { name: "Carlos Méndez", role: "Coordinador de Campo" },
-        { name: "Ana García", role: "Especialista en Fauna" },
-        { name: "Pedro Rodríguez", role: "Técnico de Laboratorio" },
-        { name: "María López", role: "Asistente de Investigación" },
-        { name: "Carlos Méndez", role: "Coordinador de Campo" },
-        { name: "Ana García", role: "Especialista en Fauna" },
-        { name: "Pedro Rodríguez", role: "Técnico de Laboratorio" },
-      ],
-      destination: "Parque Nacional Yasuní", // Lugar de movilización
-      date: {
-        start: "01/11/2024", // Fecha de inicio
-        end: "10/11/2024", // Fecha de fin
-      },
-      activities: [
-        { date: "01/11/2024", name: "Recolección de muestras de flora " },
-        { date: "02/11/2024", name: "Estudio de fauna en el sector norte" },
-        { date: "03/11/2024", name: "Análisis de suelos y agua" },
-        {
-          date: "04/11/2024",
-          name: "Fotografías aéreas de la zona de estudio",
-        },
-      ],
-    };
-
-    generateAnexo7WithinProject(data);
+  const handleGenerateDocx = () => {
+    const data = methods.getValues();
+    generateMemoSamplingTripWithinProject(data);
+    setShowDownloadSection(false);
   };
-  // A partir de aqui los visualizadores de las varibales (watch)
+  const handleGeneratePdf2 = () => {
+    const data = methods.getValues();
+    generateAnexo7WithinProject(data);    
+    setShowDownloadSection(false);
+  };
 
-  // Manejadores de estado para showSections
-  //ejm: const [showInputDirector, setShowInputDirector] = useState(false);
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const handleClearForm = () => {
+    sessionStorage.removeItem(formStorageKey);
+    window.location.reload();
+  };
 
-  //aqui el use efect donde van todo a el control de las validaciones entre los imputs
+  // useEffect principal
   useEffect(() => {
-    //aqui lo que se vaya a valdiad y demas cosas
-    //constantes para opciones usados en inputsSelect, RadioGopus etc
-    //ejemplo
-    //   if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
-    //     setShowInputDirector(true);
-    //   } else {
-    //     setShowInputDirector(false);
-    //     setValue("nombreDirector", "");
-    //   }
-  }, [setValue, clearErrors]);
+    reset(formData);
+    const subscription = watch((data) => {
+      sessionStorage.setItem(formStorageKey, JSON.stringify(data));
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, reset]);
+
+  //Control de los datos
+  useEffect(() => {
+    if (seleccionViaticosSubsistencias === "NO") {
+      setValue("nombreBanco", "");
+      setValue("tipoCuenta", "");
+      setValue("numeroCuenta", "");
+    }
+
+   if(participanteFields.length===0){
+    appendParticipante({
+      nombre: "",
+      rol: "",
+    });
+  }
+
+    if (fieldsIda.length === 0) {
+      appendIda({
+      tipoTransporte: "",
+      nombreTransporte: "",
+      ruta: "",
+      fechaSalida: "",
+      horaSalida: "",
+      fechaLlegada: "",
+      horaLlegada: "",
+    });
+  }
+
+    if (fieldsRegreso.length === 0) {
+      appendRegreso({
+      tipoTransporte: "",
+      nombreTransporte: "",
+      ruta: "",
+      fechaSalida: "",
+      horaSalida: "",
+      fechaLlegada: "",
+      horaLlegada: "",
+    });
+  }
+  if (rangoFechas.length > 0) {
+    // Obtener las actividades actuales
+    const actividadesActuales = methods.getValues("actividadesInmutables") || [];
+
+    // Creamos un mapa (objeto) de las actividades actuales para acceder fácilmente a las descripciones
+    const actividadMap = actividadesActuales.reduce((acc, actividad) => {
+      acc[actividad.fecha] = actividad.descripcion;
+      return acc;
+    }, {});
+
+    // Mapeamos el nuevo rango de fechas, manteniendo las descripciones anteriores si coinciden
+    const actividadesActualizadas = rangoFechas.map((fecha) => {
+      return {
+        fecha: fecha,
+        descripcion: actividadMap[fecha] || "", // Mantener la descripción si existe para la fecha
+      };
+    });
+
+    // Solo reemplazamos si hay un cambio real
+    if (JSON.stringify(actividadesActuales) !== JSON.stringify(actividadesActualizadas)) {
+      replace(actividadesActualizadas); // Actualizamos las actividades solo si hay cambios
+    }
+  }
+ 
+}, [replace,setValue,habilitarCampos, seleccionViaticosSubsistencias, rangoFechas, fechaSalida, fechaLlegada,fieldsIda, fieldsRegreso, participanteFields]);
+
 
   return (
     <FormProvider {...methods}>
       <Container>
         <h1 className="text-center my-4">
-          Formulario para participación en viajes técnicos dentro de proyectos
+        Formulario para salidas de campo y de muestreo y/o viajes técnicos dentro de proyectos
         </h1>
         <div className="form-container">
-          <Label text="Descargar datos actuales en (.json)"/>
+          <Label text="Descargar datos actuales en (.json)" />
           {/* Botón para descargar el formulario como .json */}
           <ActionButton
             onClick={handleDownloadJson}
             label="Descargar datos como JSON"
             variant="success"
           />
-          <Label text="Cargar datos desde archivo (.json)"/>
+          <Label text="Cargar datos desde archivo (.json)" />
           {/* Input nativo para cargar un archivo JSON */}
           <input
             type="file"
             accept=".json"
-            onChange={handleUploadJson}  // Conectar con la función
-            style={{ marginTop: '20px' }}  // Estilos opcionales
+            onChange={handleUploadJson} // Conectar con la función
+            style={{ marginTop: "20px" }} // Estilos opcionales
           />
         </div>
-        <Form onSubmit={methods.handleSubmit()}>
-          <div className="form-container"></div>
+        <Form onSubmit={methods.handleSubmit(onSubmitSamplingTrip)}>
+          <div className="form-container">
+            <LabelTitle
+              text="DATOS GENERALES PARA LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE TÉCNICO"
+              disabled={false}
+            />
 
-          <DownloadButton
-            onClick={handleGeneratePdf2}
-            icon="IconPdf.png"
-            altText="PDF Icon"
-            label="Descargar Anexo 7"
-          />
+            <InputText
+              name="codigoProyecto"
+              label="Código del proyecto:"
+              placeholder={"Ejemplo: PIGR-24-01"}
+              rules={{
+                required: "El código del proyecto es requerido",
+                pattern: {
+                  value: /^[A-Za-z]+(-[A-Za-z0-9]+)+$/,
+                  message:
+                    "El código del proyecto debe estar conformado por una combinación de letras y números separados por guiones",
+                },
+              }}
+              disabled={false}
+            />
+
+            <InputText
+              name="tituloProyecto"
+              label="Título del proyecto:"
+              rules={{ required: "El título del proyecto es requerido" }}
+              disabled={false}
+            />
+
+            <InputText
+              name="nombreDirector"
+              label="Nombre del Director del proyecto:"
+              rules={{ required: "El nombre del Director es requerido" }}
+              disabled={false}
+            />
+
+            {/* Departamento / Instituto */}
+            <InputSelect
+              name="departamento"
+              label="Departamento / Instituto:"
+              options={departamentoOptions}
+              rules={{ required: "El departamento es requerido" }}
+              disabled={false}
+            />
+            <LabelTitle text="Personal a trasladarse" />
+            <table className="activity-schedule-table">
+              <thead>
+                <tr>
+                  <th>Personal a trasladarse</th>
+                  <th>Rol en el Proyecto</th>
+                </tr>
+              </thead>
+              <tbody>
+                {participanteFields.map((field, index) => (
+                  <tr
+                    key={field.id}
+                    className={index % 2 === 0 ? "row-even" : "row-odd"}
+                  >
+                    <td>
+                      <input
+                        type="text"
+                        id={`participante[${index}].nombre`}
+                        className="form-input"
+                        {...register(`participante[${index}].nombre`, {
+                          required: "El nombre es requerido",
+                        })}
+                      />
+                      {errors.participante &&
+                        errors.participante[index]?.nombre && (
+                          <span className="error-text">
+                            {errors.participante[index].nombre.message}
+                          </span>
+                        )}
+                    </td>
+                    <td>
+                      <select
+                        id={`participante[${index}].rol`}
+                        className="form-input"
+                        defaultValue="Aéreo"
+                        {...register(`participante[${index}].rol`, {
+                          required: "Este campo es requerido",
+                        })}
+                      >
+                        <option value="Director">Director</option>
+                        <option value="Codirector">Codirector</option>
+                        <option value="Colaborador">Colaborador</option>
+                      </select>
+                      {errors.participante &&
+                        errors.participante[index]?.rol && (
+                          <span className="error-text">
+                            {errors.participante[index].rol.message}
+                          </span>
+                        )}
+                    </td>
+                    <td>
+                      <ActionButton
+                        onClick={() => removeParticipante(index)}
+                        label="Eliminar"
+                        variant="danger"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <ActionButton
+              onClick={() => {
+                appendParticipante({
+                  nombre: "", // Valor inicial para el cargo
+                  rol: "", // Valor inicial para el rol
+                });
+              }}
+              label="Agregar"
+              variant="success"
+            />
+            <LabelTitle text="DATOS DE LA SALIDA DE CAMPO Y DE MUESTREO"/>
+            <InputText
+             name="ciudad"
+             label="Lugar de movilización"
+             rules={{ required: "La ciudad a movilizarce es requerida" }}
+             disabled={false}
+            />
+
+            <InputDate
+              name="fechaInicioViaje"
+              label="Desde:"
+              rules={{
+                required: "La fecha de inicio del evento es requerida",
+                validate: (value) => {
+                  return (
+                    value >= today() ||
+                    "La fecha de inicio no puede ser anterior a la fecha actual."
+                  );
+                },
+              }}
+              disabled={false}
+            />
+
+            <InputDate
+              name="fechaFinViaje"
+              label="Hasta:"
+              rules={{
+                required: "La fecha de fin del evento es requerida",
+                validate: (value) => {
+                  return (
+                    value >= today()||
+                    "La fecha debe ser mayor a la fecha actual "+ today()
+                  );
+                },
+                validate: (value) => {
+                  return (
+                    value >= watch("fechaInicioViaje") ||
+                    "La fecha FIN de viaje  debe ser major a la fecha de incio del viaje " + fechaInicioViaje
+                  );
+                },
+
+              }}
+              disabled={false}
+            />
+
+            <Label text="Solicita para viaje tecnico" />
+            <RadioGroup
+              name="pasajesAereos"
+              label="Pasajes aéreos:"
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{ required: "Indique si requiere pasajes aéreos" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              name="viaticosSubsistencias"
+              label="Viáticos y subsistencias:"
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{
+                required: "Indique si requiere viáticos y subsistencias",
+              }}
+              disabled={false}
+            />
+             <RadioGroup
+              name="inscripcion"
+              label="Inscripción:"
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{ required: "Indique si requiere inscripción" }}
+            />
+            <LabelTitle text="Transporte" disabled={false} />
+            <LabelText
+              text="Por favor, considere que el itinerario es tentativo. Consulte el
+                itinerario del medio de transporte elegido en su página oficial
+                o sitios web de confianza. Seleccione la opción que ofrezca el
+                menor tiempo de viaje y el menor número de escalas de ser el
+                caso."
+            />
+            <Label text="TRANSPORTE DE IDA" />
+            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento, salida de campo." />
+
+            <div className="scroll-table-container">
+              <table className="activity-schedule-table">
+                <thead>
+                  <tr>
+                    <th>Tipo de Transporte</th>
+                    <th>Nombre de Transporte</th>
+                    <th>Ruta Transporte</th>
+                    <th>Fecha de Salida</th>
+                    <th>Hora de Salida</th>
+                    <th>Fecha de Llegada</th>
+                    <th>Hora de Llegada</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fieldsIda.map((field, index) => {
+                    const fechaSalida = watch(
+                      `transporteIda[${index}].fechaSalida`
+                    );
+                    const fechaLlegadaAnterior = watch(
+                      `transporteIda[${index - 1}].fechaLlegada`
+                    );
+                    return (
+                      <tr key={field.id}>
+                        <td>
+                          <select
+                            id={`tipoTransporte-${index}`}
+                            className="form-input"
+                            defaultValue="Aéreo"
+                            {...register(
+                              `transporteIda[${index}].tipoTransporte`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          >
+                            <option value="Aéreo">Aéreo</option>
+                            <option value="Terrestre">Terrestre</option>
+                            <option value="Marítimo">Marítimo</option>
+                            <option value="Otros">Otros</option>
+                          </select>
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.tipoTransporte && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].tipoTransporte
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            id={`nombreTransporte-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteIda[${index}].nombreTransporte`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.nombreTransporte && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].nombreTransporte
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            id={`ruta-${index}`}
+                            placeholder="UIO-GYE"
+                            className="form-input"
+                            {...register(`transporteIda[${index}].ruta`, {
+                              required: "Este campo es requerido",
+                            })}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.ruta && (
+                              <span className="error-text">
+                                {errors.transporteIda[index].ruta.message}
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            id={`fechaSalida-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteIda[${index}].fechaSalida`,
+                              {
+                                required: "Este campo es requerido",
+                                validate: {
+                                  noPastDate: (value) =>
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
+                                  validSequence: (value) =>
+                                    !fechaLlegadaAnterior ||
+                                    value >= fechaLlegadaAnterior ||
+                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                },
+                              }
+                            )}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.fechaSalida && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].fechaSalida
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="time"
+                            id={`horaSalida-${index}`}
+                            className="form-input"
+                            {...register(`transporteIda[${index}].horaSalida`, {
+                              required: "Este campo es requerido",
+                            })}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.horaSalida && (
+                              <span className="error-text">
+                                {errors.transporteIda[index].horaSalida.message}
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            id={`fechaLlegada-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteIda[${index}].fechaLlegada`,
+                              {
+                                required: "Este campo es requerido",
+                                validate: {
+                                  noPastDate: (value) =>
+                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                  afterSalida: (value) =>
+                                    value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+                                  
+                                  // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
+                                  validateFechaLlegadaIda: (value) =>
+                                    index === fieldsIda.length - 1
+                                      ? validateFechaLlegadaIda(value, fechaInicioViaje)
+                                      : true, // Si no es el último campo, no aplica esta validación
+                                },
+                              }
+                            )}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.fechaLlegada && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].fechaLlegada
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="time"
+                            id={`horaLlegada-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteIda[${index}].horaLlegada`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.horaLlegada && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].horaLlegada
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <ActionButton
+                            onClick={() => removeIda(index)}
+                            label="Eliminar"
+                            variant="danger"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              <ActionButton
+                onClick={() => {
+                  appendIda({
+                    tipoTransporte: "",
+                    nombreTransporte: "",
+                    ruta: "",
+                    fechaSalida: "",
+                    horaSalida: "",
+                    fechaLlegada: "",
+                    horaLlegada: "",
+                  });
+                }}
+                label="Agregar"
+                variant="success"
+              />
+            </div>
+
+            <Label text="TRANSPORTE DE REGRESO" />
+            <LabelText
+              text=" El retorno puede ser máximo un día después de la finalización
+                del evento."
+            />
+
+            <div className="scroll-table-container">
+              <table className="activity-schedule-table">
+                <thead>
+                  <tr>
+                    <th>Tipo de Transporte</th>
+                    <th>Nombre de Transporte</th>
+                    <th>Ruta Transporte</th>
+                    <th>Fecha de Salida</th>
+                    <th>Hora de Salida</th>
+                    <th>Fecha de Llegada</th>
+                    <th>Hora de Llegada</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fieldsRegreso.map((field, index) => {
+                    const fechaSalida = watch(
+                      `transporteRegreso[${index}].fechaSalida`
+                    );
+                    const fechaLlegadaAnterior = watch(
+                      `transporteRegreso[${index - 1}].fechaLlegada`
+                    );
+                    return (
+                      <tr key={field.id}>
+                        <td>
+                          <select
+                            id={`tipoTransporte-${index}`}
+                            className="form-input"
+                            defaultValue="Aéreo"
+                            {...register(
+                              `transporteRegreso[${index}].tipoTransporte`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          >
+                            <option value="Aéreo">Aéreo</option>
+                            <option value="Terrestre">Terrestre</option>
+                            <option value="Marítimo">Marítimo</option>
+                            <option value="Otros">Otros</option>
+                          </select>
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.tipoTransporte && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].tipoTransporte
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            id={`nombreTransporte-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].nombreTransporte`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]
+                              ?.nombreTransporte && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index]
+                                    .nombreTransporte.message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            id={`ruta-${index}`}
+                            placeholder="UIO-GYE"
+                            className="form-input"
+                            {...register(`transporteRegreso[${index}].ruta`, {
+                              required: "Este campo es requerido",
+                            })}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.ruta && (
+                              <span className="error-text">
+                                {errors.transporteRegreso[index].ruta.message}
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            id={`fechaSalida-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].fechaSalida`,
+                              {
+                                required: "Este campo es requerido",
+                                validate: {
+                                  noPastDate: (value) =>
+                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                  validSequence: (value) =>
+                                    !fechaLlegadaAnterior ||
+                                    value >= fechaLlegadaAnterior ||
+                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                  
+                                  // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
+                                  validateRegreso: (value) =>
+                                    index === 0 ? validateFechaSalidaRegreso(value, fechaFinViaje) : true,
+                                },
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.fechaSalida && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].fechaSalida
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="time"
+                            id={`horaSalida-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].horaSalida`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.horaSalida && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].horaSalida
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            id={`fechaLlegada-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].fechaLlegada`,
+                              {
+                                required: "Este campo es requerido",
+                                validate: {
+                                  noPastDate: (value) =>
+                                    value >= today ||
+                                    "La fecha no puede ser menor a la fecha actual",
+                                  afterSalida: (value) =>
+                                    value >= fechaSalida ||
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+                                },
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.fechaLlegada && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].fechaLlegada
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="time"
+                            id={`horaLlegada-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].horaLlegada`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.horaLlegada && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].horaLlegada
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <ActionButton
+                            onClick={() => removeRegreso(index)}
+                            label="Eliminar"
+                            variant="danger"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <ActionButton
+                onClick={() => {
+                  appendRegreso({
+                    tipoTransporte: "",
+                    nombreTransporte: "",
+                    ruta: "",
+                    fechaSalida: "",
+                    horaSalida: "",
+                    fechaLlegada: "",
+                    horaLlegada: "",
+                  });
+                }}
+                label="Agregar"
+                variant="success"
+              />
+            </div>
+
+            <LabelTitle text="CRONOGRAMA DE ACTIVIDADES" />
+            
+            <LabelText
+              text="Incluir desde la fecha de salida del país y días de traslado
+              hasta el día de llegada al destino. <br />
+              Hasta incluir la fecha de llegada al país."
+            />
+            <table className="activity-schedule-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción de la Actividad a Realizar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rangoFechas.map((fecha, index) => (
+                  <tr key={index}>
+                    <td>
+                      {/* Campo de fecha de solo lectura */}
+                      <input
+                        type="date"
+                        id={`fechaInmutable-${index}`}
+                        className="form-input"
+                        {...register(`actividadesInmutables[${index}].fecha`, {
+                          required: "Este campo es requerido",
+                        })}
+                        value={fecha} // Valor predefinido de la fecha
+                        readOnly
+                      />
+                      {errors.actividadesInmutables &&
+                        errors.actividadesInmutables[index]?.fecha && (
+                          <span className="error-text">
+                            {errors.actividadesInmutables[index].fecha.message}
+                          </span>
+                        )}
+                    </td>
+                    <td>
+                      {/* Campo de descripción editable */}
+                      <input
+                        type="text"
+                        id={`descripcionInmutable-${index}`}
+                        className="form-input"
+                        {...register(`actividadesInmutables[${index}].descripcion`, {
+                          required: "Este campo es requerido",
+                        })}
+                        placeholder="Describe la actividad a realizar"
+                      />
+                      {errors.actividadesInmutables &&
+                        errors.actividadesInmutables[index]?.descripcion && (
+                          <span className="error-text">
+                            {errors.actividadesInmutables[index].descripcion.message}
+                          </span>
+                        )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <Label text="Justificación del la salida de campo y de muestreo" />
+            <InputTextArea
+              name="objetivoViaje"
+              label="Objetivo, resultado o producto de la salida de campo y de muestreo."
+              infoText="Detalle de productos a ser alcanzados en la salida de campo y de muestreo."
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            {/* Nombre del banco */}
+            <InputText
+              name="nombreBanco"
+              label="Nombre del banco:"
+              rules={{
+                required: habilitarCampos ? "Este campo es requerido" : false,
+              }}
+              disabled={!habilitarCampos}
+            />
+
+            {/* Tipo de cuenta */}
+            <InputSelect
+              name="tipoCuenta"
+              label="Tipo de cuenta:"
+              options={[
+                { value: "Ahorros", label: "Ahorros" },
+                { value: "Corriente", label: "Corriente" },
+              ]}
+              rules={{
+                required: habilitarCampos ? "Este campo es requerido" : false,
+              }}
+              disabled={!habilitarCampos}
+            />
+
+            {/* Número de cuenta */}
+            <InputText
+              name="numeroCuenta"
+              label="No. De cuenta:"
+              rules={{
+                required: habilitarCampos ? "Este campo es requerido" : false,
+              }}
+              disabled={!habilitarCampos}
+            />
+
+          </div>
+           {/* Botón para enviar el formulario */}
+           <Row className="mt-4">
+            <Col className="text-center">
+              <Button id="btn_enviar" type="submit" variant="primary">
+                Enviar
+              </Button>
+            </Col>
+          </Row>
+
+          {showDownloadSection && (
+            <div className="mt-4">
+              <Row className="justify-content-center">
+                <Col md={4} className="text-center">
+                  <DownloadButton
+                    onClick={handleGenerateDocx}
+                    icon="IconWord.png"
+                    altText="Word Icon"
+                    label="Descargar Memorando"
+                  />
+                </Col>
+                <Col md={4} className="text-center">
+                  <DownloadButton
+                    onClick={handleGeneratePdf2}
+                    icon="IconPdf.png"
+                    altText="PDF Icon"
+                    label="Descargar Anexo 7"
+                  />
+                </Col>
+              </Row>
+            </div>
+          )}
+
+
+          <Row className="mt-4">
+            <Col className="text-center">
+              <ActionButton
+                onClick={handleClearForm}
+                label="Limpiar Formulario"
+                variant="danger"
+              />
+            </Col>
+          </Row>
         </Form>
       </Container>
     </FormProvider>
   );
 }
-
+const rolesOptions = [
+  { value: "Director", label: "Director" },
+  { value: "Codirector", label: "Codirector" },
+  { value: "Colaborador", label: "Colaborador" },
+];
+const departamentoOptions = [
+  {
+    value: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
+    label: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
+  },
+  {
+    value: "DEPARTAMENTO DE BIOLOGÍA",
+    label: "DEPARTAMENTO DE BIOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
+    label: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
+    label: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
+    label: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS SOCIALES",
+    label: "DEPARTAMENTO DE CIENCIAS SOCIALES",
+  },
+  {
+    value: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
+    label: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
+  },
+  {
+    value:
+      "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
+    label:
+      "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
+  },
+  {
+    value: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
+    label: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
+  },
+  {
+    value: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
+    label: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
+  },
+  {
+    value: "DEPARTAMENTO DE FÍSICA",
+    label: "DEPARTAMENTO DE FÍSICA",
+  },
+  {
+    value: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
+    label: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
+  },
+  {
+    value: "DEPARTAMENTO DE GEOLOGÍA",
+    label: "DEPARTAMENTO DE GEOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
+    label: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
+    label: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
+    label: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
+    label: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
+  },
+  {
+    value: "DEPARTAMENTO DE MATERIALES",
+    label: "DEPARTAMENTO DE MATERIALES",
+  },
+  {
+    value: "DEPARTAMENTO DE MATEMÁTICA",
+    label: "DEPARTAMENTO DE MATEMÁTICA",
+  },
+  {
+    value: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
+    label: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
+  },
+  {
+    value: "DEPARTAMENTO DE PETRÓLEOS",
+    label: "DEPARTAMENTO DE PETRÓLEOS",
+  },
+  {
+    value: "INSTITUTO GEOFISICO",
+    label: "INSTITUTO GEOFISICO",
+  },
+];
 export default SamplingTripWithinProjectForm;

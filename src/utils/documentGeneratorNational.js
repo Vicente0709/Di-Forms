@@ -1229,6 +1229,169 @@ export function generateMemoWithinProject(data) {
   });
 }
 
+export function generateMemoSamplingTripWithinProject(data) {
+  // Crear un texto de solicitud en función de los campos pasajesAereos, viaticosSubsistencias e inscripción
+  let solicitudOracion = "Para lo cual solicito ";
+  
+  let solicitudes = [];
+  if (data.pasajesAereos === "SI") {
+    solicitudes.push("la compra de pasajes aéreos");
+  }
+  if (data.viaticosSubsistencias === "SI") {
+    solicitudes.push("la asignación de viáticos y subsistencias");
+  }
+  if (data.inscripcion === "SI") {
+    solicitudes.push("el pago de inscripción");
+  }
+
+  if (solicitudes.length > 0) {
+    solicitudOracion += solicitudes.join(" y ") + ".";
+  } else {
+    solicitudOracion = "";
+  }
+
+  // Generar el cuerpo del memorando
+  const cuerpoMemorando = `En mi calidad de Director del Proyecto ${data.codigoProyecto}, solicito se realicen los trámites pertinentes para la salida de campo y de muestreo, a realizarse del ${data.fechaInicioViaje} al ${data.fechaFinViaje} en la ciudad de ${data.ciudad}, para lo cual autorizo el gasto para que se gestione ${solicitudOracion}`;
+
+  // Crear el documento .docx
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          // Título del memorando
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "MEMORANDO - SALIDA DE CAMPO Y DE MUESTREO",
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "center",
+          }),
+
+          // "PARA:" sección
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+
+          // Asunto del memorando
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Autorización de gasto y solicitud para salida de campo y de muestreo/${data.codigoProyecto}`,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+
+          // Cuerpo del memorando
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: cuerpoMemorando,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+
+          // Despedida
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+
+          // Firma
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+
+          // Nombre del director del proyecto
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: data.nombreDirector.toUpperCase(),
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+
+          // Cargo del firmante
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  // Guardar el archivo como .docx
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(
+      blob,
+      `Memorando solicitud salida de campo ${data.codigoProyecto}.docx`
+    );
+  });
+}
+
 export async function generateAnexoAWithinProject(data) {
   const template = {
     schemas: schemasAnexoANational,
@@ -1329,6 +1492,126 @@ export async function generateAnexoAWithinProject(data) {
       banco: data.nombreBanco,
       bancoTipoCuenta: data.tipoCuenta,
       numeroCuenta: data.numeroCuenta,
+
+      nombresCompletos2:
+        data.nombres.toUpperCase() +
+        " " +
+        data.apellidos.toUpperCase() +
+        "\n" +
+        data.cargo.toUpperCase() +
+        "\n" +
+        data.cedula,
+
+      nombresCompletosJefeInmediato:
+        data.nombreJefeInmediato.toUpperCase() +
+        "\n" +
+        data.cargoJefeInmediato.toUpperCase(),
+    },
+  ];
+
+  const pdf = await generate({ template, plugins, inputs });
+
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  saveAs(
+    blob,
+    "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
+  );
+}
+export async function generateAnexoASamplingTripWithinProject(data) {
+  const template = {
+    schemas: schemasAnexoANational,
+    basePdf: basePdfAnexoANational,
+  };
+
+  // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
+  const transporte = data.transporteIda.concat(data.transporteRegreso);
+  const ultimaFechaLlegada =
+    transporte.length > 0
+      ? transporte[transporte.length - 1]?.fechaLlegada
+      : "";
+  const ultimaHoraLlegada =
+    transporte.length > 0 ? transporte[transporte.length - 1]?.horaLlegada : "";
+  var ponentciaText = "";
+
+  if (
+    data.tituloPonencia &&
+    data.tituloPonencia.trim() !== "" &&
+    data.tituloPonencia.trim() !== "No Aplica"
+  ) {
+    ponentciaText =
+      "Para la participacion de la ponencia '" + data.tituloPonencia + "'";
+  } else {
+    ponentciaText = "";
+  }
+
+  // Concatenación de servidores/personal a trasladarse
+  let servidoresText = "";
+  if (data.participante && data.participante.length > 0) {
+    servidoresText = data.participante
+      .map((p) => p.nombre + " (" + p.rol + ")")
+      .join(", ");
+  }
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const transporteInfo = {};
+  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
+  for (let i = 0; i < 8; i++) {
+    transporteInfo[`transporteTipo${i + 1}`] =
+      transporte[i]?.tipoTransporte || "";
+    transporteInfo[`transporteNombre${i + 1}`] =
+      transporte[i]?.nombreTransporte || "";
+    transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
+    transporteInfo[`transporteFechaS${i + 1}`] =
+      formatDate(transporte[i]?.fechaSalida) || "";
+    transporteInfo[`transporteFechaSH${i + 1}`] =
+      transporte[i]?.horaSalida || "";
+    transporteInfo[`transporteFechaL${i + 1}`] =
+      formatDate(transporte[i]?.fechaLlegada) || "";
+    transporteInfo[`transporteFechaLH${i + 1}`] =
+      transporte[i]?.horaLlegada || "";
+  }
+
+  const inputs = [
+    {
+      fechaSolicitud: formattedDate,
+      viaticos: data.viaticosSubsistencias === "SI" ? "X" : "",
+      movilizacion: data.viaticosSubsistencias === "SI" ? "X" : "",
+      subsistencias: data.viaticosSubsistencias === "SI" ? "X" : "",
+      alimentacion: data.viaticosSubsistencias === "SI" ? "X" : "",
+
+      nombresCompletos:
+      data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+
+      lugar: data.ciudad,
+      puesto: data.cargo ==="" ? "" : data.cargo,
+      unidadPerteneciente: data.departamento,
+
+      fechaSalida: formatDate(data.transporteIda[0]?.fechaSalida),
+      horaSalida: data.transporteIda[0]?.horaSalida,
+
+      fechaLlegada: formatDate(ultimaFechaLlegada),
+      horaLlegada: ultimaHoraLlegada,
+
+      servidores: servidoresText.toUpperCase(),
+
+      actividades:
+        "Dentro de las actividades del proyecto  " +
+        data.codigoProyecto +
+        " titulado  '" +
+        data.tituloProyecto +
+        "'  se llevará a cabo la salida de campo y de muestreo, que tendrá lugar del  " +
+        data.fechaInicioViaje +
+        "  al  " +
+        data.fechaFinViaje +
+        " en la ciudad de  " +
+        data.ciudad +
+        ".",
+
+      ...transporteInfo,
+
+      banco: data.nombreBanco || "",
+      bancoTipoCuenta: data.tipoCuenta || "",
+      numeroCuenta: data.numeroCuenta || "",
 
       nombresCompletos2:
         data.nombres.toUpperCase() +
@@ -1461,7 +1744,7 @@ export async function generateAnexo2WithinProject(data) {
             </View>
             <View style={styles.tableCol}>
               <Text style={styles.tableCellTextBlue}>
-                {data.ciudadEvento.toUpperCase() || "_________"}
+                {data.paisEvento.toUpperCase() || "_________"}
               </Text>
             </View>
           </View>
@@ -1565,8 +1848,8 @@ export async function generateAnexo2WithinProject(data) {
                   <Text style={styles.baseText}>
                     {"( "}
                     <Text style={styles.tableCellTextBlue}>
-                      {data.participacionEvento ===
-                      "Presentación de artículo indexado"
+                      {data.pasajesAereos ===
+                      "SI"
                         ? "X"
                         : ""}
                       <Text style={styles.baseText}>{" )"}</Text>
@@ -1585,76 +1868,10 @@ export async function generateAnexo2WithinProject(data) {
                   <Text style={styles.baseText}>
                     {"( "}
                     <Text style={styles.tableCellTextBlue}>
-                      {data.participacionEvento ===
-                      "Presentación de póster, abstract, charla magistral u otros"
+                      {data.viaticosSubsistencias ===
+                      "SI"
                         ? "X"
                         : ""}
-                      <Text style={styles.baseText}>{" )"}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>- Inscripción:</Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.participacionEvento === "Asistencia" ? "X" : ""}
-                      <Text style={styles.baseText}>{" ) "}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Título de la Ponencia:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.tituloPonencia ? data.tituloPonencia : "No Aplica"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>
-                Participación en el evento:
-              </Text>
-            </View>
-
-            <View style={styles.tableCol}>
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>- Inscripción:</Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.pasajesAereos === "SI" ? "X" : ""}
-                      <Text style={styles.baseText}>{" )"}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>
-                    - Viáticos y subsistencias:
-                  </Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.viaticosSubsistencias === "SI" ? "X" : ""}
                       <Text style={styles.baseText}>{" )"}</Text>
                     </Text>
                   </Text>
@@ -1675,6 +1892,16 @@ export async function generateAnexo2WithinProject(data) {
                   </Text>
                 </View>
               </View>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Título de la Ponencia:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloPonencia ? data.tituloPonencia : "No Aplica"}
+              </Text>
             </View>
           </View>
         </View>
@@ -1727,20 +1954,14 @@ export async function generateAnexo2WithinProject(data) {
                 </Text>
               </View>
               <View style={styles.tableCol}>
-                {data.inscripciones.map((inscripcion, index) => (
+              {data.inscripciones.map((inscripcion, index) => (
                   <View key={index} style={styles.tableRow}>
                     <Text style={styles.tableCellTextBlueCenter}>
-                      {data.inscripciones.map((inscripcion, index) => (
-                        <View key={index} style={styles.tableRow}>
-                          <Text style={styles.tableCellTextBlueCenter}>
-                            {inscripcion.pagoLimite && data.inscripcion === "SI"
-                              ? inscripcion.pagoLimite +
-                                " " +
-                                (inscripcion.limiteFecha || " ")
-                              : ""}
-                          </Text>
-                        </View>
-                      ))}
+                        {inscripcion.pagoLimite && data.inscripcion === "SI"
+                        ? inscripcion.pagoLimite +
+                          " " +
+                          (inscripcion.limiteFecha || " ")
+                        : ""}
                     </Text>
                   </View>
                 ))}
@@ -1851,263 +2072,246 @@ export async function generateAnexo2WithinProject(data) {
 export async function generateAnexo7WithinProject(data) {
   const MyPDFDocument = (
     <PDFDocument>
-      <Page style={styles.page}>
-        {/* Título del formulario */}
-        <Text style={styles.header}>
-          Anexo 7 – Formulario para salidas de campo y de muestreo y/o viajes
-          técnicos dentro de proyectos
-        </Text>
-        {/* 1. Datos Generales */}
-        <View style={styles.sectionTitle}>
-          <Text>
-            1. DATOS GENERALES PARA LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE
-            TÉCNICO
+  <Page style={styles.page}>
+    {/* Título del formulario */}
+    <Text style={styles.header}>
+      Anexo 7 – Formulario para salidas de campo y de muestreo y/o viajes
+      técnicos dentro de proyectos
+    </Text>
+
+    {/* 1. Datos Generales */}
+    <View style={styles.sectionTitle}>
+      <Text>1. DATOS GENERALES PARA LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE TÉCNICO</Text>
+    </View>
+    <View style={styles.subSectionTitle}>
+      <Text>Complete según corresponda la siguiente información</Text>
+    </View>
+    <View style={styles.table}>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Código del Proyecto:</Text>
+        </View>
+        <View style={styles.tableColAuto}>
+          <Text style={styles.tableCellTextBlue}>
+            {data.codigoProyecto || "_________"}
           </Text>
         </View>
-        <View style={styles.subSectionTitle}>
-          <Text>Complete según corresponda la siguiente información</Text>
+      </View>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Título de Proyecto:</Text>
         </View>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
-            </View>
-            <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.projectCode || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Título de Proyecto:</Text>
-            </View>
-            <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.projectTitle || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>
-                Departamento / Instituto:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.department || "_________"}
-              </Text>
-            </View>
-          </View>
-
-          {/* Fila de encabezado (títulos) */}
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>Personal a trasladarse:</Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>Rol en el Proyecto:</Text>
-            </View>
-          </View>
-
-          {/* Filas dinámicas generadas con map */}
-          {data.personnelData.map((person, index) => (
-            <View key={index} style={styles.tableRow}>
-              <View style={styles.tableCol50}>
-                <Text style={styles.tableCellTextBlueCenter}>
-                  {person.name || "_________"}
-                </Text>
-              </View>
-              <View style={styles.tableCol50}>
-                <Text style={styles.tableCellTextBlueCenter}>
-                  {person.role || "_________"}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-        {/* 1. Datos De la Salida de Campo*/}
-        <View style={styles.sectionTitle}>
-          <Text>2. DATOS DE LA SALIDA DE CAMPO Y DE MUESTREO</Text>
-        </View>
-        <View style={styles.subSectionTitle}>
-          <Text>Complete según corresponda la siguiente información</Text>
-        </View>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>
-                Lugar de la movilización:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.destination || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Fecha de movilizacion:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"Inicio: "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.start || "_________"}
-                </Text>
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"Fin: "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.end || "_________"}
-                </Text>
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Solicita:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellText}>Pasajes aéreos:</Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.tableCellText}>
-                Viáticos y subsistencias:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.tableCellText}>Inscripción:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-            </View>
-          </View>
-        </View>
-        {/* 1. Detalle de actividades*/}
-        <View style={styles.sectionTitle}>
-          <Text>
-            3. ACTIVIDADES DE LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE TÉCNICO
+        <View style={styles.tableColAuto}>
+          <Text style={styles.tableCellTextBlue}>
+            {data.tituloProyecto || "_________"}
           </Text>
         </View>
-        <View style={styles.subSectionTitle}>
-          <Text>Complete según corresponda la siguiente información</Text>
+      </View>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Departamento / Instituto:</Text>
         </View>
-        {/* Encabezado de la tabla */}
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Fecha:</Text>
-            </View>
-            <View style={styles.tableCol75}>
-              <Text style={styles.tableCellText}>Actividad:</Text>
-            </View>
+        <View style={styles.tableCol}>
+          <Text style={styles.tableCellTextBlue}>
+            {data.departamento || "_________"}
+          </Text>
+        </View>
+      </View>
+
+      {/* Fila de encabezado (títulos) */}
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol50}>
+          <Text style={styles.tableCellText}>Personal a trasladarse:</Text>
+        </View>
+        <View style={styles.tableCol50}>
+          <Text style={styles.tableCellText}>Rol en el Proyecto:</Text>
+        </View>
+      </View>
+
+      {/* Filas dinámicas generadas con map */}
+      {data.participante.map((person, index) => (
+        <View key={index} style={styles.tableRow}>
+          <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlueCenter}>
+              {person.nombre || "_________"}
+            </Text>
           </View>
-
-          {/* Filas dinámicas de la tabla, basadas en el arreglo de actividades */}
-
-          {data.activities.map((activity, index) => (
-            <View key={index} style={styles.tableRow}>
-              <View style={styles.tableCol25}>
-                <Text style={styles.tableCellTextBlue}>
-                  {activity.date || "_________"}
-                </Text>
-              </View>
-              <View style={styles.tableCol75}>
-                <Text style={styles.tableCellTextBlue}>
-                  {activity.name || "_________"}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-        {/* 1. Datos De la Salida de Campo*/}
-        <View style={styles.sectionTitle}>
-          <Text>4. PRODUCTOS DE LA SALIDA DE CAMPO Y DE MUESTREO </Text>
-        </View>
-        <View style={styles.subSectionTitle}>
-          <Text>Complete según corresponda la siguiente información</Text>
-        </View>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <Text style={styles.tableCellTextBlue}>
-              {data.objetivoProductos || "_________"}
+          <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlueCenter}>
+              {person.rol || "_________"}
             </Text>
           </View>
         </View>
+      ))}
+    </View>
 
-        {/* Etiqueta de Firma */}
-        <Text style={styles.baseText}>Firma del Solicitante:</Text>
+    {/* 2. Datos De la Salida de Campo */}
+    <View style={styles.sectionTitle}>
+      <Text>2. DATOS DE LA SALIDA DE CAMPO Y DE MUESTREO</Text>
+    </View>
+    <View style={styles.subSectionTitle}>
+      <Text>Complete según corresponda la siguiente información</Text>
+    </View>
+    <View style={styles.table}>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Lugar de la movilización:</Text>
+        </View>
+        <View style={styles.tableCol}>
+          <Text style={styles.tableCellTextBlue}>
+            {data.ciudad || "_________"}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Fecha de movilización:</Text>
+        </View>
+        <View style={styles.tableCol}>
+          <Text style={styles.baseText}>
+            {"Inicio: "}
+            <Text style={styles.tableCellTextBlue}>
+              {data.fechaInicioViaje || "_________"}
+            </Text>
+          </Text>
+        </View>
+        <View style={styles.tableCol}>
+          <Text style={styles.baseText}>
+            {"Fin: "}
+            <Text style={styles.tableCellTextBlue}>
+              {data.fechaFinViaje || "_________"}
+            </Text>
+          </Text>
+        </View>
+      </View>
+      <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Solicita:
+              </Text>
+            </View>
 
-        {/* Espacio en blanco para la firma */}
-        <Text>{"\n\n\n"}</Text>
+            <View style={styles.tableCol}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>- Pasajes aéreos:</Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.pasajesAereos ===
+                      "SI"
+                        ? "X"
+                        : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
 
-        {/* Nombre completo */}
-        <Text style={styles.baseText}>________________________</Text>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>
+                    - Viáticos y subsistencias:
+                  </Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.viaticosSubsistencias ===
+                      "SI"
+                        ? "X"
+                        : ""}
+                      <Text style={styles.baseText}>{" )"}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
 
-        {/* Nombre completo */}
-        <Text style={styles.tableCellTextBlue}>
-          {`${data.rolEnProyecto === "Director"
-              ? "Director " +data.nombres + " " + data.apellidos
-              : data.nombreDirector}`}
-        </Text>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol40}>
+                  <Text style={styles.tableCellText}>- Inscripción:</Text>
+                </View>
+                <View style={styles.tableCol}>
+                  <Text style={styles.baseText}>
+                    {"( "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.inscripcion === "SI" ? "X" : ""}
+                      <Text style={styles.baseText}>{" ) "}</Text>
+                    </Text>
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+    </View>
 
-        {/* Nombre del director y código de proyecto */}
-        <Text style={styles.tableCellTextBlue}>
-          {`${ "Director del Proyecto " + data.codigoProyecto}`}
-        </Text>
+    {/* 3. Actividades */}
+    <View style={styles.sectionTitle}>
+      <Text>3. ACTIVIDADES DE LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE TÉCNICO</Text>
+    </View>
+    <View style={styles.subSectionTitle}>
+      <Text>Complete según corresponda la siguiente información</Text>
+    </View>
 
-      </Page>
-    </PDFDocument>
+    {/* Encabezado de la tabla de actividades */}
+    <View style={styles.table}>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Fecha:</Text>
+        </View>
+        <View style={styles.tableCol75}>
+          <Text style={styles.tableCellText}>Actividad:</Text>
+        </View>
+      </View>
+
+      {/* Filas dinámicas de la tabla de actividades */}
+      {data.actividadesInmutables.map((activity, index) => (
+        <View key={index} style={styles.tableRow}>
+          <View style={styles.tableCol25}>
+            <Text style={styles.tableCellTextBlue}>
+              {activity.fecha || "_________"}
+            </Text>
+          </View>
+          <View style={styles.tableCol75}>
+            <Text style={styles.tableCellTextBlue}>
+              {activity.descripcion || "_________"}
+            </Text>
+          </View>
+        </View>
+      ))}
+    </View>
+
+    {/* 4. Objetivo del Proyecto */}
+    <View style={styles.sectionTitle}>
+      <Text>4. PRODUCTOS DE LA SALIDA DE CAMPO Y DE MUESTREO</Text>
+    </View>
+    <View style={styles.subSectionTitle}>
+      <Text>Complete según corresponda la siguiente información</Text>
+    </View>
+    
+    <Text style={styles.tableCellTextBlue}>
+      {data.objetivoViaje || "_________"}
+    </Text>
+      
+
+    {/* Firma del Solicitante */}
+    <Text style={styles.baseText}>Firma del Solicitante:</Text>
+    <Text>{"\n\n\n"}</Text>
+    <Text>________________________</Text>
+    <Text style={styles.tableCellTextBlue}>
+      {data.nombreDirector || "_________"}
+    </Text>
+
+    {/* Firma del Director */}
+    <Text style={styles.tableCellTextBlue}>
+      Director del Proyecto {data.codigoProyecto || "_________"}
+    </Text>
+  </Page>
+</PDFDocument>
+
   );
 
   // Convertir el documento PDF a un Blob
