@@ -20,49 +20,85 @@ import DownloadButton from "./Buttons/DownloadButton";
 import { generateAnexo7WithinProject } from "../utils/documentGeneratorNational";
 
 function SamplingTripWithinProjectForm() {
+  const formStorageKey = "formSamplingTripWithinProject"; // Clave para almacenar el formulario en localStorage
+  const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+
   // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues:
-      JSON.parse(localStorage.getItem("formSamplingTripWithinProject")) || {},
+    defaultValues: formData,
   });
 
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
-
-  const {
-    watch,
-    setValue,
-    reset,
-    clearErrors,
-    formState: { errors },
-  } = methods;
-
-  const now = new Date();
-  const localOffset = now.getTimezoneOffset() * 60000;
-  const adjustedNow = new Date(now.getTime() - localOffset)
-    .toISOString()
-    .split("T")[0];
+  const { watch, setValue, reset, clearErrors, formState: { errors },} = methods;
 
   // Efecto para sincronizar con localStorage y manejar cálculos de fechas
   useEffect(() => {
-    // Función para inicializar los valores desde localStorage
-    const initializeFromLocalStorage = () => {
-      const formSamplingTripWithinProject =
-        JSON.parse(localStorage.getItem("formSamplingTripWithinProject")) || {};
-      reset(formSamplingTripWithinProject);
-    };
-    initializeFromLocalStorage();
+    reset(formData); // Rellenar el formulario con los datos almacenados
+
     // Suscribirse a los cambios en el formulario para guardar en localStorage
     const subscription = watch((data) => {
-      localStorage.setItem(
-        "formSamplingTripWithinProject",
-        JSON.stringify(data)
-      );
+      localStorage.setItem(formStorageKey, JSON.stringify(data));
     });
+
     // Limpiar la suscripción al desmontar el componente
     return () => subscription.unsubscribe();
   }, [watch, reset]);
+
+  // Función para descargar el formulario como JSON
+  const handleDownloadJson = () => {
+    const data = methods.getValues(); // Obtiene los datos actuales del formulario
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Viajes de Muestreo Dentro de Proyectos.json"; // Nombre del archivo
+    link.click();
+  };
+
+  // Función para cargar un archivo JSON y rellenar el formulario
+  const handleUploadJson = (event) => {
+    console.log("Inicia el proceso de carga del archivo JSON");
+
+    const file = event.target.files[0];  // Verificar si hay archivo
+    if (file) {
+      console.log("Archivo JSON seleccionado:", file.name);
+
+      const reader = new FileReader();  // Inicializa el FileReader para leer el archivo
+      reader.onload = (e) => {
+        console.log("El archivo JSON ha sido leído exitosamente");
+
+        try {
+          const json = JSON.parse(e.target.result);  // Parsear el archivo JSON
+          console.log("Archivo JSON parseado correctamente:", json);
+
+          // Reset del formulario con los datos del JSON
+          reset(json, {
+            keepErrors: false,
+            keepDirty: false,
+            keepValues: false,
+            keepTouched: false,
+            keepIsSubmitted: false,
+          });
+
+          console.log("Formulario reseteado con los valores del archivo JSON");
+
+          // Actualizar localStorage con los datos cargados
+          localStorage.setItem(formStorageKey, JSON.stringify(json));
+          console.log("Datos almacenados en localStorage");
+        } catch (err) {
+          console.error("Error al cargar el archivo JSON:", err);
+        }
+      };
+
+      reader.readAsText(file);  // Leer el archivo como texto
+      console.log("Lectura del archivo iniciada");
+    } else {
+      console.log("No se seleccionó ningún archivo JSON");
+    }
+  };
+
   // A partir de aqui los handleButtons
   const handleGeneratePdf2 = () => {
     const data = {
@@ -106,6 +142,7 @@ function SamplingTripWithinProjectForm() {
 
   // Manejadores de estado para showSections
   //ejm: const [showInputDirector, setShowInputDirector] = useState(false);
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
 
   //aqui el use efect donde van todo a el control de las validaciones entre los imputs
   useEffect(() => {
@@ -126,6 +163,23 @@ function SamplingTripWithinProjectForm() {
         <h1 className="text-center my-4">
           Formulario para participación en viajes técnicos dentro de proyectos
         </h1>
+        <div className="form-container">
+          <Label text="Descargar datos actuales en (.json)"/>
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+          <Label text="Cargar datos desde archivo (.json)"/>
+          {/* Input nativo para cargar un archivo JSON */}
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleUploadJson}  // Conectar con la función
+            style={{ marginTop: '20px' }}  // Estilos opcionales
+          />
+        </div>
         <Form onSubmit={methods.handleSubmit()}>
           <div className="form-container"></div>
 

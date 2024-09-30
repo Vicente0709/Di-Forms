@@ -20,7 +20,7 @@ const FormCard = ({ title, description, imageSrc, altText, buttonText, path, ari
           style={{ width: "100%", height: "150px", objectFit: "contain" }}
         />
         <Card.Text>{description}</Card.Text>
-        <Button variant="primary" onClick={handleCardClick} aria-label={ariaLabel}>
+        <Button variant="outline-primary" onClick={handleCardClick} aria-label={ariaLabel}>
           {buttonText}
         </Button>
       </Card.Body>

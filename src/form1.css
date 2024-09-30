@@ -71,22 +71,6 @@
   margin-top: 5px;  /* Más espacio sobre el texto de error */
 }
 
-/* Estilos para los botones de eliminación */
-button[type="button"] {
-  margin-top: 10px;
-  background-color: #dc3545;  /* Rojo para el botón de eliminación */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 15px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-}
-
-button[type="button"]:hover {
-  background-color: #c82333;  /* Rojo más oscuro al pasar el ratón */
-}
-
 /* Estilos generales para el formulario y botones */
 .clear-button {
   margin-top: 20px;

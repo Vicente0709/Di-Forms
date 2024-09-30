@@ -60,7 +60,34 @@ html, body, #root {
 
 /* Estilo del footer */
 footer {
-  background-color: #282c34;
+  background-color: #001F3E;
   color: white;
 }
 /* Fin footer */
+
+.scroll-table-container {
+  max-width: 100%; /* Asegura que el contenedor no se salga del ancho de la pantalla */
+  overflow-x: scroll; /* Permite desplazamiento horizontal */
+  overflow-y: auto; /* (Opcional) Permite desplazamiento vertical si es necesario */
+  
+}
+.input-file {
+  margin-top: 20px; /* Separación superior */
+  padding: 10px; /* Relleno interno */
+  border: 1px solid #ccc; /* Borde */
+  border-radius: 5px; /* Bordes redondeados */
+  background-color: #f9f9f9; /* Fondo del input */
+  width: 100%; /* Ancho completo del contenedor padre */
+  max-width: 400px; /* Ancho máximo del input */
+  font-size: 14px; /* Tamaño de la fuente */
+  color: #333; /* Color del texto */
+  cursor: pointer; /* Cursor de puntero al pasar sobre el input */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Sombra del cuadro */
+  outline: none; /* Sin borde azul cuando está enfocado */
+  transition: box-shadow 0.3s ease-in-out; /* Transición suave en hover o focus */
+}
+
+
+th {
+  padding: 5px;
+}

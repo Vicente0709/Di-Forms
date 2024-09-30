@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
+
 // Importación de los componentes del formulario
-import PaymentDetail from "./ComponetOutsideProjects/PaymentDetail.js";
-import Transportation from "./ComponetOutsideProjects/Transportation.js";
 import Label from "./Labels/Label.js";
 import LabelTitle from "./Labels/LabelTitle.js";
 import LabelText from "./Labels/LabelText.js";
@@ -16,126 +15,96 @@ import RadioGroup from "./Inputs/RadioGroup";
 import ActionButton from "./Buttons/ActionButton";
 import DownloadButton from "./Buttons/DownloadButton";
 
-// Importación de las funciones para generar documentos
 
+// Importación de las funciones para generar documentos
+import today from "../utils/date";
 import {
   generateMemoOutsideProject1,
   generateMemoOutsideProject2,
   generateAnexoAOutsideProject,
   generateAnexo8OutsideProject,
 } from "../utils/documentGenerator.js";
+import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
 
-//Funciones Validación
+const formStorageKey = "formEventOutsideProject"; // Clave para almacenar el formulario en localStorage
+const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
-const validarCedulaEcuatoriana = (cedula) => {
-  if (cedula.length !== 10) return false;
-
-  const provincia = parseInt(cedula.slice(0, 2), 10);
-  if (provincia < 1 || provincia > 24) return false;
-
-  let suma = 0;
-  for (let i = 0; i < 9; i++) {
-    let digito = parseInt(cedula[i], 10);
-    if (i % 2 === 0) {
-      digito *= 2;
-      if (digito > 9) digito -= 9;
-    }
-    suma += digito;
-  }
-
-  const digitoVerificador = (10 - (suma % 10)) % 10;
-  return digitoVerificador === parseInt(cedula[9], 10);
-};
 
 function EventParticipationOutsideProjectsForm() {
-  // Configuración de react-hook-form con valores predeterminados desde localStorage
+ 
+  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
-    defaultValues:
-      JSON.parse(localStorage.getItem("formEventOutsideProject")) || {},
+    defaultValues: formData,
   });
 
-  const { watch, setValue, reset, clearErrors } = methods;
+  const { register, control, watch, reset, setValue, clearErrors, formState:{errors} } = methods;
 
-  // Estados para manejar la visibilidad de la sección de descargas y el input condicional
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [showInputArticulo, setShowInputArticulo] = useState(false);
+  const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
+  const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
+  const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
 
   // Observadores para los cambios en los campos del formulario
- 
-  const seleccionArticulo = watch("articuloPublicado"); // Observa el campo "articuloPublicado"
-  const fechaInicioEvento = watch("fechaInicioEvento"); // Observa el campo "fechaInicioEvento"
+  const seleccionArticulo = watch("articuloPublicado");
+  const fechaInicioEvento = watch("fechaInicioEvento");
+  const hospedaje = watch("hospedaje");
+  const movilizacion = watch("movilizacion");
+  const alimentacion = watch("alimentacion");
+  const fechaFinEvento = watch("fechaFinEvento");
+  const inscripcion=watch("inscripcion");
+  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
+  const habilitarCampos = seleccionViaticosSubsistencias === "SI";
+  const metodoPago = watch("metodoPago");
+   
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
+  const [showInputArticulo, setShowInputArticulo] = useState(false);
 
-  // Obtener la fecha y la zona horaria local
-    const now = new Date();
-    const localOffset = now.getTimezoneOffset() * 60000; // Offset en milisegundos
-    const adjustedNow = new Date(now.getTime() - localOffset).toISOString().split("T")[0]; // Fecha ajustada para la zona horaria local
-    const hospedaje = watch("hospedaje");
-    const movilizacion = watch("movilizacion");
-    const alimentacion = watch("alimentacion");
-    const seleccionDeclaracion = watch("seleccionDeclaracion");
-    const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
-    const habilitarCampos = seleccionViaticosSubsistencias === "SI";
-
-
-    useEffect(() => {
-      // Función para inicializar los valores desde localStorage
-      const initializeFromLocalStorage = () => {
-        const formEventOutsideProject =JSON.parse(localStorage.getItem("formEventOutsideProject")) || {};
-        reset(formEventOutsideProject);
-      };
-      initializeFromLocalStorage();
-      // Suscribirse a los cambios en el formulario para guardar en localStorage
-      const subscription = watch((data) => {
-        localStorage.setItem("formEventOutsideProject", JSON.stringify(data));
-      });
-      // Limpiar la suscripción al desmontar el componente
-      return () => subscription.unsubscribe();
-    }, [watch, reset]);
-
-    // Efecto para sincronizar con localStorage y manejar la inicialización
+  // Efecto para manejar la visibilidad de secciones y limpieza de campos
   useEffect(() => {
+    // Manejar la lógica para mostrar/ocultar el campo de detalle del artículo
     
-    // Manejar la lógica para mostrar u ocultar el campo de detalle del artículo
-    if (seleccionArticulo === "SI") {
-      setShowInputArticulo(true);
-    } else {
-      setShowInputArticulo(false);
+    setShowInputArticulo(seleccionArticulo === "SI");
+    if (seleccionArticulo !== "SI") {
       setValue("detalleArticuloSI", "");
     }
+     
 
+    // Lógica para la selección de la declaración según los rubros
+    
     if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
-      // Si cualquiera de los rubros está marcado como SI, la declaración debe ser "siCubre"
       setValue("seleccionDeclaracion", "siCubre");
-    } else if (
-      hospedaje === "NO" &&
-      movilizacion === "NO" &&
-      alimentacion === "NO"
-    ) {
-      // Si todos los rubros están marcados como NO, la declaración debe ser "noCubre"
+    } else if (hospedaje === "NO" && movilizacion === "NO" && alimentacion === "NO") {
       setValue("seleccionDeclaracion", "noCubre");
     }
+    
 
+    // Manejar la habilitación o limpieza de campos bancarios según la selección de viáticos
+    
     if (!habilitarCampos) {
-      // Limpiar valores de los campos cuando se selecciona "NO"
       setValue("nombreBanco", "");
       setValue("tipoCuenta", "");
       setValue("numeroCuenta", "");
       clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
     }
-    
-  }, [watch, reset, seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos, setValue, clearErrors]);
 
-  const validateFechaFin = (fechaFin) => {
-    if (!fechaInicioEvento) {
-      return "Primero seleccione la fecha de inicio.";
+    if(inscripcion === "SI"){
+      setSeleccionInscripcion(true);
+    }else{
+      setSeleccionInscripcion(false);
+      setValue("inscripciones")
     }
-    return (
-      fechaFin >= fechaInicioEvento ||
-      "La fecha de finalización no puede ser anterior a la fecha de inicio."
-    );
-  };
+
+ if (fields.length === 0) {
+      append({
+        valorInscripcion: "",
+        pagoLimite: "",
+        limiteFecha: "",
+      });
+    }
+  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, fields.length, setValue, clearErrors]);
+
   // Función que se ejecuta al enviar el formulario
   const onSubmitEventParticipationOutside = (data) => {
     console.log(data);
@@ -180,148 +149,55 @@ function EventParticipationOutsideProjectsForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem("formEventOutsideProject");
+    sessionStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
 
-  const departamentoOptions = [
-    {
-      value: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
-      label: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
-    },
-    {
-      value: "DEPARTAMENTO DE BIOLOGÍA",
-      label: "DEPARTAMENTO DE BIOLOGÍA",
-    },
-    {
-      value: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
-      label: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
-    },
-    {
-      value: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
-      label: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
-    },
-    {
-      value: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
-      label: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
-    },
-    {
-      value: "DEPARTAMENTO DE CIENCIAS SOCIALES",
-      label: "DEPARTAMENTO DE CIENCIAS SOCIALES",
-    },
-    {
-      value: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
-      label: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
-    },
-    {
-      value:
-        "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
-      label:
-        "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
-    },
-    {
-      value: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
-      label: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
-    },
-    {
-      value: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
-      label: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
-    },
-    {
-      value: "DEPARTAMENTO DE FÍSICA",
-      label: "DEPARTAMENTO DE FÍSICA",
-    },
-    {
-      value: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
-      label: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
-    },
-    {
-      value: "DEPARTAMENTO DE GEOLOGÍA",
-      label: "DEPARTAMENTO DE GEOLOGÍA",
-    },
-    {
-      value: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
-      label: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
-    },
-    {
-      value: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
-      label: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
-    },
-    {
-      value: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
-      label: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
-    },
-    {
-      value: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
-      label: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
-    },
-    {
-      value: "DEPARTAMENTO DE MATERIALES",
-      label: "DEPARTAMENTO DE MATERIALES",
-    },
-    {
-      value: "DEPARTAMENTO DE MATEMÁTICA",
-      label: "DEPARTAMENTO DE MATEMÁTICA",
-    },
-    {
-      value: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
-      label: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
-    },
-    {
-      value: "DEPARTAMENTO DE PETRÓLEOS",
-      label: "DEPARTAMENTO DE PETRÓLEOS",
-    },
-    {
-      value: "INSTITUTO GEOFISICO",
-      label: "INSTITUTO GEOFISICO",
-    },
-  ];
+  
+  const handleDownloadJson = () => {
+    const data = methods.getValues(); // Obtiene los datos actuales del formulario
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "Participación en Eventos Fuera de Proyecto.json"; // Nombre del archivo
+    link.click();
+  };
 
-  const articuloOptions = [
-    {
-      value: "SI",
-      label: "SI",
-    },
-    {
-      value: "NO",
-      label: "NO",
-    },
-  ];
+  
+  const handleUploadJson = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader(); // Inicializa el FileReader para leer el archivo
+      reader.onload = (e) => {
+        try {
+          const json = JSON.parse(e.target.result); // Parsear el archivo JSON
+          reset(json, {
+            keepErrors: false,
+            keepDirty: false,
+            keepValues: false,
+            keepTouched: false,
+            keepIsSubmitted: false,
+          });
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+        } catch (err) {
+          console.error("Error al cargar el archivo JSON:", err);
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
 
-  const participarElementosOptions = [
-    {
-      value: "SI",
-      label: "SI",
-    },
-    {
-      value: "NO",
-      label: "NO",
-    },
-  ];
-
-  const declaracionOptions = [
-    {
-      value: "noCubre",
-      label: "Declaración si la organización NO cubre ningún rubro",
-    },
-    {
-      value: "siCubre",
-      label: "Declaración si la organización SI cubre algún rubro",
-    },
-  ];
-
-  const tipoCuentaOptions =[
-    {
-      value:"Ahorros", 
-      label:"Ahorros",
-    },
-    {
-      value: "Corriente",
-      label: "Corriente",
-    },
-  ]
-
+    const validarFechaLimiteInscripcion = (index) => {
+    const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
+  
+    if (limiteFecha && fechaFinEvento && limiteFecha > fechaFinEvento) {
+      return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
+    }
+  
+    return true;
+  };
+  
 
   return (
     <FormProvider {...methods}>
@@ -330,6 +206,23 @@ function EventParticipationOutsideProjectsForm() {
         <h1 className="text-center my-4">
           Formulario para participacion en eventos fuera de proyectos
         </h1>
+        <div className="form-container">
+          <Label text="Descargar datos actuales en (.json)"/>
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+          <Label text="Cargar datos desde archivo (.json)"/>
+          {/* Input nativo para cargar un archivo JSON */}
+          <input
+            type="file"
+            accept=".json"
+            onChange={handleUploadJson}  // Conectar con la función
+            style={{ marginTop: '20px' }}  // Estilos opcionales
+          />
+        </div>
         <Form
           onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}
         >
@@ -434,11 +327,8 @@ function EventParticipationOutsideProjectsForm() {
               rules={{
                 required: "La fecha de inicio del evento es requerida",
                 validate: (value) => {
-                  const today = new Date(now.getTime() - localOffset)
-                    .toISOString()
-                    .split("T")[0];
                   return (
-                    value >= today ||
+                    value >= today() ||
                     "La fecha de inicio no puede ser anterior a la fecha actual."
                   );
                 },
@@ -451,7 +341,8 @@ function EventParticipationOutsideProjectsForm() {
               label="Hasta:"
               rules={{
                 required: "La fecha de finalización es requerida",
-                validate: validateFechaFin,
+                validate: (value) =>
+                  validarFechaFin(value, watch("fechaInicioEvento")),
               }}
               disabled={false}
             />
@@ -528,8 +419,670 @@ function EventParticipationOutsideProjectsForm() {
               disabled={false}
             />
 
-              <Transportation />
-              <PaymentDetail />
+          <LabelTitle text="Transporte" disabled={false} />
+            <LabelText
+              text="Por favor, considere que el itinerario es tentativo. Consulte el
+                itinerario del medio de transporte elegido en su página oficial
+                o sitios web de confianza. Seleccione la opción que ofrezca el
+                menor tiempo de viaje y el menor número de escalas de ser el
+                caso."
+            />
+            <Label text="TRANSPORTE DE IDA" />
+            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento." />
+
+            <div className="scroll-table-container">
+              <table className="activity-schedule-table">
+                <thead>
+                  <tr>
+                    <th>Tipo de Transporte</th>
+                    <th>Nombre de Transporte</th>
+                    <th>Ruta Transporte</th>
+                    <th>Fecha de Salida</th>
+                    <th>Hora de Salida</th>
+                    <th>Fecha de Llegada</th>
+                    <th>Hora de Llegada</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fieldsIda.map((field, index) => {
+                    const fechaSalida = watch(
+                      `transporteIda[${index}].fechaSalida`
+                    );
+                    const fechaLlegadaAnterior = watch(
+                      `transporteIda[${index - 1}].fechaLlegada`
+                    );
+                    return (
+                      <tr key={field.id}>
+                        <td>
+                          <select
+                            id={`tipoTransporte-${index}`}
+                            className="form-input"
+                            defaultValue="Aéreo"
+                            {...register(
+                              `transporteIda[${index}].tipoTransporte`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          >
+                            <option value="Aéreo">Aéreo</option>
+                            <option value="Terrestre">Terrestre</option>
+                            <option value="Marítimo">Marítimo</option>
+                            <option value="Otros">Otros</option>
+                          </select>
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.tipoTransporte && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].tipoTransporte
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            id={`nombreTransporte-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteIda[${index}].nombreTransporte`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.nombreTransporte && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].nombreTransporte
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            id={`ruta-${index}`}
+                            placeholder="UIO-GYE"
+                            className="form-input"
+                            {...register(`transporteIda[${index}].ruta`, {
+                              required: "Este campo es requerido",
+                            })}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.ruta && (
+                              <span className="error-text">
+                                {errors.transporteIda[index].ruta.message}
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            id={`fechaSalida-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteIda[${index}].fechaSalida`,
+                              {
+                                required: "Este campo es requerido",
+                                validate: {
+                                  noPastDate: (value) =>
+                                    value >= today ||
+                                    "La fecha no puede ser menor a la fecha actual",
+                                  validSequence: (value) =>
+                                    !fechaLlegadaAnterior ||
+                                    value >= fechaLlegadaAnterior ||
+                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                },
+                              }
+                            )}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.fechaSalida && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].fechaSalida
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="time"
+                            id={`horaSalida-${index}`}
+                            className="form-input"
+                            {...register(`transporteIda[${index}].horaSalida`, {
+                              required: "Este campo es requerido",
+                            })}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.horaSalida && (
+                              <span className="error-text">
+                                {errors.transporteIda[index].horaSalida.message}
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            id={`fechaLlegada-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteIda[${index}].fechaLlegada`,
+                              {
+                                required: "Este campo es requerido",
+                                validate: {
+                                  noPastDate: (value) =>
+                                    value >= today || "La fecha no puede ser menor a la fecha actual",
+                                  afterSalida: (value) =>
+                                    value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+                                  
+                                  // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
+                                  validateFechaLlegadaIda: (value) =>
+                                    index === fieldsIda.length - 1
+                                      ? validateFechaLlegadaIda(value, fechaInicioEvento)
+                                      : true, // Si no es el último campo, no aplica esta validación
+                                },
+                              }
+                            )}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.fechaLlegada && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].fechaLlegada
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="time"
+                            id={`horaLlegada-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteIda[${index}].horaLlegada`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteIda &&
+                            errors.transporteIda[index]?.horaLlegada && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteIda[index].horaLlegada
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <ActionButton
+                            onClick={() => removeIda(index)}
+                            label="Eliminar"
+                            variant="danger"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              <ActionButton
+                onClick={() => {
+                  appendIda({
+                    tipoTransporte: "Aéreo",
+                    nombreTransporte: "",
+                    ruta: "",
+                    fechaSalida: "",
+                    horaSalida: "",
+                    fechaLlegada: "",
+                    horaLlegada: "",
+                  });
+                }}
+                label="Agregar"
+                variant="success"
+              />
+            </div>
+
+            <Label text="TRANSPORTE DE REGRESO" />
+            <LabelText
+              text=" El retorno puede ser máximo un día después de la finalización
+                del evento."
+            />
+
+            <div className="scroll-table-container">
+              <table className="activity-schedule-table">
+                <thead>
+                  <tr>
+                    <th>Tipo de Transporte</th>
+                    <th>Nombre de Transporte</th>
+                    <th>Ruta Transporte</th>
+                    <th>Fecha de Salida</th>
+                    <th>Hora de Salida</th>
+                    <th>Fecha de Llegada</th>
+                    <th>Hora de Llegada</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fieldsRegreso.map((field, index) => {
+                    const fechaSalida = watch(
+                      `transporteRegreso[${index}].fechaSalida`
+                    );
+                    const fechaLlegadaAnterior = watch(
+                      `transporteRegreso[${index - 1}].fechaLlegada`
+                    );
+                    return (
+                      <tr key={field.id}>
+                        <td>
+                          <select
+                            id={`tipoTransporte-${index}`}
+                            className="form-input"
+                            defaultValue="Aéreo"
+                            {...register(
+                              `transporteRegreso[${index}].tipoTransporte`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          >
+                            <option value="Aéreo">Aéreo</option>
+                            <option value="Terrestre">Terrestre</option>
+                            <option value="Marítimo">Marítimo</option>
+                            <option value="Otros">Otros</option>
+                          </select>
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.tipoTransporte && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].tipoTransporte
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            id={`nombreTransporte-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].nombreTransporte`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]
+                              ?.nombreTransporte && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index]
+                                    .nombreTransporte.message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            id={`ruta-${index}`}
+                            placeholder="UIO-GYE"
+                            className="form-input"
+                            {...register(`transporteRegreso[${index}].ruta`, {
+                              required: "Este campo es requerido",
+                            })}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.ruta && (
+                              <span className="error-text">
+                                {errors.transporteRegreso[index].ruta.message}
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            id={`fechaSalida-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].fechaSalida`,
+                              {
+                                required: "Este campo es requerido",
+                                validate: {
+                                  noPastDate: (value) =>
+                                    value >= today || "La fecha no puede ser menor a la fecha actual",
+                                  validSequence: (value) =>
+                                    !fechaLlegadaAnterior ||
+                                    value >= fechaLlegadaAnterior ||
+                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                  
+                                  // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
+                                  validateRegreso: (value) =>
+                                    index === 0 ? validateFechaSalidaRegreso(value, fechaFinEvento) : true,
+                                },
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.fechaSalida && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].fechaSalida
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="time"
+                            id={`horaSalida-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].horaSalida`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.horaSalida && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].horaSalida
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            id={`fechaLlegada-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].fechaLlegada`,
+                              {
+                                required: "Este campo es requerido",
+                                validate: {
+                                  noPastDate: (value) =>
+                                    value >= today ||
+                                    "La fecha no puede ser menor a la fecha actual",
+                                  afterSalida: (value) =>
+                                    value >= fechaSalida ||
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+                                },
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.fechaLlegada && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].fechaLlegada
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <input
+                            type="time"
+                            id={`horaLlegada-${index}`}
+                            className="form-input"
+                            {...register(
+                              `transporteRegreso[${index}].horaLlegada`,
+                              {
+                                required: "Este campo es requerido",
+                              }
+                            )}
+                          />
+                          {errors.transporteRegreso &&
+                            errors.transporteRegreso[index]?.horaLlegada && (
+                              <span className="error-text">
+                                {
+                                  errors.transporteRegreso[index].horaLlegada
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+                        <td>
+                          <ActionButton
+                            onClick={() => removeRegreso(index)}
+                            label="Eliminar"
+                            variant="danger"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+              <ActionButton
+                onClick={() => {
+                  appendRegreso({
+                    tipoTransporte: "Aéreo",
+                    nombreTransporte: "",
+                    ruta: "",
+                    fechaSalida: "",
+                    horaSalida: "",
+                    fechaLlegada: "",
+                    horaLlegada: "",
+                  });
+                }}
+                label="Agregar"
+                variant="success"
+              />
+            </div>
+             
+            {seleccionInscripcion  && (
+             <div >
+             <h3>• Valor de la inscripción</h3>
+             <p>
+               Por favor, ingrese las fechas máximas de pago según la información
+               proporcionada en la página oficial del evento. Recuerde que solo se debe
+               seleccionar una de las tres opciones disponibles para la fecha de pago,
+               y asegúrese de que la fecha seleccionada no sea posterior a la fecha de
+               inicio del evento.
+             </p>
+       
+             {/* Tabla Dinámica */}
+             <div className="scroll-table-container">
+             <table className="payment-table">
+               <thead>
+               <tr>
+                   <th>Nro.</th>
+                   <th>Moneda</th>
+                   <th>Valor de inscripción</th>
+                   <th>Pago a realizarse</th>
+                   <th>Fecha</th>
+                   <th>Acciones</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 {fields.map((field, index) => (
+                   <tr key={field.id}>
+                     <td>
+                       <input
+                         type="number"
+                         value={index + 1} // Auto-incrementa el número basado en el índice
+                         readOnly
+                         className="form-input"
+                       />
+                     </td>
+                     <td>
+                       <select
+                         id="monedaPago"
+                         {...register(`inscripciones[${index}].monedaPago`, {
+                           required: "La moneda es requerida",
+                         })}
+                         className="form-select"
+                       >
+                         <option value="">Seleccione</option>
+                         <option value="$ ">Dólares</option>
+                         <option value="€ ">Euros</option>
+                         <option value="CHF ">
+                           Francos Suizos
+                         </option>
+                       </select>
+                       {errors.monedaPago && (
+                         <span className="error-text">
+                           {errors.monedaPago.message}
+                         </span>
+                       )}
+                     </td>
+       
+                     <td>
+                       <input
+                         type="number"
+                         step="0.01"
+                         id={`valorInscripcion-${index}`}
+                         placeholder="100.00"
+                         className="form-input"
+                         {...register(`inscripciones[${index}].valorInscripcion`, {
+                           required: "Este campo es requerido",
+                         })}
+                       />
+                       {errors.inscripciones &&
+                         errors.inscripciones[index]?.valorInscripcion && (
+                           <span className="error-text">
+                             {errors.inscripciones[index].valorInscripcion.message}
+                           </span>
+                         )}
+                     </td>
+                     <td>
+                       <select
+                         id="pagoLimite"
+                         {...register(`inscripciones[${index}].pagoLimite`, {
+                           required: "El pago limite es requerido",
+                         })}
+                         className="form-select"
+                       >
+                         <option value="">Seleccione</option>
+                         <option value="Antes del ">Antes</option>
+                         <option value="Despues del ">Despues</option>
+                         <option value="Hasta el ">
+                           Fecha maxima de pago
+                         </option>
+                       </select>
+                       {errors.pagoLimite && (
+                         <span className="error-text">
+                           {errors.pagoLimite.message}
+                         </span>
+                       )}
+                     </td>
+       
+                     <td>
+                       <input
+                         type="date"
+                         id={`limiteFecha-${index}`}
+                         className="form-input"
+                         {...register(`inscripciones[${index}].limiteFecha`, {
+                           validate: () => validarFechaLimiteInscripcion(index),
+                         })}
+                       />
+                       {errors.inscripciones &&
+                         errors.inscripciones[index]?.limiteFecha && (
+                           <span className="error-text">
+                             {errors.inscripciones[index].limiteFecha.message}
+                           </span>
+                         )}
+                     </td>
+                     <td>
+                      <ActionButton
+                        onClick={() => remove(index)}
+                        label="Eliminar"
+                        variant="danger"
+                      />
+                     </td>
+                   </tr>
+                 ))}
+               </tbody>
+             </table>
+             <ActionButton
+                onClick={() =>
+                  append({
+                    valorInscripcion: "",
+                    pagoLimite: "",
+                    limiteFecha: "",
+                  })
+                }
+                label="Agregar"
+                variant="success"
+              />
+            </div>
+            <LabelText text=" Considere que si el pago de inscripción es una moneda diferente a la
+               moneda legal del país se requiere un banco intermediario , por lo que se
+               solicita se comunique con la organización del evento para obtener esta
+               información." />
+            <LabelText text="En el caso que no exista banco intermediario se podrá solicitar un pago
+               por reembolso siempre y cuando se tenga la contestación oficial de la
+               organización de no tener un banco intermediario." />
+       
+             {/* Método de pago */}
+             <div className="form-group">
+               <h3>Método de pago:</h3>
+       
+               <div>
+                 <input
+                   type="radio"
+                   id="transferencia"
+                   value="Transferencia"
+                   {...register("metodoPago", {
+                     required: "Seleccione un método de pago",
+                   })}
+                 />
+                 <label htmlFor="transferencia">
+                   1. Transferencia ("El pago es realizado por la EOD-UGIPS del VIIV")
+                 </label>
+               </div>
+               {metodoPago === "Transferencia" && (
+                 <div className="sub-group">
+                    <LabelText text="En la solicitud se debe adjuntar los siguientes documentos:" />
+                    <LabelText text="Formulario de pagos al exterior (Anexo 6)" />
+                    <LabelText text="Documento donde se puede verificar el costo y fechas de la inscripción al evento" />
+                 </div>
+               )}
+               <div>
+                 <input
+                   type="radio"
+                   id="otra"
+                   value="Otra"
+                   {...register("metodoPago", {
+                     required: "Seleccione un método de pago",
+                   })}
+                 />
+                 <label htmlFor="otra">
+                   2. Otra (tarjeta de crédito, efectivo, etc.)
+                 </label>
+               </div>
+               {metodoPago === "Otra" && (
+                 <div className="sub-group">
+                   
+                  <Label text="Incluir la siguiente información y documentos:" />
+                  <LabelText text="Solicitud de REEMBOLSO. Incluir en el texto del memorando la justificación de por qué se solicita este método de pago." />
+                  <LabelText text="Documento donde se puede verificar el costo y fechas de la inscripción al evento" />
+                  <LabelText text="Documento en el cual se indique que el pago solo se puede realizar con tarjeta de crédito o efectivo o que no cuenta con banco intermediario." />
+                 </div>
+               )}
+               {errors.metodoPago && (
+                 <span className="error-text">{errors.metodoPago.message}</span>
+               )}
+             </div>
+           </div>
+            )}
 
               <LabelTitle text="Declaración de gastos, conforme reglamento de viáticos al exterior" />
               <LabelText text=" Selecciona según corresponda. Responda SI aunque la organización del
@@ -566,7 +1119,7 @@ function EventParticipationOutsideProjectsForm() {
               options={declaracionOptions}
               disabled
             />
-            {seleccionDeclaracion === "siCubre" && (
+            {watch("seleccionDeclaracion") === "siCubre" && (
             <>
             <LabelText text="En mi calidad de profesor-investigador de la EPN, declaro que la
             Organización del evento SI cubre gastos, por lo que solicito se
@@ -577,7 +1130,7 @@ function EventParticipationOutsideProjectsForm() {
             </>
               )}
 
-            {seleccionDeclaracion === "noCubre" && (
+            {watch("seleccionDeclaracion") === "noCubre" && (
             <LabelText text= "En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento NO cubre ningún gasto, por lo que solicito se gestione la asignación de viáticos conforme se establece en el artículo 7 del Reglamento de Viáticos al Exterior."/>
           )}
 
@@ -648,48 +1201,32 @@ function EventParticipationOutsideProjectsForm() {
             <div className="mt-4">
               <Row className="justify-content-center">
                 <Col md={4} className="text-center">
-                  <div onClick={handleGenerateMemo1} className="download-item">
-                    <img
-                      src="IconWord.png"
-                      alt="Word Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Memorando del Jefe del Departamento</span>
-                  </div>
+                  <DownloadButton
+                    onClick={handleGenerateMemo1}
+                    label="Descargar Memorando del Jefe del Departamento"
+                    icon="IconWord.png"
+                  />
                 </Col>
                 <Col md={4} className="text-center">
-                  <div onClick={handleGenerateMemo2} className="download-item">
-                    <img
-                      src="IconWord.png"
-                      alt="Word Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Memorando del Profesor al Jefe </span>
-                  </div>
+                  <DownloadButton
+                    onClick={handleGenerateMemo2}
+                    label="Descargar Memorando del Profesor al Jefe"
+                    icon="IconWord.png"
+                  />
                 </Col>
                 <Col md={4} className="text-center">
-                  <div onClick={handleGeneratePdf} className="download-item">
-                    <img
-                      src="IconPdf.png"
-                      alt="PDF Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Anexo A</span>
-                  </div>
+                  <DownloadButton
+                    onClick={handleGeneratePdf}
+                    label="Descargar Anexo A"
+                    icon="IconPdf.png"
+                  />
                 </Col>
                 <Col md={4} className="text-center">
-                  <div onClick={handleGeneratePdf2} className="download-item">
-                    <img
-                      src="IconPdf.png"
-                      alt="PDF Icon"
-                      className="download-icon"
-                      style={{ cursor: "pointer" }}
-                    />
-                    <span>Descargar Anexo 8</span>
-                  </div>
+                  <DownloadButton
+                    onClick={handleGeneratePdf2}
+                    label="Descargar Anexo 8"
+                    icon="IconPdf.png"
+                  />
                 </Col>
               </Row>
 
@@ -722,3 +1259,140 @@ function EventParticipationOutsideProjectsForm() {
   );
 }
 export default EventParticipationOutsideProjectsForm;
+  
+const departamentoOptions = [
+  {
+    value: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
+    label: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
+  },
+  {
+    value: "DEPARTAMENTO DE BIOLOGÍA",
+    label: "DEPARTAMENTO DE BIOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
+    label: "DEPARTAMENTO DE CIENCIAS ADMINISTRATIVAS",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
+    label: "DEPARTAMENTO DE CIENCIAS DE ALIMENTOS Y BIOTECNOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
+    label: "DEPARTAMENTO DE CIENCIAS NUCLEARES",
+  },
+  {
+    value: "DEPARTAMENTO DE CIENCIAS SOCIALES",
+    label: "DEPARTAMENTO DE CIENCIAS SOCIALES",
+  },
+  {
+    value: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
+    label: "DEPARTAMENTO DE ECONOMÍA CUANTITATIVA",
+  },
+  {
+    value:
+      "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
+    label:
+      "DEPARTAMENTO DE ELECTRÓNICA, TELECOMUNICACIONES Y REDES DE LA INFORMACIÓN",
+  },
+  {
+    value: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
+    label: "DEPARTAMENTO DE ENERGÍA ELÉCTRICA",
+  },
+  {
+    value: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
+    label: "DEPARTAMENTO DE ESTUDIOS ORGANIZACIONALES Y DESARROLLO HUMANO",
+  },
+  {
+    value: "DEPARTAMENTO DE FÍSICA",
+    label: "DEPARTAMENTO DE FÍSICA",
+  },
+  {
+    value: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
+    label: "DEPARTAMENTO DE FORMACIÓN BÁSICA",
+  },
+  {
+    value: "DEPARTAMENTO DE GEOLOGÍA",
+    label: "DEPARTAMENTO DE GEOLOGÍA",
+  },
+  {
+    value: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
+    label: "DEPARTAMENTO DE INFORMÁTICA Y CIENCIAS DE LA COMPUTACIÓN",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
+    label: "DEPARTAMENTO DE INGENIERIA CIVIL Y AMBIENTAL",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
+    label: "DEPARTAMENTO DE INGENIERÍA MECÁNICA",
+  },
+  {
+    value: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
+    label: "DEPARTAMENTO DE INGENIERÍA QUÍMICA",
+  },
+  {
+    value: "DEPARTAMENTO DE MATERIALES",
+    label: "DEPARTAMENTO DE MATERIALES",
+  },
+  {
+    value: "DEPARTAMENTO DE MATEMÁTICA",
+    label: "DEPARTAMENTO DE MATEMÁTICA",
+  },
+  {
+    value: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
+    label: "DEPARTAMENTO DE METALURGIA EXTRACTIVA",
+  },
+  {
+    value: "DEPARTAMENTO DE PETRÓLEOS",
+    label: "DEPARTAMENTO DE PETRÓLEOS",
+  },
+  {
+    value: "INSTITUTO GEOFISICO",
+    label: "INSTITUTO GEOFISICO",
+  },
+];
+
+const articuloOptions = [
+  {
+    value: "SI",
+    label: "SI",
+  },
+  {
+    value: "NO",
+    label: "NO",
+  },
+];
+
+const participarElementosOptions = [
+  {
+    value: "SI",
+    label: "SI",
+  },
+  {
+    value: "NO",
+    label: "NO",
+  },
+];
+
+const declaracionOptions = [
+  {
+    value: "noCubre",
+    label: "Declaración si la organización NO cubre ningún rubro",
+  },
+  {
+    value: "siCubre",
+    label: "Declaración si la organización SI cubre algún rubro",
+  },
+];
+
+const tipoCuentaOptions =[
+  {
+    value:"Ahorros", 
+    label:"Ahorros",
+  },
+  {
+    value: "Corriente",
+    label: "Corriente",
+  },
+];
