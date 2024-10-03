@@ -3,75 +3,121 @@ import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes Props
-import Label from "./Labels/Label";
-import LabelTitle from "./Labels/LabelTitle";
-import LabelText from "./Labels/LabelText";
-import InputSelect from "./Inputs/InputSelect";
-import InputText from "./Inputs/InputText";
-import InputTextArea from "./Inputs/InputTextArea";
-import InputDate from "./Inputs/InputDate";
-import RadioGroup from "./Inputs/RadioGroup";
-import ActionButton from "./Buttons/ActionButton";
-import DownloadButton from "./Buttons/DownloadButton";
+import Label from "../components/Labels/Label.js";
+import LabelTitle from "../components/Labels/LabelTitle.js";
+import LabelText from "../components/Labels/LabelText.js";
+import InputSelect from "../components/Inputs/InputSelect.js";
+import InputText from "../components/Inputs/InputText.js";
+import InputTextArea from "../components/Inputs/InputTextArea.js";
+import InputDate from "../components/Inputs/InputDate.js";
+import RadioGroup from "../components/Inputs/RadioGroup.js";
+import ActionButton from "../components/Buttons/ActionButton.js";
+import DownloadButton from "../components/Buttons/DownloadButton.js";
 
 //Importación de funciones
-import today from "../utils/date";
-import { generateDateRange } from "../utils/dataRange";
-import {validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso} from "../utils/validaciones.js";
+import today from "../utils/date.js";
+import { generateDateRange } from "../utils/dataRange.js";
+import {
+  validarCedulaEcuatoriana,
+  validarFechaFin,
+  validateFechaLlegadaIda,
+  validateFechaSalidaRegreso,
+} from "../utils/validaciones.js";
 
 // Importación de las funciones para generar documentos
-import { generateAnexo7WithinProject,generateMemoSamplingTripWithinProject } from "../utils/documentGeneratorNational";
-import { getValue } from "@testing-library/user-event/dist/utils";
+import {
+  generateAnexo7WithinProject,
+  generateMemoSamplingTripWithinProject,
+  NationalSamplingTrips,
+} from "../utils/documentGeneratorNational.js";
 
 //Constantes globales
 const formStorageKey = "formSamplingTripWithinProject"; // Clave para almacenar el formulario en sessionStorage
 
-function SamplingTripWithinProjectForm() {
+function NationalSamplingTripsForm() {
   // Configuración del formulario con react-hook-form y valores predeterminados desde sessionStorage
   const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {};
 
-  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formData});
-  const { register, control, watch, setValue, reset, clearErrors, formState: { errors }, } = methods;
+  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formData });
+  const { register, control, watch, setValue, reset, clearErrors, formState: { errors } } = methods;
 
   //FieldArrays para tablas
-  const { fields: participanteFields, append: appendParticipante, remove: removeParticipante } = useFieldArray({control, name: "participante"});
+  const { fields: participanteFields, append: appendParticipante, remove: removeParticipante } = useFieldArray({ control, name: "participante" });
   const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
-  const { fields: immutableFields, replace } = useFieldArray({ control, name: "actividadesInmutables" });
+  const { fields: immutableFields, replace: replaceInmutableFields } = useFieldArray({ control, name: "actividadesInmutables" });
+
+  if (fieldsRegreso.length === 0) {
+      appendRegreso({
+        tipoTransporte: "",
+        nombreTransporte: "",
+        ruta: "",
+        fechaSalida: "",
+        horaSalida: "",
+        fechaLlegada: "",
+        horaLlegada: "",
+      });
+    }
+    if (participanteFields.length === 0) {
+      appendParticipante({
+        viaticos: false,               // Solicita Viáticos
+        nombre: "",                    // Personal nombre
+        cedula: "",                    // Cédula
+        rol: "",                       // Rol en el Proyecto
+        cargo: "",                     // Cargo
+        nombreJefeInmediato: "",       // Nombre Jefe Inmediato
+        cargoJefeInmediato: "",        // Cargo del Jefe Inmediato
+        banco: "",                     // Nombre del Banco
+        tipoCuenta: "",                // Tipo de Cuenta
+        numeroCuenta: "",              // Número de Cuenta
+        departamento: ""               // Departamento
+      });
+    }
+  
+    if (fieldsIda.length === 0) {
+      appendIda({
+        tipoTransporte: "",
+        nombreTransporte: "",
+        ruta: "",
+        fechaSalida: "",
+        horaSalida: "",
+        fechaLlegada: "",
+        horaLlegada: "",
+      });
+    }
 
   //visualizadores con watch
-  const fechaInicioViaje =  watch("fechaInicioViaje");
+  const fechaInicioViaje = watch("fechaInicioViaje");
   const fechaFinViaje = watch("fechaFinViaje");
   const transporteIdaValues = watch("transporteIda");
   const transporteRegresoValues = watch("transporteRegreso");
   const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
 
-  //Derivaciones de visualizadores 
-  const habilitarCampos = seleccionViaticosSubsistencias === "SI";
-  const fechaSalida = transporteIdaValues && transporteIdaValues.length > 0
-  ? transporteIdaValues[0].fechaSalida
-  : null;
-
-const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length > 0
-  ? transporteRegresoValues[transporteRegresoValues.length - 1].fechaLlegada
-  : null;
-
-  const rangoFechas = generateDateRange(fechaSalida, fechaLlegada);
-
-
-
   //manejadores de estado
-  const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const [fechaInicioActividades, setFechaInicioActividades] = useState("");
+  const [fechaFinActividades, setFechaFinActividades] = useState("");
+  const [prevFechaInicio, setPrevFechaInicio] = useState("");
+  const [prevFechaFin, setPrevFechaFin] = useState("");
 
-  const onSubmitSamplingTrip = (data)=>{
-  setShowDownloadSection(true);
-  }
+  const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const rangoFechas = generateDateRange(
+    fechaInicioActividades,
+    fechaFinActividades
+  );
+  // const [rangoFechas, setRangoFechas] = useState([]);
+
+  const onSubmitSamplingTrip = (data) => {
+    console.log(data);
+    setShowDownloadSection(true);
+  };
+  const datos = () => {
+    const data = methods.getValues();
+    console.log(data);
+  };
 
   const handleDownloadJson = () => {
     const data = methods.getValues();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json", });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Viajes de Muestreo Dentro de Proyectos.json";
@@ -85,6 +131,7 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
       reader.onload = (e) => {
         try {
           const json = JSON.parse(e.target.result);
+          console.log("Datos cargados:", json); // Verifica los datos cargados
           reset(json, {
             keepErrors: false,
             keepDirty: false,
@@ -92,7 +139,13 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
             keepTouched: false,
             keepIsSubmitted: false,
           });
-          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+          replaceInmutableFields(json.actividadesInmutables);
+          sessionStorage.removeItem(formStorageKey); // Eliminar el ítem existente
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json)); // Cargar el nuevo JSON
+          console.log(
+            "Datos almacenados en sessionStorage:",
+            sessionStorage.getItem(formStorageKey)
+          ); // Verifica los datos almacenados
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }
@@ -106,9 +159,15 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
     generateMemoSamplingTripWithinProject(data);
     setShowDownloadSection(false);
   };
+  const handleGeneratePdfAnexosA = () => {
+    const data = methods.getValues();
+    NationalSamplingTrips(data);
+    setShowDownloadSection(false);
+  };
+
   const handleGeneratePdf2 = () => {
     const data = methods.getValues();
-    generateAnexo7WithinProject(data);    
+    generateAnexo7WithinProject(data);
     setShowDownloadSection(false);
   };
 
@@ -122,80 +181,60 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
     reset(formData);
     const subscription = watch((data) => {
       sessionStorage.setItem(formStorageKey, JSON.stringify(data));
+
+      // Obtener las fechas de inicio y fin
+      const fechaInicio = data.transporteIda?.[0]?.fechaSalida || "";
+      const fechaFin = data.transporteRegreso?.length
+        ? data.transporteRegreso[data.transporteRegreso.length - 1]
+            ?.fechaLlegada
+        : "";
+
+      // Actualizar solo si las fechas han cambiado y no están vacías
+      if (fechaInicio !== prevFechaInicio && fechaInicio !== "") {
+        console.log("Fecha de inicio de actividades actualizada:", fechaInicio);
+        setFechaInicioActividades(fechaInicio);
+        setPrevFechaInicio(fechaInicio);
+      }
+
+      if (fechaFin !== prevFechaFin && fechaFin !== "") {
+        console.log("Fecha de fin de actividades actualizada:", fechaFin);
+        setFechaFinActividades(fechaFin);
+        setPrevFechaFin(fechaFin);
+      }
     });
     return () => subscription.unsubscribe();
-  }, [watch, reset]);
+  }, [watch, reset, prevFechaInicio, prevFechaFin]);
 
-  //Control de los datos
-  useEffect(() => {
-    if (seleccionViaticosSubsistencias === "NO") {
-      setValue("nombreBanco", "");
-      setValue("tipoCuenta", "");
-      setValue("numeroCuenta", "");
+  // Segundo useEffect
+  useEffect(() => { 
+    if (fechaInicioActividades && fechaFinActividades && fechaInicioActividades !== "" && fechaFinActividades !== "") {
+      console.log(
+        "Esto se ejecuta solo si hay un cambio en las fechas de inicio o fin de actividades"
+      );
+      const currentFields = methods.getValues("actividadesInmutables") || [];
+      const dates = generateDateRange(
+        fechaInicioActividades,
+        fechaFinActividades
+      );
+      const newFields = dates.map((date) => {
+        const existingField = currentFields.find(
+          (field) => field.fecha === date
+        );
+        return {
+          fecha: date,
+          descripcion: existingField ? existingField.descripcion : "",
+        };
+      });
+      replaceInmutableFields(newFields);
     }
-
-   if(participanteFields.length===0){
-    appendParticipante({
-      nombre: "",
-      rol: "",
-    });
-  }
-
-    if (fieldsIda.length === 0) {
-      appendIda({
-      tipoTransporte: "",
-      nombreTransporte: "",
-      ruta: "",
-      fechaSalida: "",
-      horaSalida: "",
-      fechaLlegada: "",
-      horaLlegada: "",
-    });
-  }
-
-    if (fieldsRegreso.length === 0) {
-      appendRegreso({
-      tipoTransporte: "",
-      nombreTransporte: "",
-      ruta: "",
-      fechaSalida: "",
-      horaSalida: "",
-      fechaLlegada: "",
-      horaLlegada: "",
-    });
-  }
-  if (rangoFechas.length > 0) {
-    // Obtener las actividades actuales
-    const actividadesActuales = methods.getValues("actividadesInmutables") || [];
-
-    // Creamos un mapa (objeto) de las actividades actuales para acceder fácilmente a las descripciones
-    const actividadMap = actividadesActuales.reduce((acc, actividad) => {
-      acc[actividad.fecha] = actividad.descripcion;
-      return acc;
-    }, {});
-
-    // Mapeamos el nuevo rango de fechas, manteniendo las descripciones anteriores si coinciden
-    const actividadesActualizadas = rangoFechas.map((fecha) => {
-      return {
-        fecha: fecha,
-        descripcion: actividadMap[fecha] || "", // Mantener la descripción si existe para la fecha
-      };
-    });
-
-    // Solo reemplazamos si hay un cambio real
-    if (JSON.stringify(actividadesActuales) !== JSON.stringify(actividadesActualizadas)) {
-      replace(actividadesActualizadas); // Actualizamos las actividades solo si hay cambios
-    }
-  }
- 
-}, [replace,setValue,habilitarCampos, seleccionViaticosSubsistencias, rangoFechas, fechaSalida, fechaLlegada,fieldsIda, fieldsRegreso, participanteFields]);
-
+  }, [fechaInicioActividades, fechaFinActividades]);
 
   return (
     <FormProvider {...methods}>
       <Container>
         <h1 className="text-center my-4">
-        Formulario para salidas de campo y de muestreo y/o viajes técnicos dentro de proyectos
+          Formulario para salidas de campo y de muestreo y/o viajes técnicos
+          dentro de proyectos
         </h1>
         <div className="form-container">
           <Label text="Descargar datos actuales en (.json)" />
@@ -254,87 +293,17 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
             <InputSelect
               name="departamento"
               label="Departamento / Instituto:"
+              infoText="Seleccione el departamento o instituto al cual pertenece el proyecto, este campo usualmente es el departamento  al cual pertence el director del proyecto"
               options={departamentoOptions}
               rules={{ required: "El departamento es requerido" }}
               disabled={false}
             />
-            <LabelTitle text="Personal a trasladarse" />
-            <table className="activity-schedule-table">
-              <thead>
-                <tr>
-                  <th>Personal a trasladarse</th>
-                  <th>Rol en el Proyecto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {participanteFields.map((field, index) => (
-                  <tr
-                    key={field.id}
-                    className={index % 2 === 0 ? "row-even" : "row-odd"}
-                  >
-                    <td>
-                      <input
-                        type="text"
-                        id={`participante[${index}].nombre`}
-                        className="form-input"
-                        {...register(`participante[${index}].nombre`, {
-                          required: "El nombre es requerido",
-                        })}
-                      />
-                      {errors.participante &&
-                        errors.participante[index]?.nombre && (
-                          <span className="error-text">
-                            {errors.participante[index].nombre.message}
-                          </span>
-                        )}
-                    </td>
-                    <td>
-                      <select
-                        id={`participante[${index}].rol`}
-                        className="form-input"
-                        defaultValue="Aéreo"
-                        {...register(`participante[${index}].rol`, {
-                          required: "Este campo es requerido",
-                        })}
-                      >
-                        <option value="Director">Director</option>
-                        <option value="Codirector">Codirector</option>
-                        <option value="Colaborador">Colaborador</option>
-                      </select>
-                      {errors.participante &&
-                        errors.participante[index]?.rol && (
-                          <span className="error-text">
-                            {errors.participante[index].rol.message}
-                          </span>
-                        )}
-                    </td>
-                    <td>
-                      <ActionButton
-                        onClick={() => removeParticipante(index)}
-                        label="Eliminar"
-                        variant="danger"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <ActionButton
-              onClick={() => {
-                appendParticipante({
-                  nombre: "", // Valor inicial para el cargo
-                  rol: "", // Valor inicial para el rol
-                });
-              }}
-              label="Agregar"
-              variant="success"
-            />
-            <LabelTitle text="DATOS DE LA SALIDA DE CAMPO Y DE MUESTREO"/>
+             <LabelTitle text="DATOS DE LA SALIDA DE CAMPO Y DE MUESTREO" />
             <InputText
-             name="ciudad"
-             label="Lugar de movilización"
-             rules={{ required: "La ciudad a movilizarce es requerida" }}
-             disabled={false}
+              name="ciudad"
+              label="Lugar de movilización"
+              rules={{ required: "La ciudad a movilizarce es requerida" }}
+              disabled={false}
             />
 
             <InputDate
@@ -359,17 +328,17 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                 required: "La fecha de fin del evento es requerida",
                 validate: (value) => {
                   return (
-                    value >= today()||
-                    "La fecha debe ser mayor a la fecha actual "+ today()
+                    value >= today() ||
+                    "La fecha debe ser mayor a la fecha actual " + today()
                   );
                 },
                 validate: (value) => {
                   return (
                     value >= watch("fechaInicioViaje") ||
-                    "La fecha FIN de viaje  debe ser major a la fecha de incio del viaje " + fechaInicioViaje
+                    "La fecha FIN de viaje  debe ser major a la fecha de incio del viaje " +
+                      fechaInicioViaje
                   );
                 },
-
               }}
               disabled={false}
             />
@@ -398,7 +367,264 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
               }}
               disabled={false}
             />
-             <RadioGroup
+            <LabelTitle text="Personal a trasladarse" />
+            <div className="scroll-table-container">
+              <table className="activity-schedule-table">
+                <thead>
+                  <tr>
+                    <th className="solicita-viaticos">Solicita Viáticos</th>
+                    <th className="personal-nombre">Personal nombre</th>
+                    <th className="cedula" >Cédula</th>
+                    <th className="rol-proyecto">Rol en el Proyecto</th>
+                    <th className="cargo">Cargo</th>
+                    <th className="nombre-jefe">Nombre Jefe Inmediato</th>
+                    <th className="cargo-jefe" >Cargo del Jefe Inmediato</th>
+                    <th className="nombre-banco" >Nombre del Banco</th>
+                    <th className="tipo-cuenta" >Tipo de Cuenta</th>
+                    <th className="numero-cuenta">Número de Cuenta</th>
+                    <th className="departamento">Departamento</th>
+                    <th className="acciones">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {participanteFields.map((field, index) => {
+                    // Usamos watch para observar el valor de 'viaticos' de cada participante
+                    const viaticosChecked = watch(
+                      `participante[${index}].viaticos`
+                    );
+
+                    return (
+                      <tr
+                        key={field.id}
+                        className={index % 2 === 0 ? "row-even" : "row-odd"}
+                      >
+                        {/* Checkbox de Viáticos */}
+                        <td>
+                          <input
+                            type="checkbox"
+                            title="Marca esta opcion si el personal solicita viaticos"
+                            id={`participante[${index}].viaticos`}
+                            {...register(`participante[${index}].viaticos`)}
+                          />
+                        </td>
+
+                        {/* Campo de Personal a trasladarse */}
+                        <td>
+                          <input
+                            title="Nombre completo del personal que se traslada"
+                            type="text"
+                            id={`participante[${index}].nombre`}
+                            className="form-input"
+                            placeholder="Nombre del participante"
+                            {...register(`participante[${index}].nombre`, {
+                              required: "El nombre es requerido",
+                            })}
+                          />
+                          {errors.participante &&
+                            errors.participante[index]?.nombre && (
+                              <span className="error-text">
+                                {errors.participante[index].nombre.message}
+                              </span>
+                            )}
+                        </td>
+                        {/* Campo de Cédula */}
+                        <td>
+                          <input
+                            title="Número de cédula del personal"
+                            type="text"
+                            id={`participante[${index}].cedula`}
+                            className="form-input"
+                            {...register(`participante[${index}].cedula`, {
+                              required: "La cédula es requerida",
+                              validate: (value) => validarCedulaEcuatoriana(value) || "Cédula inválida",
+                            })}
+                          />
+                          {errors.participante && errors.participante[index]?.cedula && (
+                            <span className="error-text">
+                              {errors.participante[index].cedula.message}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Campo de Rol */}
+                        <td>
+                          <select
+                            title="Rol que desempeña el personal en el proyecto"
+                            id={`participante[${index}].rol`}
+                            className="form-input"
+                            {...register(`participante[${index}].rol`, {
+                              required: "Este campo es requerido",
+                            })}
+                          >
+                            <option value="Director">Director</option>
+                            <option value="Codirector">Codirector</option>
+                            <option value="Colaborador">Colaborador</option>
+                          </select>
+                          {errors.participante &&
+                            errors.participante[index]?.rol && (
+                              <span className="error-text">
+                                {errors.participante[index].rol.message}
+                              </span>
+                            )}
+                        </td>
+
+                        {/* Campo de Cargo */}
+                        <td>
+                          <input
+                            title="Tal como consta en su acción de personal. Ejemplos: Profesor Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo; Profesor Principal a Tiempo Completo."
+                            type="text"
+                            id={`participante[${index}].cargo`}
+                            className="form-input"
+                            placeholder="Profesor agregado a tiempo completo"
+                            {...register(`participante[${index}].cargo`, {
+                              required: "El cargo es requerido",
+                            })}
+                          />
+                          {errors.participante &&
+                            errors.participante[index]?.cargo && (
+                              <span className="error-text">
+                                {errors.participante[index].cargo.message}
+                              </span>
+                            )}
+                        </td>
+                          
+                        {/* Campo de Nombre del Jefe Inmediato */}
+                        <td>
+                          <input
+                            title="Nombres completos del jefe inmediato"
+                            type="text"
+                            id={`participante[${index}].nombreJefeInmediato`}
+                            className="form-input"
+                            placeholder="Nombre del jefe inmediato"
+                            {...register(`participante[${index}].nombreJefeInmediato`, {
+                              required: "El nombre del jefe inmediato es requerido",
+                            })}
+                          />
+                          {errors.participante && errors.participante[index]?.nombreJefeInmediato && (
+                            <span className="error-text">
+                              {errors.participante[index].nombreJefeInmediato.message}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Campo de Cargo del Jefe Inmediato */}
+                        <td>
+                          <input
+                            title="Favor colocar el cargo del Jefe inmediato, puede usar las siglas para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante"
+                            type="text"
+                            id={`participante[${index}].cargoJefeInmediato`}
+                            className="form-input"
+                            placeholder="Jefe del DACI"
+                            {...register(`participante[${index}].cargoJefeInmediato`, {
+                              required: "El cargo del jefe inmediato es requerido",
+                            })}
+                          />
+                          {errors.participante && errors.participante[index]?.cargoJefeInmediato && (
+                            <span className="error-text">
+                              {errors.participante[index].cargoJefeInmediato.message}
+                            </span>
+                          )}
+                        </td>
+
+                        {/* Campo de Nombre del Banco */}
+                        <td>
+                          <input
+                            type="text"
+                            id={`participante[${index}].banco`}
+                            className="form-input"
+                            {...register(`participante[${index}].banco`)}
+                            disabled={!viaticosChecked} // Deshabilitar si no se selecciona Viáticos
+                          />
+                        </td>
+
+                        {/* Dropdown de Tipo de Cuenta */}
+                        <td>
+                          <select
+                            id={`participante[${index}].tipoCuenta`}
+                            className="form-input"
+                            {...register(`participante[${index}].tipoCuenta`)}
+                            disabled={!viaticosChecked} // Deshabilitar si no se selecciona Viáticos
+                          >
+                            <option value="ahorros">Ahorros</option>
+                            <option value="corriente">Corriente</option>
+                          </select>
+                        </td>
+
+                        {/* Campo de Número de Cuenta */}
+                        <td>
+                          <input
+                            type="text"
+                            id={`participante[${index}].numeroCuenta`}
+                            className="form-input"
+                            {...register(`participante[${index}].numeroCuenta`)}
+                            disabled={!viaticosChecked} // Deshabilitar si no se selecciona Viáticos
+                          />
+                        </td>
+                        <td>
+                          <select
+                            id={`participante[${index}].departamento`}
+                            className="form-input"
+                            {...register(
+                              `participante[${index}].departamento`,
+                              {
+                                required: "El departamento es requerido",
+                              }
+                            )}
+                          >
+                            {departamentoOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.participante &&
+                            errors.participante[index]?.departamento && (
+                              <span className="error-text">
+                                {
+                                  errors.participante[index].departamento
+                                    .message
+                                }
+                              </span>
+                            )}
+                        </td>
+
+                        {/* Botón para eliminar participante */}
+                        <td>
+                          <ActionButton
+                            onClick={() => removeParticipante(index)}
+                            label="Eliminar"
+                            variant="danger"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {/* Botón para agregar participante */}
+              <ActionButton
+                onClick={() => {
+                  appendParticipante({
+                    viaticos: false,               // Solicita Viáticos
+                    nombre: "",                    // Personal nombre
+                    cedula: "",                    // Cédula
+                    rol: "",                       // Rol en el Proyecto
+                    cargo: "",                     // Cargo
+                    nombreJefeInmediato: "",       // Nombre Jefe Inmediato
+                    cargoJefeInmediato: "",        // Cargo del Jefe Inmediato
+                    banco: "",                     // Nombre del Banco
+                    tipoCuenta: "",                // Tipo de Cuenta
+                    numeroCuenta: "",              // Número de Cuenta
+                    departamento: ""               // Departamento
+                  });
+                }}
+                label="Agregar"
+                variant="success"
+              />
+            </div>
+           
+            {/* <RadioGroup
               name="inscripcion"
               label="Inscripción:"
               options={[
@@ -406,7 +632,7 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                 { value: "NO", label: "NO" },
               ]}
               rules={{ required: "Indique si requiere inscripción" }}
-            />
+            /> */}
             <LabelTitle text="Transporte" disabled={false} />
             <LabelText
               text="Por favor, considere que el itinerario es tentativo. Consulte el
@@ -566,14 +792,19 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
-                                    value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-                                  
+                                    value >= fechaSalida ||
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+
                                   // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
                                   validateFechaLlegadaIda: (value) =>
                                     index === fieldsIda.length - 1
-                                      ? validateFechaLlegadaIda(value, fechaInicioViaje)
+                                      ? validateFechaLlegadaIda(
+                                          value,
+                                          fechaInicioViaje
+                                        )
                                       : true, // Si no es el último campo, no aplica esta validación
                                 },
                               }
@@ -623,11 +854,10 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                   })}
                 </tbody>
               </table>
-
               <ActionButton
                 onClick={() => {
                   appendIda({
-                    tipoTransporte: "",
+                    tipoTransporte: "Aéreo",
                     nombreTransporte: "",
                     ruta: "",
                     fechaSalida: "",
@@ -749,15 +979,21 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
                                     value >= fechaLlegadaAnterior ||
                                     "La fecha de salida debe ser posterior a la fecha de llegada anterior",
-                                  
+
                                   // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
                                   validateRegreso: (value) =>
-                                    index === 0 ? validateFechaSalidaRegreso(value, fechaFinViaje) : true,
+                                    index === 0
+                                      ? validateFechaSalidaRegreso(
+                                          value,
+                                          fechaFinViaje
+                                        )
+                                      : true,
                                 },
                               }
                             )}
@@ -805,7 +1041,7 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today ||
+                                    value >= today() ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida ||
@@ -861,7 +1097,7 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
               <ActionButton
                 onClick={() => {
                   appendRegreso({
-                    tipoTransporte: "",
+                    tipoTransporte: "Aéreo",
                     nombreTransporte: "",
                     ruta: "",
                     fechaSalida: "",
@@ -876,12 +1112,13 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
             </div>
 
             <LabelTitle text="CRONOGRAMA DE ACTIVIDADES" />
-            
+
             <LabelText
               text="Incluir desde la fecha de salida del país y días de traslado
               hasta el día de llegada al destino. <br />
               Hasta incluir la fecha de llegada al país."
             />
+
             <table className="activity-schedule-table">
               <thead>
                 <tr>
@@ -890,18 +1127,21 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                 </tr>
               </thead>
               <tbody>
-                {rangoFechas.map((fecha, index) => (
-                  <tr key={index}>
+                {immutableFields.map((field, index) => (
+                  <tr
+                    key={field.id}
+                    className={index % 2 === 0 ? "row-even" : "row-odd"}
+                  >
+                    {/* Campo de Fecha */}
                     <td>
-                      {/* Campo de fecha de solo lectura */}
                       <input
                         type="date"
-                        id={`fechaInmutable-${index}`}
+                        id={`actividadesInmutables[${index}].fecha`}
                         className="form-input"
                         {...register(`actividadesInmutables[${index}].fecha`, {
-                          required: "Este campo es requerido",
+                          required: "La fecha es requerida",
                         })}
-                        value={fecha} // Valor predefinido de la fecha
+                        value={field.fecha} // Valor predefinido de la fecha
                         readOnly
                       />
                       {errors.actividadesInmutables &&
@@ -911,21 +1151,27 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                           </span>
                         )}
                     </td>
-                    <td>
-                      {/* Campo de descripción editable */}
+
+                    <td style={{ width: "100%" }}>
                       <input
                         type="text"
-                        id={`descripcionInmutable-${index}`}
+                        id={`actividadesInmutables[${index}].descripcion`}
                         className="form-input"
-                        {...register(`actividadesInmutables[${index}].descripcion`, {
-                          required: "Este campo es requerido",
-                        })}
-                        placeholder="Describe la actividad a realizar"
+                        placeholder="Descripción de la actividad"
+                        {...register(
+                          `actividadesInmutables[${index}].descripcion`,
+                          {
+                            required: "La descripción es requerida",
+                          }
+                        )}
                       />
                       {errors.actividadesInmutables &&
                         errors.actividadesInmutables[index]?.descripcion && (
                           <span className="error-text">
-                            {errors.actividadesInmutables[index].descripcion.message}
+                            {
+                              errors.actividadesInmutables[index].descripcion
+                                .message
+                            }
                           </span>
                         )}
                     </td>
@@ -933,7 +1179,8 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                 ))}
               </tbody>
             </table>
-            <Label text="Justificación del la salida de campo y de muestreo" />
+
+            <LabelTitle text="Justificación del la salida de campo y de muestreo" />
             <InputTextArea
               name="objetivoViaje"
               label="Objetivo, resultado o producto de la salida de campo y de muestreo."
@@ -941,46 +1188,16 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
               rules={{ required: "Este campo es requerido" }}
               disabled={false}
             />
-
-            {/* Nombre del banco */}
-            <InputText
-              name="nombreBanco"
-              label="Nombre del banco:"
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-
-            {/* Tipo de cuenta */}
-            <InputSelect
-              name="tipoCuenta"
-              label="Tipo de cuenta:"
-              options={[
-                { value: "Ahorros", label: "Ahorros" },
-                { value: "Corriente", label: "Corriente" },
-              ]}
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-
-            {/* Número de cuenta */}
-            <InputText
-              name="numeroCuenta"
-              label="No. De cuenta:"
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-
           </div>
-           {/* Botón para enviar el formulario */}
-           <Row className="mt-4">
+          {/* Botón para enviar el formulario */}
+          <Row className="mt-4">
             <Col className="text-center">
-              <Button id="btn_enviar" type="submit" variant="primary">
+              <Button
+                id="btn_enviar"
+                type="submit"
+                variant="primary"
+                onClick={datos}
+              >
                 Enviar
               </Button>
             </Col>
@@ -999,6 +1216,14 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
                 </Col>
                 <Col md={4} className="text-center">
                   <DownloadButton
+                    onClick={handleGeneratePdfAnexosA}
+                    icon="IconPdf.png"
+                    altText="PDF Icon"
+                    label="Descargar Anexos A .zip"
+                  />
+                </Col>
+                <Col md={4} className="text-center">
+                  <DownloadButton
                     onClick={handleGeneratePdf2}
                     icon="IconPdf.png"
                     altText="PDF Icon"
@@ -1008,7 +1233,6 @@ const fechaLlegada = transporteRegresoValues && transporteRegresoValues.length >
               </Row>
             </div>
           )}
-
 
           <Row className="mt-4">
             <Col className="text-center">
@@ -1121,4 +1345,4 @@ const departamentoOptions = [
     label: "INSTITUTO GEOFISICO",
   },
 ];
-export default SamplingTripWithinProjectForm;
+export default NationalSamplingTripsForm;

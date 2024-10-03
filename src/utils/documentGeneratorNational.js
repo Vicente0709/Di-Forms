@@ -1,18 +1,12 @@
 import React from "react";
 import { Font } from "@react-pdf/renderer";
-import {
-  Page,
-  Text,
-  View,
-  Document as PDFDocument,
-  StyleSheet,
-  PDFDownloadLink,
-  pdf,
-} from "@react-pdf/renderer";
+import { Page, Text, View, Document as PDFDocument, StyleSheet, PDFDownloadLink, pdf,} from "@react-pdf/renderer";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
 import { generate } from "@pdfme/generator";
 import { text, image, barcodes } from "@pdfme/schemas";
+import JSZip from "jszip";
+
 
 import { basePdfAnexoANational } from "../utilsNational/basePdfAnexoANational";
 import { schemasAnexoANational } from "../utilsNational/schemasAnexoANational";
@@ -234,7 +228,7 @@ const month = String(today.getMonth() + 1).padStart(2, "0"); // Los meses son 0-
 const year = today.getFullYear();
 const formattedDate = `${day}/${month}/${year}`;
 
-export async function generateMemoNationalOutsideProject1(data) {
+export async function generateMemoNationalOutsideProject1(data,returnDocument = false) {
   const departament = capitalizeWords(data.departamento.toLowerCase());
   // Array para almacenar las solicitudes
   let solicitudes = [];
@@ -402,7 +396,7 @@ export async function generateMemoNationalOutsideProject1(data) {
   });
 }
 
-export async function generateMemoNationalOutsideProject2(data) {
+export async function generateMemoNationalOutsideProject2(data,returnDocument = false) {
   let solicitudes = [];
 
   // Verificar si se debe incluir "viáticos y subsistencias"
@@ -570,7 +564,7 @@ export async function generateMemoNationalOutsideProject2(data) {
   });
 }
 
-export async function generateAnexo10NationalOutsideProject(data) {
+export async function generateAnexo10NationalOutsideProject(data,returnDocument = false) {
     const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
@@ -959,7 +953,7 @@ export async function generateAnexo10NationalOutsideProject(data) {
   saveAs(blob, `Anexo 10 - Formulario salidas nacionales fuera de proyecto.pdf`);
 }
 
-export async function generateAnexoANationalOutsideProject(data) {
+export async function generateAnexoANationalOutsideProject(data,returnDocument = false) {
   const template = {
     schemas: schemasAnexoANational,
     basePdf: basePdfAnexoANational,
@@ -1075,7 +1069,7 @@ export async function generateAnexoANationalOutsideProject(data) {
   saveAs(blob, "Anexo 1 - Solicitud de viáticos EPN.pdf");
 }
 
-export function generateMemoWithinProject(data) {
+export function generateMemoWithinProject(data,returnDocument = false) {
   const nombresApellidos = capitalizeWords(
     (data.nombres + " " + data.apellidos).toLowerCase()
   );
@@ -1246,7 +1240,7 @@ export function generateMemoWithinProject(data) {
   });
 }
 
-export function generateMemoSamplingTripWithinProject(data) {
+export function generateMemoSamplingTripWithinProject(data,returnDocument = false) {
   // Crear un texto de solicitud en función de los campos pasajesAereos, viaticosSubsistencias e inscripción
   let solicitudOracion = "Para lo cual solicito ";
   
@@ -1409,7 +1403,87 @@ export function generateMemoSamplingTripWithinProject(data) {
   });
 }
 
-export async function generateAnexoAWithinProject(data) {
+export async function NationalSamplingTrips(data,returnDocument = false) {
+  const template = {
+    schemas: schemasAnexoANational,
+    basePdf: basePdfAnexoANational,
+  };
+
+  const transporte = data.transporteIda.concat(data.transporteRegreso);
+  const ultimaFechaLlegada = transporte.length > 0 ? transporte[transporte.length - 1]?.fechaLlegada : "";
+  const ultimaHoraLlegada = transporte.length > 0 ? transporte[transporte.length - 1]?.horaLlegada : "";
+
+
+  let servidoresText = "";
+  for (const participante of data.participante) {
+    if (servidoresText) {
+      servidoresText += ", ";
+    }
+    servidoresText += participante.nombre.toUpperCase();
+  }
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+
+  const zip = new JSZip();
+
+  for (const participante of data.participante) {
+    const transporteInfo = {};
+    for (let i = 0; i < 8; i++) {
+      transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
+      transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
+      transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
+      transporteInfo[`transporteFechaS${i + 1}`] = formatDate(transporte[i]?.fechaSalida) || "";
+      transporteInfo[`transporteFechaSH${i + 1}`] = transporte[i]?.horaSalida || "";
+      transporteInfo[`transporteFechaL${i + 1}`] = formatDate(transporte[i]?.fechaLlegada) || "";
+      transporteInfo[`transporteFechaLH${i + 1}`] = transporte[i]?.horaLlegada || "";
+    }
+
+    const inputs = [
+      {
+        fechaSolicitud: formattedDate,
+        viaticos: participante.viaticos ? "X" : "",
+        movilizacion: participante.viaticos ? "X" : "",
+        subsistencias: participante.viaticos ? "X" : "",
+        alimentacion: participante.viaticos ? "X" : "",
+
+        nombresCompletos: participante.nombre.toUpperCase(),
+        lugar: data.ciudad + ", Ecuador",
+        puesto: participante.cargo,
+        unidadPerteneciente: participante.departamento,
+
+        fechaSalida: formatDate(data.transporteIda[0]?.fechaSalida),
+        horaSalida: data.transporteIda[0]?.horaSalida,
+
+        fechaLlegada: formatDate(ultimaFechaLlegada),
+        horaLlegada: ultimaHoraLlegada,
+
+        servidores: participante.nombre.toUpperCase() + servidoresText.toUpperCase(),
+
+        actividades: "Dentro de las actividades del proyecto  " + data.codigoProyecto + " titulado  '" + data.tituloProyecto + "', que tendrá lugar del  " + data.fechaInicioEvento + "  al  " + data.fechaFinEvento + " en la ciudad de  " + data.ciudadEvento + ", Ecuador. ",
+
+        ...transporteInfo,
+
+        banco: participante.viaticos? participante.banco: "",
+        bancoTipoCuenta: participante.viaticos? participante.tipoCuenta: "",
+        numeroCuenta: participante.viaticos? participante.numeroCuenta: "",
+
+        nombresCompletos2: participante.nombre.toUpperCase() + "\n" + participante.cargo.toUpperCase() + "\n" + participante.cedula,
+
+        nombresCompletosJefeInmediato: participante.nombreJefeInmediato.toUpperCase() + "\n" + participante.cargoJefeInmediato.toUpperCase(),
+      },
+    ];
+
+    const pdf = await generate({ template, plugins, inputs });
+    const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+
+    zip.file(`AnexoA_${participante.nombre.replace(/\s+/g, '_')}.pdf`, blob);
+  }
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  saveAs(zipBlob, "AnexosA.zip");
+}
+
+export async function generateAnexoAWithinProject(data,returnDocument = false) {
   const template = {
     schemas: schemasAnexoANational,
     basePdf: basePdfAnexoANational,
@@ -1534,7 +1608,7 @@ export async function generateAnexoAWithinProject(data) {
     "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
   );
 }
-export async function generateAnexoASamplingTripWithinProject(data) {
+export async function generateAnexoASamplingTripWithinProject(data,returnDocument = false) {
   const template = {
     schemas: schemasAnexoANational,
     basePdf: basePdfAnexoANational,
@@ -1655,7 +1729,7 @@ export async function generateAnexoASamplingTripWithinProject(data) {
   );
 }
 
-export async function generateAnexo2WithinProject(data) {
+export async function generateAnexo2WithinProject(data,returnDocument = false) {
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
@@ -2086,7 +2160,7 @@ export async function generateAnexo2WithinProject(data) {
 
 // color: '#2573ca',
 
-export async function generateAnexo7WithinProject(data) {
+export async function generateAnexo7WithinProject(data,returnDocument = false) {
   const MyPDFDocument = (
     <PDFDocument>
   <Page style={styles.page}>
@@ -2242,21 +2316,6 @@ export async function generateAnexo7WithinProject(data) {
                         ? "X"
                         : ""}
                       <Text style={styles.baseText}>{" )"}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>- Inscripción:</Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.inscripcion === "SI" ? "X" : ""}
-                      <Text style={styles.baseText}>{" ) "}</Text>
                     </Text>
                   </Text>
                 </View>

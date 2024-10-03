@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import InscriptionPaymentForm from "../components/InscriptionPaymentForm";
+import InscriptionPaymentForm from "../../forms/InscriptionPaymentForm";
 
 function InscriptionPayment() {
   useEffect(() => {

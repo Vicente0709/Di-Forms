@@ -1,146 +1,137 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useForm, FormProvider,useFieldArray} from "react-hook-form";
+import React, { useState, useEffect } from "react";
+import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
-// Importación de los componentes Props
-import Label from "./Labels/Label";
-import LabelTitle from "./Labels/LabelTitle";
-import LabelText from "./Labels/LabelText";
-import InputSelect from "./Inputs/InputSelect";
-import InputText from "./Inputs/InputText";
-import InputTextArea from "./Inputs/InputTextArea";
-import InputDate from "./Inputs/InputDate";
-import RadioGroup from "./Inputs/RadioGroup";
-import ActionButton from "./Buttons/ActionButton";
-import DownloadButton from "./Buttons/DownloadButton";
+// Importación de los componentes del formulario
+import Label from "../components/Labels/Label.js";
+import LabelTitle from "../components/Labels/LabelTitle.js";
+import LabelText from "../components/Labels/LabelText.js";
+import InputSelect from "../components/Inputs/InputSelect.js";
+import InputText from "../components/Inputs/InputText.js";
+import InputTextArea from "../components/Inputs/InputTextArea.js";
+import InputDate from "../components/Inputs/InputDate.js";
+import RadioGroup from "../components/Inputs/RadioGroup.js";
+import ActionButton from "../components/Buttons/ActionButton.js";
+import DownloadButton from "../components/Buttons/DownloadButton.js";
+import today from "../utils/date.js";
 
-// Importación de funciones 
-import { generateDateRange } from "../utils/dataRange";
-import today from "../utils/date";
-import {validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso} from "../utils/validaciones.js";
-import { generateAnexoATripWithingProject, generateMemoTripWithinProjec1, generateMemoTripWithinProjec2, generateAnexoB2WithinProject } from "../utils/documentGenerator";
+// Importación de las funciones para generar documentos
 
-//Constantes globales para el formulario
-const formStorageKey = "formTechnicalTripWithinProjects";
-const daysStorageKey = "diferenciaDiasViajeTecnicoDeProyectos";
-const formTechnicalTripWithinProjects = JSON.parse(localStorage.getItem(formStorageKey)) || {};
+import {
+  generateMemoNationalOutsideProject1,
+  generateMemoNationalOutsideProject2,
+  generateAnexo10NationalOutsideProject,
+  generateAnexoANationalOutsideProject,
+} from "../utils/documentGeneratorNational.js";
+import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
 
-function TechnicalTripWithinProjects() {
+const formStorageKey = "formNationalOutsideProject"; // Clave para almacenar el formulario en localStorage
+const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+
+function ExternalNationalEventsForm() {
   
   // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
-  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formTechnicalTripWithinProjects });
-  const {register,control, watch, setValue, reset, clearErrors, formState: { errors },} = methods;
-  
-  //FielsdArray para tablas de transporte y actividades
+  const methods = useForm({
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: formData,
+  });
+
+ 
+  const { register, control, watch, reset, setValue, clearErrors, formState:{errors} } = methods;
+
   const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
-  const { fields: immutableFields, replace } = useFieldArray({ control, name: "actividadesInmutables" });
-  
+  const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
 
-  // Visualizadores con watch
-  const rolEnProyecto = watch("rolEnProyecto");
-  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
-  const fechaFinEvento = watch("fechaFinEvento");
+  // Observadores para los cambios en los campos del formulario
+  const seleccionArticulo = watch("articuloPublicado");
   const fechaInicioEvento = watch("fechaInicioEvento");
-
-  // Estados derivados de las observaciones
+  const fechaFinEvento = watch("fechaFinEvento");
+  const hospedaje = watch("hospedaje"); 
+  const inscripcion=watch("inscripcion");
+  const movilizacion = watch("movilizacion");
+  const alimentacion = watch("alimentacion");
+  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
   const habilitarCampos = seleccionViaticosSubsistencias === "SI";
+  const metodoPago = watch("metodoPago");
   
-  // Manejadores de estado para showSections
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [showInputDirector, setShowInputDirector] = useState(false);
-  const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
-  const [showInputJustificacion, setshowInputJustificacion] = useState(false);
+  const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
+  const [showInputArticulo, setShowInputArticulo] = useState(false);
 
-  const [fechaInicioEventoActividades, setFechaInicioEvento] = useState("");
-  const [fechaFinEventoActividades, setFechaFinEvento] = useState(""); 
+  // Efecto para manejar la visibilidad de secciones y limpieza de campos
+  useEffect(() => {
+    // Manejar la lógica para mostrar/ocultar el campo de detalle del artículo
+    setShowInputArticulo(seleccionArticulo === "SI");
+    if (seleccionArticulo !== "SI") {
+      setValue("detalleArticuloSI", "");
+    }
+
+    // Lógica para la selección de la declaración según los rubros
+    if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
+      setValue("seleccionDeclaracion", "siCubre");
+    } else if (hospedaje === "NO" && movilizacion === "NO" && alimentacion === "NO") {
+      setValue("seleccionDeclaracion", "noCubre");
+    }
+
+    // Manejar la habilitación o limpieza de campos bancarios según la selección de viáticos
+    if (!habilitarCampos) {
+      setValue("nombreBanco", "");
+      setValue("tipoCuenta", "");
+      setValue("numeroCuenta", "");
+      clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
+    }
+
+    if(inscripcion === "SI"){
+      setSeleccionInscripcion(true);
+    }else{
+      setSeleccionInscripcion(false);
+      setValue("inscripciones")
+    }
+
+    if (fields.length === 0) {
+      append({
+        valorInscripcion: "",
+        pagoLimite: "",
+        limiteFecha: "",
+      });
+    }
+
+
+  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, fields.length, setValue, clearErrors]);
+
   
-  // Funciónes auxiliares y handlers para eventos
-  const onSubmitTechnicalTrip = (data) => {
+
+  // Función que se ejecuta al enviar el formulario
+  const onSubmitNationalOutside = (data) => {
     console.log(data);
     setShowDownloadSection(true);
+    console.log(methods.getValues());
   };
 
-  const handleGenerateDocx = () => {
-    const formTripWothinProject = methods.getValues();
-    if (formTripWothinProject.rolEnProyecto === "Director") {
-      generateMemoTripWithinProjec1(formTripWothinProject);
-      setShowDownloadSection(false);
-    }
-    if (
-      formTripWothinProject.rolEnProyecto === "Codirector" ||
-      formTripWothinProject.rolEnProyecto === "Colaborador"
-    ) {
-      generateMemoTripWithinProjec2(formTripWothinProject);
-      setShowDownloadSection(false);
-    }
-  };
-
-  const handleGeneratePdf = () => {
-    const formTripWothinProject = methods.getValues();
-    generateAnexoATripWithingProject(formTripWothinProject);
-    setShowDownloadSection(false);
-  };
-
-  const handleGeneratePdf2 = () => {
-    const formTripWothinProject = methods.getValues();
-    generateAnexoB2WithinProject(formTripWothinProject);
-    setShowDownloadSection(false);
-  };
-
-  const handleDownloadAll = () => {
-    console.log("Descargando todos los documentos");
-    const formTripWothinProject = methods.getValues();
-    handleGenerateDocx(formTripWothinProject);
-    handleGeneratePdf(formTripWothinProject);
-    handleGeneratePdf2(formTripWothinProject);
-  };
-
-  const handleClearForm = () => {
-    localStorage.removeItem(formStorageKey);
-    localStorage.removeItem(daysStorageKey);
-    setShowDownloadSection(false);
-    window.location.reload();
-  };
-
-  const extraerYCalcularFechas = useCallback((formData) => {
-    const { transporteIda = [], transporteRegreso = [] } = formData;
-    const fechaInicio = transporteIda[0]?.fechaSalida || "";
-    const fechaFin = transporteRegreso[transporteRegreso.length - 1]?.fechaLlegada || "";
-    calcularDiferenciaEnDias(fechaInicio, fechaFin);
-  },[]);
-
-  const calcularDiferenciaEnDias = (fechaInicioString, fechaFinString) => {
-    const fechaInicio = new Date(fechaInicioString);
-    const fechaFin = new Date(fechaFinString);
-    if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-      setDiferenciaEnDias(0);
-      localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: 0 }));
-      return;
-    }
-    const diferenciaEnDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
-    setDiferenciaEnDias(diferenciaEnDias);
-    localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: diferenciaEnDias }));
-  };
-
+  // Función para descargar el formulario como JSON
   const handleDownloadJson = () => {
-    const data = methods.getValues();
+    const data = methods.getValues(); // Obtiene los datos actuales del formulario
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "Viajes Técnicos Dentro de Proyectos.json";
+    link.download = "Participación Nacional Fuera de Proyectos.json"; // Nombre del archivo
     link.click();
   };
-  
+
+  // Función para cargar un archivo JSON y rellenar el formulario
   const handleUploadJson = (event) => {
-    const file = event.target.files[0];
+    const file = event.target.files[0];  // Verificar si hay archivo
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader();  // Inicializa el FileReader para leer el archivo
       reader.onload = (e) => {
         try {
-          const json = JSON.parse(e.target.result);
+          const json = JSON.parse(e.target.result);  // Parsear el archivo JSON
+  
+          // Reset del formulario con los datos del JSON
           reset(json, {
             keepErrors: false,
             keepDirty: false,
@@ -148,119 +139,76 @@ function TechnicalTripWithinProjects() {
             keepTouched: false,
             keepIsSubmitted: false,
           });
-          localStorage.setItem(formStorageKey, JSON.stringify(json));
+  
+          // Actualizar localStorage con los datos cargados
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }
       };
-      reader.readAsText(file);
+      reader.readAsText(file);  // Leer el archivo como texto
     }
   };
+
+  const handleGenerateMemo1 = () => {
+   const formNationalOutsideProject = methods.getValues();
+    generateMemoNationalOutsideProject1(formNationalOutsideProject);
+    setShowDownloadSection(false);
+  };
+
+  const handleGenerateMemo2 = () => {
+    const formNationalOutsideProject = methods.getValues();
+    generateMemoNationalOutsideProject2(formNationalOutsideProject);
+    setShowDownloadSection(false);
+  };
+
+  const handleGeneratePdf = () => {
+    const formNationalOutsideProject= methods.getValues();
+    generateAnexoANationalOutsideProject(formNationalOutsideProject);
+    setShowDownloadSection(false);
+  };
+
+  const handleGeneratePdf2 = () => {
+    const formNationalOutsideProject = methods.getValues();
+    generateAnexo10NationalOutsideProject(formNationalOutsideProject);
+    setShowDownloadSection(false);
+  };
   
-  const manejarTablas = useCallback(() => {
-    const initialTransporte = {
-      tipoTransporte: "Aéreo",
-      nombreTransporte: "",
-      ruta: "",
-      fechaSalida: "",
-      horaSalida: "",
-      fechaLlegada: "",
-      horaLlegada: "",
-    };
-    if (fieldsIda.length === 0) appendIda(initialTransporte);
-    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
-  },[appendIda,appendRegreso,fieldsIda,fieldsRegreso]);
+
+  // Función para descargar todos los documentos
+
+  const handleDownloadAll = () => {
+    handleGenerateMemo1();
+    handleGenerateMemo2();
+    handleGeneratePdf();
+    handleGeneratePdf2();
+    setShowDownloadSection(false);
+  };
+
+  // Función para limpiar el formulario y resetear datos
+  const handleClearForm = () => {
+    sessionStorage.removeItem(formStorageKey);
+    setShowDownloadSection(false);
+    window.location.reload();
+  };
+  const validarFechaLimiteInscripcion = (index) => {
+    const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
   
-  // Efecto para sincronizar con localStorage
-  useEffect(() => {
-    reset(formTechnicalTripWithinProjects);
-    extraerYCalcularFechas(formTechnicalTripWithinProjects);
-
-    // Suscribirse a los cambios en el formulario en tiempo real.
-    const subscription = watch((data) => {
-      localStorage.setItem(formStorageKey, JSON.stringify(data));
-      extraerYCalcularFechas(data);
-    });
-    return () => subscription.unsubscribe();
-  }, [extraerYCalcularFechas, watch, reset]);
+    if (limiteFecha && fechaFinEvento && limiteFecha > fechaFinEvento) {
+      return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
+    }
   
-  //aqui el use efect donde van todo a el control de las validaciones entre los imputs
-  useEffect(() => {
-    manejarTablas();
-    const sincronizarFechasCronogramaActividades = () => {
-      const formData = JSON.parse(localStorage.getItem(formStorageKey));
-      
-      if (formData) {
-        const fechaInicio = formData.transporteIda?.[0]?.fechaSalida || "";
-        const fechaFin = formData.transporteRegreso?.[formData.transporteRegreso.length - 1]?.fechaLlegada || "";
-        setFechaInicioEvento(fechaInicio);
-        setFechaFinEvento(fechaFin);
-      }
-      const diferenciaDias = JSON.parse(localStorage.getItem(daysStorageKey));
-      if (diferenciaDias) setDiferenciaEnDias(diferenciaDias.diferencia);
-    };
-    
-    
-    
-    // Mostrar el campo 'nombreDirector' solo para ciertos roles en el proyecto
-    if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
-      setShowInputDirector(true);
-    } else {
-      setShowInputDirector(false);
-      setValue("nombreDirector", ""); // Limpiar campo 'nombreDirector' cuando no aplica
-    }
+    return true;
+  };
 
-    // Limpiar los campos de cuenta bancaria si no se requieren viáticos
-    if (!habilitarCampos) {
-      setValue("nombreBanco", "");
-      setValue("tipoCuenta", "");
-      setValue("numeroCuenta", "");
 
-      // Limpiar errores asociados a los campos de cuenta bancaria
-      clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
-    }
-
-    if (diferenciaEnDias > 15) {
-      setshowInputJustificacion(true);
-       
-    } else {
-      setshowInputJustificacion(false);
-      setValue("justificacionComision", "No Aplica"); // Limpia el campo si la diferencia es 15 días o menos
-      setValue("justificacionComision", "");
-    }
-
-    sincronizarFechasCronogramaActividades();
-    const intervalId = setInterval(sincronizarFechasCronogramaActividades, 1000); // Cada 1 segundo
-    return () => clearInterval(intervalId);
-  }, [
-    manejarTablas,
-    diferenciaEnDias,
-    rolEnProyecto,
-    habilitarCampos,
-    fieldsIda.length,
-    fieldsRegreso.length,
-    setShowInputDirector,
-    setValue,
-    clearErrors,
-  ]);
-
-  //Actividades fijas inmutables
-  useEffect(() => { 
-    if (fechaInicioEventoActividades && fechaFinEventoActividades) {
-      const dates = generateDateRange(fechaInicioEventoActividades, fechaFinEventoActividades);
-      const newFields = dates.map(date => ({
-        fecha: date,
-        descripcion: ""
-      }));
-      replace(newFields); // Reemplaza las actividades inmutables con las nuevas fechas
-    }
-  }, [replace, fechaInicioEventoActividades, fechaFinEventoActividades]);
 
   return (
     <FormProvider {...methods}>
       <Container>
+        {/* Título del formulario */}
         <h1 className="text-center my-4">
-          Formulario para participación en viajes técnicos dentro de proyectos
+          Formulario para participacion nacional en eventos fuera de proyectos
         </h1>
         <div className="form-container">
           <Label text="Descargar datos actuales en (.json)"/>
@@ -279,39 +227,31 @@ function TechnicalTripWithinProjects() {
             style={{ marginTop: '20px' }}  // Estilos opcionales
           />
         </div>
-        <Form onSubmit={methods.handleSubmit(onSubmitTechnicalTrip)}>
+        <Form
+          onSubmit={methods.handleSubmit(onSubmitNationalOutside)}
+        >
+        
           <div className="form-container">
-            {/* Datos del proyecto */}
-            <LabelTitle text="Detalles del proyecto" disabled={false} />
-
+            <LabelTitle text="Datos Personales" />
             <InputText
-              name="codigoProyecto"
-              label="Código del proyecto:"
-              placeholder={"Ejemplo: PIGR-24-01"}
-              rules={{
-                required: "El código del proyecto es requerido",
-                pattern: {
-                  value: /^[A-Za-z]+(-[A-Za-z0-9]+)+$/,
-                  message:
-                    "El código del proyecto debe estar conformado por una combinación de letras y números separados por guiones",
-                },
-              }}
+              name="nombres"
+              label="Nombres del participante"
+              placeholder="Juan Sebastian"
+              rules={{ required: "Los nombres son requeridos" }}
               disabled={false}
             />
 
             <InputText
-              name="tituloProyecto"
-              label="Título del proyecto:"
-              rules={{ required: "El título del proyecto es requerido" }}
+              name="apellidos"
+              label="Apellidos del participante"
+              placeholder="Perez Ramirez"
+              rules={{ required: "Los apellidos son requeridos" }}
               disabled={false}
             />
-
-            {/* Datos personales */}
-            <LabelTitle text="Datos personales" disabled={false} />
 
             <InputText
               name="cedula"
-              label="Cédula de ciudadanía:"
+              label="Cédula de ciudadania"
               rules={{
                 required: "La cédula es requerida",
                 pattern: {
@@ -319,113 +259,71 @@ function TechnicalTripWithinProjects() {
                   message: "La cédula debe contener solo 10 dígitos",
                 },
                 validate: (value) =>
-                  validarCedulaEcuatoriana(value) || "La cédula no es válida",
+                  validarCedulaEcuatoriana(value) || "la cédula no es válida",
               }}
               disabled={false}
             />
-
+            
             <InputText
-              name="nombres"
-              label="Nombres del participante:"
-              placeholder="Juan Sebastian"
-              rules={{ required: "Los nombres son requeridos" }}
+              name="puesto"
+              label="Puesto que ocupa"
+              infoText="Tal como consta en su acción de personal. Ejemplos: Profesor
+              Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
+              Profesor Principal a Tiempo Completo."
+              rules={{ required: "El puesta que ocupa es requerido" }}
               disabled={false}
             />
-
-            {/* Apellidos del participante */}
-            <InputText
-              name="apellidos"
-              label="Apellidos del participante:"
-              placeholder="Perez Ramirez"
-              rules={{ required: "Los apellidos son requeridos" }}
-              disabled={false}
-            />
-
-            {/* Cargo del participante */}
-            <InputText
-              name="cargo"
-              label="Cargo:"
-              placeholder="Profesor Agregado a Tiempo Completo..."
-              infoText="Tal como consta en su acción de personal. Ejemplos: Profesor Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo; Profesor Principal a Tiempo Completo."
-              rules={{ required: "El cargo es requerido" }}
-              disabled={false}
-            />
-
-            {/* Rol en el proyecto */}
-            <InputSelect
-              name="rolEnProyecto"
-              label="Rol en el proyecto:"
-              options={rolesOptions}
-              rules={{ required: "El rol en el proyecto es requerido" }}
-              disabled={false}
-            />
-
-            {/* Nombre del Director (si es necesario) */}
-            {showInputDirector && (
-              <InputText
-                name="nombreDirector"
-                label="Nombre del Director del proyecto:"
-                rules={{ required: "El nombre del Director es requerido" }}
-                disabled={false}
-              />
-            )}
-
-            {/* Departamento / Instituto */}
+                
             <InputSelect
               name="departamento"
-              label="Departamento / Instituto:"
-              options={departamentoOptions}
+              label="Departamento / Instituto"
               rules={{ required: "El departamento es requerido" }}
               disabled={false}
+              options={departamentoOptions}
             />
-
-            {/* Nombres y apellidos del Jefe inmediato */}
+            
             <InputText
               name="nombreJefeInmediato"
-              label="Nombres y apellidos del Jefe inmediato:"
+              label="Nombres y Apellidos del Jefe Inmediato"
               rules={{ required: "El nombre del jefe inmediato es requerido" }}
               disabled={false}
             />
-
-            {/* Cargo del Jefe inmediato */}
             <InputText
               name="cargoJefeInmediato"
-              label="Cargo del Jefe inmediato:"
-              placeholder="Jefe del DACI, subrogante"
-              infoText="Favor colocar el cargo del Jefe inmediato, puede usar las siglas para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante"
+              label="Cargo del Jefe inmediato"
+              infoText="Favor colocar el cargo del Jefe inmediato, puede usar las siglas
+              para referirse al departamento. Para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante"
               rules={{
                 required: "El cargo del jefe inmediato es requerido",
-                minLength: {
-                  value: 10,
-                  message: "El cargo que escribio es demasiado corto",
-                },
+            minLength: {
+              value: 10,
+              message: "El cargo que escribio es demasiado corto",
+            },
               }}
-              disabled={false}
             />
-            <LabelTitle text="Detalles del viaje técnico" disabled={false} />
+
+            <LabelTitle text="Detalles del evento" />
             <InputText
-              name="nombreIntitucionAcogida"
-              label="Nombre de la institución de acogida:"
-              rules={{
-                required: "El nombre de la institución de acogida es requerido",
-              }}
+              name="tituloEvento"
+              label="Título del Evento"
+              rules={{ required: "El título del evento es requerido" }}
               disabled={false}
             />
-            <Label text="Lugar del evento" />
+
             <InputText
               name="ciudadEvento"
-              label="Ciudad:"
+              label="Ciudad"
               rules={{ required: "La ciudad del evento es requerida" }}
               disabled={false}
             />
+
             <InputText
               name="paisEvento"
-              label="País:"
-              rules={{ required: "El país del evento es requerido" }}
-              disabled={false}
+              label="País"
+              defaultValue="Ecuador"
+              disabled
             />
             <Label text="Fechas del evento" />
-
             <InputDate
               name="fechaInicioEvento"
               label="Desde:"
@@ -445,52 +343,86 @@ function TechnicalTripWithinProjects() {
               name="fechaFinEvento"
               label="Hasta:"
               rules={{
-                required: "La fecha de fin del evento es requerida",
+                required: "La fecha de finalización es requerida",
                 validate: (value) =>
                   validarFechaFin(value, watch("fechaInicioEvento")),
+                }}
+              disabled={false}
+            />
+
+            <InputTextArea
+              name="RelevanciaAcademica"
+              label="Relevancia Académica del evento"
+              rules={{
+                required: "La relevancia académica del evento es requerida",
               }}
               disabled={false}
             />
-            <Label text="Solicita para viaje tecnico" />
-            <RadioGroup
-              name="pasajesAereos"
-              label="Pasajes aéreos:"
-              options={[
-                { value: "SI", label: "SI" },
-                { value: "NO", label: "NO" },
-              ]}
-              rules={{ required: "Indique si requiere pasajes aéreos" }}
+
+            <InputText
+              name="tituloPonencia"
+              label="Título de la Ponencia"
+              rules={{ required: "El título de la ponencia es requerido" }}
+              disabled={false}
+            />
+
+            <InputText
+              name="tipoPonencia"
+              label="Tipo de Ponencia"
+              placeholder="Plenaria, poster, otros"
+              rules={{ required: "El tipo de ponencia es requerido" }}
               disabled={false}
             />
 
             <RadioGroup
+              label="¿El Artículo será publicado?"
+              name="articuloPublicado"
+              options={articuloOptions}
+              rules={{ required: "Indique si el artículo será publicado" }}
+              disabled={false}
+            />
+
+            {showInputArticulo && (
+              <InputText
+                name="detalleArticuloSI"
+                label="Detalle"
+                infoText="Por favor, ingrese el nombre de la revista y base de datos indexadas, 
+                el número especial de revista o memorias del evento, 
+                la revista o memorias en las cuales se publicará el artículo."
+                placeholder="Especifique"
+                rules={{
+                  required: "El detalle del artículo es requerido",
+                }}
+                disabled={false}
+              />
+            )}
+
+            <RadioGroup
+              label="Pasajes aéreos"
+              name="pasajesAereos"
+              options={participarElementosOptions}
+              rules={{ required: "Indique si requiere pasajes aéreos" }}
+              disable={false}
+            />
+
+            <RadioGroup
+              label="Viáticos y subsistencias"
               name="viaticosSubsistencias"
-              label="Viáticos y subsistencias:"
-              options={[
-                { value: "SI", label: "SI" },
-                { value: "NO", label: "NO" },
-              ]}
+              options={participarElementosOptions}
               rules={{
                 required: "Indique si requiere viáticos y subsistencias",
               }}
               disabled={false}
             />
-            <Label text="Justificación del viaje técnico" />
-            <InputTextArea
-              name="objetivoProyecto"
-              label="Objetivo, resultado o producto del proyecto al que aporta el viaje técnico."
-              infoText="Escriba textualmente el objetivo, resultado o producto del proyecto.<br /> Esta información debe ser tomada de la propuesta aprobada."
-              rules={{ required: "Este campo es requerido" }}
+            <RadioGroup
+              label="Inscripción"
+              name="inscripcion"
+              options={participarElementosOptions}
+              rules={{ required: "Indique si requiere inscripción" }}
               disabled={false}
             />
-            <InputTextArea
-              name="relevanciaViajeTecnico"
-              label="Relevancia del viaje técnico para el desarrollo del proyecto:"
-              infoText="Describa la relevancia del viaje técnico y aporte al cumplimiento del objetivo, resultado o producto."
-              rules={{ required: "Este campo es requerido" }}
-              disabled={false}
-            />
-            <LabelTitle text="Transporte" disabled={false} />
+
+<LabelTitle text="Transporte" disabled={false} />
             <LabelText
               text="Por favor, considere que el itinerario es tentativo. Consulte el
                 itinerario del medio de transporte elegido en su página oficial
@@ -602,7 +534,7 @@ function TechnicalTripWithinProjects() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() ||
+                                    value >= today ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
@@ -649,7 +581,7 @@ function TechnicalTripWithinProjects() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today || "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
                                   
@@ -832,7 +764,7 @@ function TechnicalTripWithinProjects() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today || "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
                                     value >= fechaLlegadaAnterior ||
@@ -888,7 +820,7 @@ function TechnicalTripWithinProjects() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today()||
+                                    value >= today ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida ||
@@ -957,203 +889,323 @@ function TechnicalTripWithinProjects() {
                 variant="success"
               />
             </div>
-            
-            <div >
-            <LabelTitle text="CRONOGRAMA DE ACTIVIDADES" />
-                <LabelText
-                  text="Incluir desde la fecha de salida del país y días de traslado
-                  hasta el día de llegada al destino. <br />
-                  Hasta incluir la fecha de llegada al país."
-                />
+             
 
-                {/* Tabla de actividades inmutables */}
-                <LabelText text="Fechas del Evento" />
-                <table className="activity-schedule-table">
-                  <thead>
-                    <tr>
-                      <th>Nro.</th>
-                      <th>Fecha</th>
-                      <th>Descripción de la Actividad a Realizar</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {immutableFields.map((field, index) => (
-                      <tr key={field.id}>
-                        <td>
-                          <input
-                            type="number"
-                            value={index + 1} // Asigna el número basado en el índice (1, 2, 3, etc.)
-                            readOnly
-                            className="form-input"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="date"
-                            id={`fechaInmutable-${index}`}
-                            className="form-input"
-                            {...register(
-                              `actividadesInmutables[${index}].fecha`,
-                              {
-                                required: "Este campo es requerido",
-                              }
-                            )}
-                            readOnly // Campo de fecha de solo lectura
-                          />
-                          {errors.actividadesInmutables &&
-                            errors.actividadesInmutables[index]?.fecha && (
-                              <span className="error-text">
-                                {
-                                  errors.actividadesInmutables[index].fecha
-                                    .message
-                                }
-                              </span>
-                            )}
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            id={`descripcionInmutable-${index}`}
-                            className="form-input"
-                            {...register(
-                              `actividadesInmutables[${index}].descripcion`,
-                              {
-                                required: "Este campo es requerido",
-                              }
-                            )}
-                            placeholder="Describe la actividad a realizar"
-                          />
-                          {errors.actividadesInmutables &&
-                            errors.actividadesInmutables[index]
-                              ?.descripcion && (
-                              <span className="error-text">
-                                {
-                                  errors.actividadesInmutables[index]
-                                    .descripcion.message
-                                }
-                              </span>
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-              {/* Sección para justificar la comisión mayor a 15 días */}
-              {showInputJustificacion && (
-               <div>
-               <LabelTitle
-                 text=" Justificar la necesidad de la comisión de servicios mayor
-                 a 15 días"
-               />
-               <LabelText
-                 text="Completar esta sección solo en caso de que la participación al
-                 evento requiera más de quince días de comisión de servicio."
-               />
-               <InputTextArea
-                 name="justificacionComision"
-                 label="Justificación de la comisión de servicios mayor a 15 días"
-                 placeholder="Escriba aquí la justificación."
-                 rules={{
-                   required: "Este campo es requerido",
-                 }}
-                 disabled={diferenciaEnDias <= 15}
-                 defaultValue="No Aplica"
-               />
-             </div>
-              ) }
+            {seleccionInscripcion  && (
+             <div >
+             <h3>• Valor de la inscripción</h3>
+             <p>
+               Por favor, ingrese las fechas máximas de pago según la información
+               proporcionada en la página oficial del evento. Recuerde que solo se debe
+               seleccionar una de las tres opciones disponibles para la fecha de pago,
+               y asegúrese de que la fecha seleccionada no sea posterior a la fecha de
+               inicio del evento.
+             </p>
+       
+             {/* Tabla Dinámica */}
+             <div className="scroll-table-container">
+             <table className="payment-table">
+               <thead>
+               <tr>
+                   <th>Nro.</th>
+                   <th>Valor de inscripción</th>
+                   <th>Pago a realizarse</th>
+                   <th>Fecha</th>
+                   <th>Acciones</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 {fields.map((field, index) => (
+                   <tr key={field.id}>
+                     <td>
+                       <input
+                         type="number"
+                         value={index + 1} // Auto-incrementa el número basado en el índice
+                         readOnly
+                         className="form-input"
+                       />
+                     </td>
+                            
+                     <td>
+                       <input
+                         type="number"
+                         step="0.01"
+                         id={`valorInscripcion-${index}`}
+                         placeholder="100.00"
+                         className="form-input"
+                         {...register(`inscripciones[${index}].valorInscripcion`, {
+                           required: "Este campo es requerido",
+                         })}
+                       />
+                       {errors.inscripciones &&
+                         errors.inscripciones[index]?.valorInscripcion && (
+                           <span className="error-text">
+                             {errors.inscripciones[index].valorInscripcion.message}
+                           </span>
+                         )}
+                     </td>
+                     <td>
+                       <select
+                         id="pagoLimite"
+                         {...register(`inscripciones[${index}].pagoLimite`, {
+                           required: "El pago limite es requerido",
+                         })}
+                         className="form-select"
+                       >
+                         <option value="">Seleccione</option>
+                         <option value="Antes del ">Antes</option>
+                         <option value="Despues del ">Despues</option>
+                         <option value="Hasta el ">
+                           Fecha maxima de pago
+                         </option>
+                       </select>
+                       {errors.pagoLimite && (
+                         <span className="error-text">
+                           {errors.pagoLimite.message}
+                         </span>
+                       )}
+                     </td>
+       
+                     <td>
+                       <input
+                         type="date"
+                         id={`limiteFecha-${index}`}
+                         className="form-input"
+                         {...register(`inscripciones[${index}].limiteFecha`, {
+                           validate: () => validarFechaLimiteInscripcion(index),
+                         })}
+                       />
+                       {errors.inscripciones &&
+                         errors.inscripciones[index]?.limiteFecha && (
+                           <span className="error-text">
+                             {errors.inscripciones[index].limiteFecha.message}
+                           </span>
+                         )}
+                     </td>
+                     <td>
+                      <ActionButton
+                        onClick={() => remove(index)}
+                        label="Eliminar"
+                        variant="danger"
+                      />
+                     </td>
+                   </tr>
+                 ))}
+               </tbody>
+             </table>
+             <ActionButton
+                onClick={() =>
+                  append({
+                    valorInscripcion: "",
+                    pagoLimite: "",
+                    limiteFecha: "",
+                  })
+                }
+                label="Agregar"
+                variant="success"
+              />
             </div>
-            <LabelTitle text="CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS" />
-            <LabelText text="Obligatorio si marcó viáticos" />
-
-            {/* Nombre del banco */}
-            <InputText
-              name="nombreBanco"
-              label="Nombre del banco:"
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-
-            {/* Tipo de cuenta */}
-            <InputSelect
-              name="tipoCuenta"
-              label="Tipo de cuenta:"
-              options={[
-                { value: "Ahorros", label: "Ahorros" },
-                { value: "Corriente", label: "Corriente" },
-              ]}
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-
-            {/* Número de cuenta */}
-            <InputText
-              name="numeroCuenta"
-              label="No. De cuenta:"
-              rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
-              }}
-              disabled={!habilitarCampos}
-            />
-            <LabelTitle text="SERVIDORES QUE INTEGRAN LOS SERVICIOS INSTITUCIONALES (opcional)" />
-            <LabelText text="Completar esta sección solo en caso de que usted asista al mismo evento junto con otros funcionarios." />
-            <InputTextArea
-              name="servidores"
-              label="Nombre de los funcionarios:"
-              placeholder="Escriba aquí los nombres de los funcionarios, separados por comas"
-              rules={{ required: false }}
+            <LabelText text=" Considere que si el pago de inscripción es una moneda diferente a la
+               moneda legal del país se requiere un banco intermediario , por lo que se
+               solicita se comunique con la organización del evento para obtener esta
+               información." />
+            <LabelText text="En el caso que no exista banco intermediario se podrá solicitar un pago
+               por reembolso siempre y cuando se tenga la contestación oficial de la
+               organización de no tener un banco intermediario." />
+       
+             {/* Método de pago */}
+             <div className="form-group">
+               <h3>Método de pago:</h3>
+       
+               <div>
+                 <input
+                   type="radio"
+                   id="transferencia"
+                   value="Transferencia"
+                   {...register("metodoPago", {
+                     required: "Seleccione un método de pago",
+                   })}
+                 />
+                 <label htmlFor="transferencia">
+                   1. Transferencia ("El pago es realizado por la EOD-UGIPS del VIIV")
+                 </label>
+               </div>
+               {metodoPago === "Transferencia" && (
+                 <div className="sub-group">
+                    <LabelText text="En la solicitud se debe adjuntar los siguientes documentos:" />
+                    <LabelText text="Formulario de pagos al exterior (Anexo 6)" />
+                    <LabelText text="Documento donde se puede verificar el costo y fechas de la inscripción al evento" />
+                 </div>
+               )}
+               <div>
+                 <input
+                   type="radio"
+                   id="otra"
+                   value="Otra"
+                   {...register("metodoPago", {
+                     required: "Seleccione un método de pago",
+                   })}
+                 />
+                 <label htmlFor="otra">
+                   2. Otra (tarjeta de crédito, efectivo, etc.)
+                 </label>
+               </div>
+               {metodoPago === "Otra" && (
+                 <div className="sub-group">
+                   
+                  <Label text="Incluir la siguiente información y documentos:" />
+                  <LabelText text="Solicitud de REEMBOLSO. Incluir en el texto del memorando la justificación de por qué se solicita este método de pago." />
+                  <LabelText text="Documento donde se puede verificar el costo y fechas de la inscripción al evento" />
+                  <LabelText text="Documento en el cual se indique que el pago solo se puede realizar con tarjeta de crédito o efectivo o que no cuenta con banco intermediario." />
+                 </div>
+               )}
+               {errors.metodoPago && (
+                 <span className="error-text">{errors.metodoPago.message}</span>
+               )}
+             </div>
+           </div>
+            )}
+              
+              <LabelTitle text="Declaración de gastos, conforme reglamento de viáticos al exterior" />
+              <LabelText text=" Selecciona según corresponda. Responda SI aunque la organización del
+              evento cubra el rubro parcialmente. "/>
+              <LabelText text= "La organización del evento cubre los siguientes rubros:"/>
+              
+            <RadioGroup
+              label="a) Hospedaje"
+              name="hospedaje"
+              options={participarElementosOptions}
+              rules={{ required: "Este campo es requerido" }}
               disabled={false}
             />
-            <LabelTitle text="DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS AL EXTERIOR" />
-            <Label text="REQUISITOS:" />
-            <LabelText text="• Formulario de solicitud de autorización para cumplimiento de servicios institucionales" />
-            <LabelText text="• Formulario para salida al exterior dentro de proyectos – viajes técnicos" />
-            <LabelText text="• Copia de la carta de invitación" />
-            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avalada por el represente del curso y el Jefe o Director de la Unidad Académica. O en el caso de que esta actividad se realice fuera del periodo de clases aval del Jefe o Director de la Unidad Académica indicando este particular." />
-            <LabelText text="• Quipux por parte del Director del Proyecto al Vicerrectorado de Investigación, Innovación y Vinculación, detallando el requerimiento de la salida al exterior." />
 
-            {/* Fin del fomrulario */}
+            <RadioGroup
+              label="b) Movilización interna"
+              name="movilizacion"
+              options={participarElementosOptions}
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              label="c) Alimentación"
+              name="alimentacion"
+              options={participarElementosOptions}
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              label="Selección de declaración"
+              name="seleccionDeclaracion"
+              options={declaracionOptions}
+              disabled
+            />
+            {watch("siCubre") && (
+            <>
+            <LabelText text="En mi calidad de profesor-investigador de la EPN, declaro que la
+            Organización del evento SI cubre gastos, por lo que solicito se
+            gestione la asignación viáticos conforme se establece en el artículo
+            13 del Reglamento de Viáticos al Exterior."/>
+
+            <LabelText text= "**A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, o de los establecidos en el artículo 9 del Reglamento de Viáticos al Exterior, que no hayan sido cubiertos por estas instituciones u organismos, para el reconocimiento de estos rubros y su correspondiente liquidación."/>
+            </>
+              )}
+
+            {watch("noCubre") && (
+            <LabelText text= "En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento NO cubre ningún gasto, por lo que solicito se gestione la asignación de viáticos conforme se establece en el artículo 7 del Reglamento de Viáticos al Exterior."/>
+          )}
+
+            <LabelTitle text="Cuenta bancaria del servidor para recibir los viáticos"/>
+            <LabelText text="Obligatorio si marcó viáticos."/>
+
+            <InputText
+            name="nombreBanco"
+            label="Nombre del banco"
+            rules={{required: habilitarCampos? "Este campo es requerido": false}}
+            disabled={!habilitarCampos}
+            />
+
+            <InputSelect
+              name="tipoCuenta"
+              label="Tipo de Cuenta"
+              rules={{ required: habilitarCampos? "Este campo es requerido":false }}
+              disabled={!habilitarCampos}
+              options={tipoCuentaOptions}
+            />
+
+            <InputText
+            name="numeroCuenta"
+            label="No. de Cuenta"
+            rules={{required: habilitarCampos? "Este campo es requerido": false}}
+            disabled={!habilitarCampos}
+            />
+
+            <LabelTitle text= "Serviores que integran los servicios institucionales (opcional)"/>
+
+            <InputTextArea
+            name="servidores"
+            infoText="Completar esta sección solo en caso de que usted asista al mismo evento junto con otros funcionarios."
+            label="Nombre de los funcionarios"
+            placeholder="Escriba aquí los nombres de los funcionarios, separados por comas"
+            disabled={false}
+            />
+
+            <LabelTitle text= "DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS DE SALIDA NACIONAL FUERA DE PROYECTOS"/>
+            <Label text= "REQUISITOS:"/>
+            <LabelText text="• Formulario de solicitud de autorización para cumplimiento de servicios institucionales."/>
+            <LabelText text="• Formulario para salida nacional  fuera de proyectos."/>
+            <LabelText text="• Copia de la carta o correo de aceptación de la ponencia y/o poster a ser presentada por el profesor solicitante."/>
+            <LabelText text="• Copia de artículo, ponencia o poster aceptado para verificación de autores y afiliación de la EPN."/>
+            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avaladas por el Jefe o Director de la Unidad Académica del profesor que realizará la salida nacional y del representante estudiantil del curso. O en el caso de que esta actividad se realice fuera del periodo de clases  el aval del Jefe o Director de la Unidad Académica indicando este particular."/>
+            <LabelText text="• Documento donde se puede verificar el costo, fechas de la inscripción al evento y fechas de participación en el evento (NO factura/ NO invoice)."/>
+            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda o Información de la cuenta bancaria."/>
+            <LabelText text="• Quipux del profesor al Jefe o Director de la Unidad Académica solicitando el permiso y aval correspondiente para participar en el evento, deberá detallar todo el requerimiento, viáticos, pasajes, inscripción, de ser el caso."/>
+            <LabelText text="• Quipux por parte del Jefe o Director de la Unidad Académica, al Vicerrectorado de Investigación, Innovación y Vinculación, detallando el requerimiento de la salida nacional y auspicio solicitado."/>
+
+
+
           </div>
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button id="btn_enviar" type="submit" variant="primary">
+            <Button id="btn_enviar" type="submit" variant="primary">
                 Enviar
               </Button>
             </Col>
           </Row>
 
-          {/* Sección de descargas que aparece después de enviar el formulario */}
+          {/* Sección de descarga de documentos, visible tras enviar el formulario */}
           {showDownloadSection && (
             <div className="mt-4">
               <Row className="justify-content-center">
                 <Col md={4} className="text-center">
                   <DownloadButton
-                    onClick={handleGenerateDocx}
+                    onClick={handleGenerateMemo1}
+                    label="Descargar Memorando del Jefe del Departamento"
                     icon="IconWord.png"
-                    altText="Word Icon"
-                    label="Descargar Memorando"
                   />
                 </Col>
                 <Col md={4} className="text-center">
                   <DownloadButton
+                    onClick={handleGenerateMemo2}
+                    label="Descargar Memorando del Profesor al Jefe"
+                    icon="IconWord.png"
+                  />
+                </Col>
+                <Col md={4} className="text-center">
+                <DownloadButton
                     onClick={handleGeneratePdf}
-                    icon="IconPdf.png"
-                    altText="PDF Icon"
                     label="Descargar Anexo A"
+                    icon="IconPdf.png"
                   />
                 </Col>
                 <Col md={4} className="text-center">
                   <DownloadButton
                     onClick={handleGeneratePdf2}
+                    label="Descargar Anexo 10"
                     icon="IconPdf.png"
-                    altText="PDF Icon"
-                    label="Descargar Anexo 2B"
                   />
                 </Col>
               </Row>
@@ -1162,9 +1214,9 @@ function TechnicalTripWithinProjects() {
               <Row className="mt-3">
                 <Col className="text-center">
                   <ActionButton
-                    onClick={handleDownloadAll}
-                    label="Descargar Todo"
-                    variant="success"
+                  onClick={handleDownloadAll}
+                  label="Descargar Todo"
+                  variant="success"
                   />
                 </Col>
               </Row>
@@ -1172,13 +1224,12 @@ function TechnicalTripWithinProjects() {
           )}
 
           {/* Botón para limpiar el formulario */}
-
           <Row className="mt-4">
             <Col className="text-center">
-              <ActionButton
-                onClick={handleClearForm}
-                label="Limpiar Formulario"
-                variant="danger"
+             <ActionButton
+              onClick={handleClearForm}
+              label="Limpiar Formulario"
+              variant="danger"
               />
             </Col>
           </Row>
@@ -1187,11 +1238,8 @@ function TechnicalTripWithinProjects() {
     </FormProvider>
   );
 }
-const rolesOptions = [
-  { value: "Director", label: "Director" },
-  { value: "Codirector", label: "Codirector" },
-  { value: "Colaborador", label: "Colaborador" },
-];
+export default ExternalNationalEventsForm;
+
 
 const departamentoOptions = [
   {
@@ -1285,4 +1333,47 @@ const departamentoOptions = [
     label: "INSTITUTO GEOFISICO",
   },
 ];
-export default TechnicalTripWithinProjects;
+
+const articuloOptions = [
+  {
+    value: "SI",
+    label: "SI",
+  },
+  {
+    value: "NO",
+    label: "NO",
+  },
+];
+
+const participarElementosOptions = [
+  {
+    value: "SI",
+    label: "SI",
+  },
+  {
+    value: "NO",
+    label: "NO",
+  },
+];
+
+const declaracionOptions = [
+  {
+    value: "noCubre",
+    label: "Declaración si la organización NO cubre ningún rubro",
+  },
+  {
+    value: "siCubre",
+    label: "Declaración si la organización SI cubre algún rubro",
+  },
+];
+
+const tipoCuentaOptions =[
+  {
+    value:"Ahorros", 
+    label:"Ahorros",
+  },
+  {
+    value: "Corriente",
+    label: "Corriente",
+  },
+];

@@ -1,177 +1,135 @@
 import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
+import JSZip from "jszip";
+// Importación de props
+import Label from "../components/Labels/Label.js";
+import LabelTitle from "../components/Labels/LabelTitle.js";
+import LabelText from "../components/Labels/LabelText.js";
+import InputSelect from "../components/Inputs/InputSelect.js";
+import InputText from "../components/Inputs/InputText.js";
+import InputTextArea from "../components/Inputs/InputTextArea.js";
+import InputDate from "../components/Inputs/InputDate.js";
+import RadioGroup from "../components/Inputs/RadioGroup.js";
+import ActionButton from "../components/Buttons/ActionButton.js";
+import DownloadButton from "../components/Buttons/DownloadButton.js";
 
+// Importación de las funciones
+import { generateDateRange } from "../utils/dataRange.js";
+import today from "../utils/date.js";
+import { generateMemorandoA, generateAnexoA, generateAnexo2A } from "../utils/generatorDocuments/event/internationalEventDocuments.js";
+import {validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso} from "../utils/validaciones.js";
+import { saveAs } from "file-saver";
 
-// Importación de los componentes del formulario
-import Label from "./Labels/Label.js";
-import LabelTitle from "./Labels/LabelTitle.js";
-import LabelText from "./Labels/LabelText.js";
-import InputSelect from "./Inputs/InputSelect";
-import InputText from "./Inputs/InputText";
-import InputTextArea from "./Inputs/InputTextArea";
-import InputDate from "./Inputs/InputDate";
-import RadioGroup from "./Inputs/RadioGroup";
-import ActionButton from "./Buttons/ActionButton";
-import DownloadButton from "./Buttons/DownloadButton";
+//Constaltes globales para el formulario
+const formStorageKey = "formEventParticipationWithinProjects"; // Clave para almacenar el formulario en sessionStorage
 
+function ProjectInternationalEventsForm() {
+  const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde sessionStorage
+  // Configuración del formulario con react-hook-form y valores predeterminados desde sessionStorage
+  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formData });
+  const { register, control, watch, setValue, reset, clearErrors, formState: { errors }} = methods;
 
-// Importación de las funciones para generar documentos
-import today from "../utils/date";
-import {
-  generateMemoOutsideProject1,
-  generateMemoOutsideProject2,
-  generateAnexoAOutsideProject,
-  generateAnexo8OutsideProject,
-} from "../utils/documentGenerator.js";
-import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
-
-const formStorageKey = "formEventOutsideProject"; // Clave para almacenar el formulario en localStorage
-const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
-
-
-function EventParticipationOutsideProjectsForm() {
- 
-  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
-  const methods = useForm({
-    mode: "onChange",
-    reValidateMode: "onChange",
-    defaultValues: formData,
-  });
-
-  const { register, control, watch, reset, setValue, clearErrors, formState:{errors} } = methods;
-
+  //FielsdArray para tablas de transporte y actividades
   const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
+  const { fields: immutableFields, replace: replaceInmutableFields } = useFieldArray({ control, name: "actividadesInmutables" });
   const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
-
-  // Observadores para los cambios en los campos del formulario
-  const seleccionArticulo = watch("articuloPublicado");
-  const fechaInicioEvento = watch("fechaInicioEvento");
+  
+  const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "", };
+  const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
+  
+  // Observadores de campos
+  const tipoEventoSeleccionado = watch("tipoEvento");
+  const participacionEvento = watch("participacionEvento");
+  const seleccionDeclaracion = watch("seleccionDeclaracion");
+  const viaticos = watch("viaticosSubsistencias");
   const hospedaje = watch("hospedaje");
   const movilizacion = watch("movilizacion");
   const alimentacion = watch("alimentacion");
   const fechaFinEvento = watch("fechaFinEvento");
-  const inscripcion=watch("inscripcion");
-  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
-  const habilitarCampos = seleccionViaticosSubsistencias === "SI";
+  const fechaInicioEvento = watch("fechaInicioEvento");
   const metodoPago = watch("metodoPago");
-   
+
+  // Estados derivados de las observaciones
+  const isAsistencia = participacionEvento === "Asistencia";
+
+  // Estados locales
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
-  const [showInputArticulo, setShowInputArticulo] = useState(false);
 
-  // Efecto para manejar la visibilidad de secciones y limpieza de campos
-  useEffect(() => {
-    // Manejar la lógica para mostrar/ocultar el campo de detalle del artículo
-    
-    setShowInputArticulo(seleccionArticulo === "SI");
-    if (seleccionArticulo !== "SI") {
-      setValue("detalleArticuloSI", "");
-    }
-     
+  //manejadores de estado para actividades
+  const [fechaInicioActividades, setFechaInicioActividades] = useState("");
+  const [fechaFinActividades, setFechaFinActividades] = useState("");
+  const [prevFechaInicio, setPrevFechaInicio] = useState("");
+  const [prevFechaFin, setPrevFechaFin] = useState("");
+  const [cantidadDias, setCantidadDias] = useState(0);
 
-    // Lógica para la selección de la declaración según los rubros
-    
-    if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
-      setValue("seleccionDeclaracion", "siCubre");
-    } else if (hospedaje === "NO" && movilizacion === "NO" && alimentacion === "NO") {
-      setValue("seleccionDeclaracion", "noCubre");
-    }
-    
-
-    // Manejar la habilitación o limpieza de campos bancarios según la selección de viáticos
-    
-    if (!habilitarCampos) {
-      setValue("nombreBanco", "");
-      setValue("tipoCuenta", "");
-      setValue("numeroCuenta", "");
-      clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
-    }
-
-    if(inscripcion === "SI"){
-      setSeleccionInscripcion(true);
-    }else{
-      setSeleccionInscripcion(false);
-      setValue("inscripciones")
-    }
-
- if (fields.length === 0) {
-      append({
-        valorInscripcion: "",
-        pagoLimite: "",
-        limiteFecha: "",
-      });
-    }
-  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, fields.length, setValue, clearErrors]);
-
-  // Función que se ejecuta al enviar el formulario
-  const onSubmitEventParticipationOutside = (data) => {
-    console.log(data);
+  
+  // Funciones auxiliares y handler de eventos
+  const onSubmit = (data) => {
     setShowDownloadSection(true);
     console.log(methods.getValues());
   };
 
-  // Funciones para manejar la generación de documentos
-  const handleGenerateMemo1 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateMemoOutsideProject1(formEventOutsideProject);
-    setShowDownloadSection(false);
+  const datos = () => {
+    const data = methods.getValues();
+    console.log(data);
   };
 
-  const handleGenerateMemo2 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateMemoOutsideProject2(formEventOutsideProject);
-    setShowDownloadSection(false);
+  const handleGenerateDocx = () => {
+    const formData = methods.getValues();
+    generateMemorandoA(formData);
+      setShowDownloadSection(false);
   };
 
   const handleGeneratePdf = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateAnexoAOutsideProject(formEventOutsideProject);
+    const formData = methods.getValues();
+    generateAnexoA(formData);
     setShowDownloadSection(false);
   };
 
   const handleGeneratePdf2 = () => {
-    const formEventOutsideProject = methods.getValues();
-    generateAnexo8OutsideProject(formEventOutsideProject);
+    const formData = methods.getValues();
+    generateAnexo2A(formData);
     setShowDownloadSection(false);
   };
 
-  // Función para descargar todos los documentos
-
-  const handleDownloadAll = () => {
-    handleGenerateMemo1();
-    handleGenerateMemo2();
-    handleGeneratePdf();
-    handleGeneratePdf2();
+  const handleDownloadAll = async () => {
+    const formData = methods.getValues();
+    const docxBlob = await generateMemorandoA(formData,true);
+    const pdfBlob = await generateAnexoA(formData,true);
+    const pdfBlob2 = await generateAnexo2A(formData,true);
+    const zip = new JSZip();
+    zip.file(`Memorando solicitud para participar en evento académico ${formData.codigoProyecto}.docx`, docxBlob);
+    zip.file(`Anexo A - Solicitud de Viaticos EPN ${formData.codigoProyecto}.pdf`, pdfBlob);
+    zip.file(`Anexo 2A - Formulario para participacion en eventos dentro de proyectos ${formData.codigoProyecto}.pdf`, pdfBlob2);
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "Documentos participacion en eventos dentro de proyectos.zip");
     setShowDownloadSection(false);
   };
-
-  // Función para limpiar el formulario y resetear datos
+  
   const handleClearForm = () => {
     sessionStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
-
   
   const handleDownloadJson = () => {
     const data = methods.getValues(); // Obtiene los datos actuales del formulario
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "Participación en Eventos Fuera de Proyecto.json"; // Nombre del archivo
+    link.download = "Participación en Eventos Dentro Proyectos.json"; // Nombre del archivo
     link.click();
   };
 
-  
   const handleUploadJson = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader(); // Inicializa el FileReader para leer el archivo
+      const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const json = JSON.parse(e.target.result); // Parsear el archivo JSON
+          const json = JSON.parse(e.target.result);
           reset(json, {
             keepErrors: false,
             keepDirty: false,
@@ -179,7 +137,9 @@ function EventParticipationOutsideProjectsForm() {
             keepTouched: false,
             keepIsSubmitted: false,
           });
-          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+          replaceInmutableFields(json.actividadesInmutables);
+          sessionStorage.removeItem(formStorageKey); // Eliminar el ítem existente
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json)); // Cargar el nuevo JSON
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }
@@ -188,139 +148,283 @@ function EventParticipationOutsideProjectsForm() {
     }
   };
 
-    const validarFechaLimiteInscripcion = (index) => {
+  const validarFechaLimiteInscripcion = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
-  
     if (limiteFecha && fechaFinEvento && limiteFecha > fechaFinEvento) {
       return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
     }
-  
     return true;
   };
-  
+
+
+  // UseEffect principal y separado para la suscrioción de cambios en el formulario
+  useEffect(() => {
+    reset(formData);
+    const subscription = watch((data) => {
+      sessionStorage.setItem(formStorageKey, JSON.stringify(data));
+      // Obtener las fechas de inicio y fin
+      const fechaInicio = data.transporteIda?.[0]?.fechaSalida || "";
+      const fechaFin = data.transporteRegreso?.length
+        ? data.transporteRegreso[data.transporteRegreso.length - 1]
+            ?.fechaLlegada
+        : "";
+      console.log("fechas obtenidas con methods tiempo real",fechaInicio, fechaFin);
+      console.log("fechas previas",prevFechaInicio,prevFechaFin);
+      console.log("fechas almacenadas",fechaInicioActividades,fechaFinActividades);
+        
+      // Actualizar solo si las fechas han cambiado y no están vacías
+      if (fechaInicio !== prevFechaInicio && fechaInicio !== "" && fechaInicio !== fechaInicioActividades ) {
+        console.log("Fecha de inicio de actividades actualizada:", fechaInicio);
+        setFechaInicioActividades(fechaInicio);
+        setPrevFechaInicio(fechaInicio);
+      }
+      if (fechaFin !== prevFechaFin && fechaFin !== "" && fechaFin !== fechaFinActividades) {
+        console.log("Fecha de fin de actividades actualizada:", fechaFin);
+        setFechaFinActividades(fechaFin);
+        setPrevFechaFin(fechaFin);
+      }
+    });
+    
+
+    return () => subscription.unsubscribe();
+  }, [watch, reset, fechaFinActividades,fechaInicioActividades]);
+
+  // Segundo useEffect
+  useEffect(() => { 
+    if (fechaInicioActividades && fechaFinActividades && fechaInicioActividades !== "" && fechaFinActividades !== "") {
+      console.log(
+        "Esto se ejecuta solo si hay un cambio en las ,fechas de inicio o fin de actividades"
+      );
+      const currentFields = methods.getValues("actividadesInmutables") || [];
+      const dates = generateDateRange(
+        fechaInicioActividades,
+        fechaFinActividades
+      );
+      const newFields = dates.map((date) => {
+        const existingField = currentFields.find(
+          (field) => field.fecha === date
+        );
+        return {
+          fecha: date,
+          descripcion: existingField ? existingField.descripcion : "",
+        };
+      });
+      replaceInmutableFields(newFields);
+      setCantidadDias(newFields.length);
+    }
+  }, [fechaInicioActividades, fechaFinActividades]);
+
+  // useEffect para controlar los campos del formulario
+  useEffect(() => {
+    if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
+      setValue("seleccionDeclaracion", "siCubre");
+    } else {
+      setValue("seleccionDeclaracion", "noCubre");
+    }
+    if (fields.length === 0) append(initialInscripcion);
+    if (fieldsIda.length === 0) appendIda(initialTransporte);
+    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
+
+    if (participacionEvento === "Asistencia") clearErrors(["tituloPonencia"]);
+    if (tipoEventoSeleccionado!== "Otro evento académico")setValue("otroEventoEspecificar", "");
+    if (viaticos==="NO"){
+      setValue("nombreBanco", "");
+      setValue("tipoCuenta", "");
+      setValue("numeroCuenta", "");
+      clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
+    }
+  }, [
+    viaticos,
+    fieldsIda,
+    fieldsRegreso,
+    fields, 
+    append,
+    participacionEvento,
+    tipoEventoSeleccionado,
+    isAsistencia,
+    hospedaje,
+    movilizacion,
+    alimentacion,
+    setValue,
+    clearErrors,
+  ]);
 
   return (
     <FormProvider {...methods}>
       <Container>
-        {/* Título del formulario */}
         <h1 className="text-center my-4">
-          Formulario para participacion en eventos fuera de proyectos
+          Formulario para participación en eventos dentro de proyectos
         </h1>
         <div className="form-container">
-          <Label text="Descargar datos actuales en (.json)"/>
+          <Label text="Descargar datos actuales en (.json)" />
           {/* Botón para descargar el formulario como .json */}
           <ActionButton
             onClick={handleDownloadJson}
             label="Descargar datos como JSON"
             variant="success"
           />
-          <Label text="Cargar datos desde archivo (.json)"/>
+          <Label text="Cargar datos desde archivo (.json)" />
           {/* Input nativo para cargar un archivo JSON */}
           <input
             type="file"
             accept=".json"
-            onChange={handleUploadJson}  // Conectar con la función
-            style={{ marginTop: '20px' }}  // Estilos opcionales
+            onChange={handleUploadJson} // Conectar con la función
+            className="input-file"
           />
         </div>
-        <Form
-          onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}
-        >
-        
+        {/* Formulario con diferentes secciones */}
+        <Form onSubmit={methods.handleSubmit(onSubmit)}>
           <div className="form-container">
-            <LabelTitle text="Datos Personales" />
+            <LabelTitle text="Detalles del proyecto" disabled={false} />
+
+            <InputText
+              name="codigoProyecto"
+              label="Código del proyecto:"
+              placeholder={"Ejemplo: PIGR-24-01"}
+              rules={{
+                required: "El código del proyecto es requerido",
+                pattern: {
+                  value: /^[A-Za-z]+(-[A-Za-z0-9]+)+$/,
+                  message:
+                    "El código del proyecto debe estar conformado por una combinación de letras y números separados por guiones",
+                },
+              }}
+              disabled={false}
+            />
+
+            <InputText
+              name="tituloProyecto"
+              label="Título del proyecto:"
+              rules={{ required: "El título del proyecto es requerido" }}
+              disabled={false}
+            />
+            <LabelTitle text="Datos Personales" disabled={false} />
+            <InputText
+              name="cedula"
+              label="Cédula de ciudadanía"
+              rules={{
+                required: "La cedula es requerida",
+                pattern: {
+                  value: /^\d{10}$/,
+                  message: "La cedula debe contener solo 10 digitos",
+                },
+                validate: (value) =>
+                  validarCedulaEcuatoriana(value) || "La cedula es invalida",
+              }}
+              disabled={false}
+            />
             <InputText
               name="nombres"
-              label="Nombres del participante"
+              label="Nombres del participante:"
               placeholder="Juan Sebastian"
               rules={{ required: "Los nombres son requeridos" }}
               disabled={false}
             />
 
+            {/* Apellidos del participante */}
             <InputText
               name="apellidos"
-              label="Apellidos del participante"
+              label="Apellidos del participante:"
               placeholder="Perez Ramirez"
               rules={{ required: "Los apellidos son requeridos" }}
               disabled={false}
             />
 
+            {/* Cargo del participante */}
             <InputText
-              name="cedula"
-              label="Cédula de ciudadania"
-              rules={{
-                required: "La cédula es requerida",
-                pattern: {
-                  value: /^\d{10}$/,
-                  message: "La cédula debe contener solo 10 dígitos",
-                },
-                validate: (value) =>
-                  validarCedulaEcuatoriana(value) || "la cédula no es válida",
-              }}
+              name="cargo"
+              label="Cargo:"
+              placeholder="Profesor Agregado a Tiempo Completo..."
+              infoText="Tal como consta en su acción de personal. Ejemplos: Profesor Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo; Profesor Principal a Tiempo Completo."
+              rules={{ required: "El cargo es requerido" }}
               disabled={false}
             />
 
-            <InputText
-              name="puesto"
-              label="Puesto que ocupa"
-              infoText="Tal como consta en su acción de personal. Ejemplos: Profesor
-          Agregado a Tiempo Completo; Profesor Auxiliar a Tiempo Completo;
-          Profesor Principal a Tiempo Completo."
-              rules={{ required: "El puesta que ocupa es requerido" }}
+            {/* Rol en el proyecto */}
+            <InputSelect
+              name="rolEnProyecto"
+              label="Rol en el proyecto:"
+              options={rolesOptions}
+              rules={{ required: "El rol en el proyecto es requerido" }}
               disabled={false}
             />
 
+            {/* Nombre del Director (si es necesario) */}
+            {watch("rolEnProyecto")!== "Director" && (
+              <InputText
+                name="nombreDirector"
+                label="Nombre del Director del proyecto:"
+                rules={{ required: "El nombre del Director es requerido" }}
+                disabled={watch("rolEnProyecto") === "Director"}
+              />
+            )}
+
+            {/* Departamento / Instituto */}
             <InputSelect
               name="departamento"
-              label="Departamento / Instituto"
+              label="Departamento / Instituto:"
+              options={departamentoOptions}
               rules={{ required: "El departamento es requerido" }}
               disabled={false}
-              options={departamentoOptions}
             />
 
+            {/* Nombres y apellidos del Jefe inmediato */}
             <InputText
               name="nombreJefeInmediato"
-              label="Nombres y Apellidos del Jefe Inmediato"
+              label="Nombres y apellidos del Jefe inmediato:"
               rules={{ required: "El nombre del jefe inmediato es requerido" }}
               disabled={false}
             />
 
+            {/* Cargo del Jefe inmediato */}
             <InputText
               name="cargoJefeInmediato"
-              label="Cargo del Jefe inmediato"
-              infoText="Favor colocar el cargo del Jefe inmediato, puede usar las siglas
-              para referirse al departamento. Para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante"
+              label="Cargo del Jefe inmediato:"
+              placeholder="Jefe del DACI, subrogante"
+              infoText="Favor colocar el cargo del Jefe inmediato, puede usar las siglas para referirse al departamento. Ejemplo: Jefe del DACI / Jefe del DACI, subrogante"
               rules={{
                 required: "El cargo del jefe inmediato es requerido",
-            minLength: {
-              value: 10,
-              message: "El cargo que escribio es demasiado corto",
-            },
+                minLength: {
+                  value: 10,
+                  message: "El cargo que escribio es demasiado corto",
+                },
               }}
-            />
-
-            <LabelTitle text="Detalles del evento" />
-            <InputText
-              name="tituloEvento"
-              label="Título del Evento"
-              rules={{ required: "El título del evento es requerido" }}
               disabled={false}
             />
 
+            <LabelTitle text="Detalles del evento" disabled={false} />
+
+            <InputText
+              name="tituloEvento"
+              label="Título del evento:"
+              rules={{
+                required: "El título del evento es requerido",
+              }}
+              disabled={false}
+            />
+
+            <LabelText text="Lugar del evento:" />
+
             <InputText
               name="ciudadEvento"
-              label="Ciudad"
-              rules={{ required: "La ciudad del evento es requerida" }}
+              label="Ciudad:"
+              rules={{
+                required: "La ciudad del evento es requerida",
+              }}
               disabled={false}
             />
 
             <InputText
               name="paisEvento"
-              label="País"
-              rules={{ required: "El país del evento es requerido" }}
+              label="País:"
+              rules={{
+                required: "El país del evento es requerido",
+              }}
               disabled={false}
             />
-            <Label text="Fechas del evento" />
+
+            <LabelText text="Fechas del evento:" />
+
             <InputDate
               name="fechaInicioEvento"
               label="Desde:"
@@ -340,86 +444,118 @@ function EventParticipationOutsideProjectsForm() {
               name="fechaFinEvento"
               label="Hasta:"
               rules={{
-                required: "La fecha de finalización es requerida",
+                required: "La fecha de fin del evento es requerida",
                 validate: (value) =>
                   validarFechaFin(value, watch("fechaInicioEvento")),
               }}
               disabled={false}
             />
-
-            <InputTextArea
-              name="RelevanciaAcademica"
-              label="Relevancia Académica del evento"
-              rules={{
-                required: "La relevancia académica del evento es requerida",
-              }}
-              disabled={false}
-            />
-
-            <InputText
-              name="tituloPonencia"
-              label="Título de la Ponencia"
-              rules={{ required: "El título de la ponencia es requerido" }}
-              disabled={false}
-            />
-
-            <InputText
-              name="tipoPonencia"
-              label="Tipo de Ponencia"
-              placeholder="Plenaria, poster, otros"
-              rules={{ required: "El tipo de ponencia es requerido" }}
-              disabled={false}
-            />
-
             <RadioGroup
-              label="¿El Artículo será publicado?"
-              name="articuloPublicado"
-              options={articuloOptions}
-              rules={{ required: "Indique si el artículo será publicado" }}
-              disabled={false}
+              name="tipoEvento"
+              label="Tipo de evento:"
+              options={eventTypeOptions}
+              rules={{ required: "El tipo de evento es requerido" }}
             />
 
-            {showInputArticulo && (
+            {tipoEventoSeleccionado === "Otro evento académico" && (
               <InputText
-                name="detalleArticuloSI"
-                label="Detalle"
-                infoText="Por favor, ingrese el nombre de la revista y base de datos indexadas, 
-                el número especial de revista o memorias del evento, 
-                la revista o memorias en las cuales se publicará el artículo."
+                name="otroEventoEspecificar"
+                label="Especifique el otro evento académico:"
                 placeholder="Especifique"
                 rules={{
-                  required: "El detalle del artículo es requerido",
+                  required: "Por favor especifique el otro evento académico",
                 }}
-                disabled={false}
+                disabled={tipoEventoSeleccionado !== "Otro evento académico"}
               />
             )}
-
             <RadioGroup
-              label="Pasajes aéreos"
-              name="pasajesAereos"
-              options={participarElementosOptions}
-              rules={{ required: "Indique si requiere pasajes aéreos" }}
-              disable={false}
+              name="participacionEvento"
+              label="Participación en el evento:"
+              options={participationOptions}
+              rules={{ required: "Seleccione una opción" }}
             />
 
+            {/* Título de la ponencia */}
+            <InputText
+              name="tituloPonencia"
+              label="Título de la Ponencia:"
+              rules={{
+                required: "El título de la ponencia es requerido",
+              }}
+              defaultValue="No Aplica" // Valor por defecto si está deshabilitado
+              disabled={isAsistencia}
+            />
+            <Label text="Solicita para participar en el evento:" />
+            {/* Pasajes aéreos */}
             <RadioGroup
-              label="Viáticos y subsistencias"
+              name="pasajesAereos"
+              label="Pasajes aéreos:"
+              options={pasajesAereosOptions}
+              rules={{ required: "Indique si requiere pasajes aéreos" }}
+            />
+
+            {/* Viáticos y subsistencias */}
+            <RadioGroup
               name="viaticosSubsistencias"
-              options={participarElementosOptions}
+              label="Viáticos y subsistencias:"
+              options={viaticosOptions}
               rules={{
                 required: "Indique si requiere viáticos y subsistencias",
               }}
-              disabled={false}
             />
+
+            {/* Inscripción */}
             <RadioGroup
-              label="Inscripción"
               name="inscripcion"
-              options={participarElementosOptions}
+              label="Inscripción:"
+              options={inscripcionOptions}
               rules={{ required: "Indique si requiere inscripción" }}
+            />
+
+            <LabelTitle
+              text="JUSTIFICACIÓN Y RELEVANCIA DE LA PARTICIPACIÓN"
               disabled={false}
             />
 
-          <LabelTitle text="Transporte" disabled={false} />
+            {/* 3.1 Objetivo, resultado o producto del proyecto */}
+            <InputTextArea
+              name="objetivoProyecto"
+              label="Objetivo, resultado o producto del proyecto al que aporta la participación en el evento"
+              placeholder="Escriba textualmente el objetivo, resultado o producto del proyecto."
+              rules={{
+                required: "Este campo es requerido",
+                validate: (value) =>
+                  value.length >= 50 ||
+                  "La descripción está muy corta. Debe tener al menos 50 caracteres.",
+              }}
+              infoText="Esta información debe ser tomada de la propuesta aprobada."
+              disabled={false}
+            />
+
+            {/* 3.2 Relevancia del evento para su proyecto */}
+            <InputTextArea
+              name="relevanciaEvento"
+              label="Relevancia del evento para su proyecto relacionado con el objetivo, resultado o producto del punto anterior"
+              placeholder="Describa la relevación del evento y aporte al cumplimiento del objetivo, resultado o producto."
+              rules={{
+                required: "Este campo es requerido",
+                validate: (value) =>
+                  value.length >= 50 ||
+                  "La descripción está muy corta. Debe tener al menos 50 caracteres.",
+              }}
+              infoText="Describa la relevancia del evento y aporte al cumplimiento del objetivo."
+              disabled={false}
+            />
+
+            <LabelTitle text="Transporte" disabled={false} />
+            <LabelText
+              text="Por favor, considere que el itinerario es tentativo. Consulte el
+                itinerario del medio de transporte elegido en su página oficial
+                o sitios web de confianza. Seleccione la opción que ofrezca el
+                menor tiempo de viaje y el menor número de escalas de ser el
+                caso."
+            />
+             <LabelTitle text="Transporte" disabled={false} />
             <LabelText
               text="Por favor, considere que el itinerario es tentativo. Consulte el
                 itinerario del medio de transporte elegido en su página oficial
@@ -428,7 +564,7 @@ function EventParticipationOutsideProjectsForm() {
                 caso."
             />
             <Label text="TRANSPORTE DE IDA" />
-            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento." />
+            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento, salida de campo." />
 
             <div className="scroll-table-container">
               <table className="activity-schedule-table">
@@ -531,7 +667,7 @@ function EventParticipationOutsideProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today ||
+                                    value >= today() ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
@@ -578,14 +714,19 @@ function EventParticipationOutsideProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
-                                    value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-                                  
+                                    value >= fechaSalida ||
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+
                                   // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
                                   validateFechaLlegadaIda: (value) =>
                                     index === fieldsIda.length - 1
-                                      ? validateFechaLlegadaIda(value, fechaInicioEvento)
+                                      ? validateFechaLlegadaIda(
+                                          value,
+                                          fechaInicioEvento
+                                        )
                                       : true, // Si no es el último campo, no aplica esta validación
                                 },
                               }
@@ -625,7 +766,12 @@ function EventParticipationOutsideProjectsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeIda(index)}
+                            onClick={() => {
+                              if(fieldsIda.length > 1){
+
+                                removeIda(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -635,9 +781,9 @@ function EventParticipationOutsideProjectsForm() {
                   })}
                 </tbody>
               </table>
-
               <ActionButton
                 onClick={() => {
+                  
                   appendIda({
                     tipoTransporte: "Aéreo",
                     nombreTransporte: "",
@@ -761,15 +907,21 @@ function EventParticipationOutsideProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
                                     value >= fechaLlegadaAnterior ||
                                     "La fecha de salida debe ser posterior a la fecha de llegada anterior",
-                                  
+
                                   // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
                                   validateRegreso: (value) =>
-                                    index === 0 ? validateFechaSalidaRegreso(value, fechaFinEvento) : true,
+                                    index === 0
+                                      ? validateFechaSalidaRegreso(
+                                          value,
+                                          fechaFinEvento
+                                        )
+                                      : true,
                                 },
                               }
                             )}
@@ -817,7 +969,7 @@ function EventParticipationOutsideProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today ||
+                                    value >= today() ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida ||
@@ -860,7 +1012,12 @@ function EventParticipationOutsideProjectsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeRegreso(index)}
+                            onClick={() => {
+                              if(fieldsRegreso.length > 1){
+
+                                removeRegreso(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -886,8 +1043,107 @@ function EventParticipationOutsideProjectsForm() {
                 variant="success"
               />
             </div>
-             
-            {seleccionInscripcion  && (
+            
+            {cantidadDias>15 &&
+            <div>
+            <LabelTitle text="CRONOGRAMA DE ACTIVIDADES" />
+
+            <LabelText
+              text="Incluir desde la fecha de salida del país y días de traslado
+              hasta el día de llegada al destino. <br />
+              Hasta incluir la fecha de llegada al país."
+            />
+            <table className="activity-schedule-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción de la Actividad a Realizar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {immutableFields.map((field, index) => (
+                  <tr
+                    key={field.id}
+                    className={index % 2 === 0 ? "row-even" : "row-odd"}
+                  >
+                    {/* Campo de Fecha */}
+                    <td>
+                      <input
+                        type="date"
+                        id={`actividadesInmutables[${index}].fecha`}
+                        className="form-input"
+                        {...register(`actividadesInmutables[${index}].fecha`, {
+                          required: "La fecha es requerida",
+                        })}
+                        value={field.fecha} // Valor predefinido de la fecha
+                        readOnly
+                      />
+                      {errors.actividadesInmutables &&
+                        errors.actividadesInmutables[index]?.fecha && (
+                          <span className="error-text">
+                            {errors.actividadesInmutables[index].fecha.message}
+                          </span>
+                        )}
+                    </td>
+
+                    <td style={{ width: "100%" }}>
+                      <input
+                        type="text"
+                        id={`actividadesInmutables[${index}].descripcion`}
+                        className="form-input"
+                        placeholder={
+                          cantidadDias > 15
+                            ? "Descripción obligatoria de la actividad" // Placeholder si cantidadDias > 15
+                            : "No es necesario rellenar este campo solo se habilita si se supera los 15 dias "    // Placeholder si cantidadDias <= 15
+                        }
+                        {...register(
+                          `actividadesInmutables[${index}].descripcion`,
+                          {
+                            required: cantidadDias > 15 ? "La descripción es requerida" : false, // Requerido solo si cantidadDias > 15
+                          }
+                        )}
+                        disabled={cantidadDias < 16} 
+                      />
+                      {errors.actividadesInmutables &&
+                        errors.actividadesInmutables[index]?.descripcion && (
+                          <span className="error-text">
+                            {
+                              errors.actividadesInmutables[index].descripcion
+                                .message
+                            }
+                          </span>
+                        )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+            }
+            {cantidadDias>15 &&
+            <div>
+                <LabelTitle
+                  text=" Justificar la necesidad de la comisión de servicios mayor
+                  a 15 días"
+                />
+                <LabelText
+                  text="Completar esta sección solo en caso de que la participación al
+                  evento requiera más de quince días de comisión de servicio."
+                />
+                <InputTextArea
+                  name="justificacionComision"
+                  label="Justificación de la comisión de servicios mayor a 15 días"
+                  rules={{
+                    required: "Este campo es requerido",
+                  }}
+                  defaultValue={"No Aplica"} // Valor por defecto si está deshabilitado
+                  disabled={cantidadDias <= 15}
+                />
+              </div>
+            }
+            
+
+            {watch("inscripcion") === "SI" && 
              <div >
              <h3>• Valor de la inscripción</h3>
              <p>
@@ -991,6 +1247,7 @@ function EventParticipationOutsideProjectsForm() {
                          className="form-input"
                          {...register(`inscripciones[${index}].limiteFecha`, {
                            validate: () => validarFechaLimiteInscripcion(index),
+                            required: "Este campo es requerido",
                          })}
                        />
                        {errors.inscripciones &&
@@ -1014,6 +1271,7 @@ function EventParticipationOutsideProjectsForm() {
              <ActionButton
                 onClick={() =>
                   append({
+                    monedaPago: "",
                     valorInscripcion: "",
                     pagoLimite: "",
                     limiteFecha: "",
@@ -1082,115 +1340,170 @@ function EventParticipationOutsideProjectsForm() {
                )}
              </div>
            </div>
+            }
+
+            <LabelTitle
+              text="DECLARACIÓN DE GASTOS, CONFORME REGLAMENTO DE VIÁTICOS AL EXTERIOR"
+              disabled={false}
+            />
+
+            <LabelText text="Selecciona según corresponda. Responda SI aunque la organización del evento cubra el rubro parcialmente." />
+
+            {/* La organización del evento cubre los siguientes rubros */}
+            <LabelTitle
+              text="La organización del evento cubre los siguientes rubros:"
+              disabled={false}
+            />
+
+            <RadioGroup
+              name="hospedaje"
+              label="a) Hospedaje"
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              name="movilizacion"
+              label="b) Movilización interna"
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            <RadioGroup
+              name="alimentacion"
+              label="c) Alimentación"
+              options={[
+                { value: "SI", label: "SI" },
+                { value: "NO", label: "NO" },
+              ]}
+              rules={{ required: "Este campo es requerido" }}
+              disabled={false}
+            />
+
+            <LabelText text="Para evitar reproceso, envíe un email al organizador del evento con copia a <span class='bolded'>daniel.sosa@epn.edu.ec</span> y <span class='bolded'>direccion.investigacion@epn.edu.ec</span> consultando:" />
+            <LabelText text="Dear event organizer: The National Polytechnic School will sponsor my participation in the event. To calculate the per diem, we need to know if the event offers, even for one time, any of the main meals breakfast, lunch, or dinner." />
+
+            {/* Selección de declaración */}
+            <LabelTitle text="Selección de declaración" disabled={false} />
+
+            <RadioGroup
+              name="seleccionDeclaracion"
+              label=""
+              options={[
+                {
+                  value: "noCubre",
+                  label: "Declaración si la organización NO cubre ningún rubro",
+                },
+                {
+                  value: "siCubre",
+                  label: "Declaración si la organización SI cubre algún rubro",
+                },
+              ]}
+              disabled={true} // Bloquear cambios manuales
+            />
+
+            {seleccionDeclaracion === "noCubre" && (
+              <LabelText text="En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento NO cubre ningún gasto, por lo que solicito se gestione la asignación de viáticos conforme se establece en el artículo 7 del Reglamento de Viáticos al Exterior." />
             )}
 
-              <LabelTitle text="Declaración de gastos, conforme reglamento de viáticos al exterior" />
-              <LabelText text=" Selecciona según corresponda. Responda SI aunque la organización del
-              evento cubra el rubro parcialmente. "/>
-              <LabelText text= "La organización del evento cubre los siguientes rubros:"/>
-              
-            <RadioGroup
-              label="a) Hospedaje"
-              name="hospedaje"
-              options={participarElementosOptions}
-              rules={{ required: "Este campo es requerido" }}
+            {seleccionDeclaracion === "siCubre" && (
+              <div>
+                <LabelText text="En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento SI cubre gastos, por lo que solicito se gestione la asignación viáticos conforme se establece en el artículo 13 del Reglamento de Viáticos al Exterior." />
+                <LabelText text="**A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, o de los establecidos en el artículo 9 del Reglamento de Viáticos al Exterior, que no hayan sido cubiertos por estas instituciones u organismos, para el reconocimiento de estos rubros y su correspondiente liquidación." />
+              </div>
+            )}
+
+            <LabelTitle
+              text="CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS"
               disabled={false}
             />
+            <LabelText text="Obligatorio si marcó viáticos" />
 
-            <RadioGroup
-              label="b) Movilización interna"
-              name="movilizacion"
-              options={participarElementosOptions}
-              rules={{ required: "Este campo es requerido" }}
-              disabled={false}
-            />
-
-            <RadioGroup
-              label="c) Alimentación"
-              name="alimentacion"
-              options={participarElementosOptions}
-              rules={{ required: "Este campo es requerido" }}
-              disabled={false}
-            />
-
-            <RadioGroup
-              label="Selección de declaración"
-              name="seleccionDeclaracion"
-              options={declaracionOptions}
-              disabled
-            />
-            {watch("seleccionDeclaracion") === "siCubre" && (
-            <>
-            <LabelText text="En mi calidad de profesor-investigador de la EPN, declaro que la
-            Organización del evento SI cubre gastos, por lo que solicito se
-            gestione la asignación viáticos conforme se establece en el artículo
-            13 del Reglamento de Viáticos al Exterior."/>
-
-            <LabelText text= "**A su regreso el investigador(a) deberá presentar la factura o nota de venta de los gastos de hospedaje y/o alimentación, o de los establecidos en el artículo 9 del Reglamento de Viáticos al Exterior, que no hayan sido cubiertos por estas instituciones u organismos, para el reconocimiento de estos rubros y su correspondiente liquidación."/>
-            </>
-              )}
-
-            {watch("seleccionDeclaracion") === "noCubre" && (
-            <LabelText text= "En mi calidad de profesor-investigador de la EPN, declaro que la Organización del evento NO cubre ningún gasto, por lo que solicito se gestione la asignación de viáticos conforme se establece en el artículo 7 del Reglamento de Viáticos al Exterior."/>
-          )}
-
-            <LabelTitle text="Cuenta bancaria del servidor para recibir los viáticos"/>
-            <LabelText text="Obligatorio si marcó viáticos."/>
-
+            {/* Nombre del banco */}
             <InputText
-            name="nombreBanco"
-            label="Nombre del banco"
-            rules={{required: habilitarCampos? "Este campo es requerido": false}}
-            disabled={!habilitarCampos}
+              name="nombreBanco"
+              label="Nombre del banco:"
+              rules={{
+                required:  watch("viaticosSubsistencias")==="SI" ? "Este campo es requerido" : false,
+              }}
+              
+              disabled={watch("viaticosSubsistencias")!=="SI"}
             />
 
+            {/* Tipo de cuenta */}
             <InputSelect
               name="tipoCuenta"
-              label="Tipo de Cuenta"
-              rules={{ required: habilitarCampos? "Este campo es requerido":false }}
-              disabled={!habilitarCampos}
-              options={tipoCuentaOptions}
+              label="Tipo de cuenta:"
+              options={[
+                { value: "", label: "Seleccione" },
+                { value: "Ahorros", label: "Ahorros" },
+                { value: "Corriente", label: "Corriente" },
+              ]}
+              rules={{
+                required: watch("viaticosSubsistencias")==="SI" ? "Este campo es requerido" : false,
+              }}
+              
+              disabled={watch("viaticosSubsistencias")!=="SI"}
             />
 
+            {/* Número de cuenta */}
             <InputText
-            name="numeroCuenta"
-            label="No. de Cuenta"
-            rules={{required: habilitarCampos? "Este campo es requerido": false}}
-            disabled={!habilitarCampos}
+              name="numeroCuenta"
+              label="No. De cuenta:"
+              rules={{
+                required: watch("viaticosSubsistencias")==="SI" ? "Este campo es requerido" : false,
+              }}
+              
+              disabled={watch("viaticosSubsistencias")!=="SI"}
             />
 
-            <LabelTitle text= "Servidores que integran los servicios institucionales (opcional)"/>
+            <LabelTitle
+              text="SERVIDORES QUE INTEGRAN LOS SERVICIOS INSTITUCIONALES (opcional)"
+              disabled={false}
+            />
+            <LabelText text="Completar esta sección solo en caso de que usted asista al mismo evento junto con otros funcionarios." />
 
+            {/* Nombre de los funcionarios */}
             <InputTextArea
-            name="servidores"
-            infoText="Completar esta sección solo en caso de que usted asista al mismo evento junto con otros funcionarios."
-            label="Nombre de los funcionarios"
-            placeholder="Escriba aquí los nombres de los funcionarios, separados por comas"
-            disabled={false}
+              name="servidores"
+              label="Nombre de los funcionarios:"
+              placeholder="Escriba aquí los nombres de los funcionarios, separados por comas"
+              rules={{ required: false }} // Este campo es opcional
+              infoText="Escriba los nombres separados por comas."
             />
 
-            <LabelTitle text= "DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS AL EXTERIOR"/>
-            <Label text= "REQUISITOS:"/>
-            <LabelText text="• Formulario de solicitud de autorización para cumplimiento de servicios institucionales."/>
-            <LabelText text="• Formulario para salida al exterior fuera de proyectos."/>
-            <LabelText text="• Copia de la carta o correo de aceptación de la ponencia y/o poster a ser presentada por el profesor solicitante."/>
-            <LabelText text="• Copia de artículo, ponencia o poster aceptado para verificación de autores y afiliación de la EPN."/>
-            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avalada por el represente del curso y el jefe inmediato."/>
-            <LabelText text="• Documento donde se puede verificar el costo, fechas de la inscripción al evento y fechas de participación en el evento. (NO factura/ NO invoice)"/>
-            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda."/>
-            <LabelText text="• Quipux del profesor al Jefe  o Director de la Unidad Académica solicitando el permiso y aval correspondiente para 
-              participar en el evento, deberá detallar todo el requerimiento, viáticos, pasajes, inscripción, de ser el caso."/>
-            <LabelText text="• Quipux por parte del Jefe o Director de la Unidad Académica, al Vicerrectorado de Investigación, Innovación y Vinculación, 
-              detallando el requerimiento de la salida al exterior y auspicio solicitado."/>
+            <LabelTitle
+              text="DOCUMENTACIÓN REQUERIDA PARA AUSPICIOS AL EXTERIOR"
+              disabled={false}
+            />
 
+            <Label text="REQUISITOS:" />
 
+            {/* Documentos de Requisito */}
+            <LabelText text="• Formulario de solicitud de autorización para cumplimiento de servicios institucionales." />
+            <LabelText text="• Formulario para salida al exterior dentro de proyectos." />
+            <LabelText text="• Copia de la carta o correo de aceptación de la ponencia a ser presentada, o copia del documento de registro en el evento, o copia de la carta de invitación." />
+            <LabelText text="• Copia del artículo, poster, abstract o ponencia, cuando aplique, aceptado para verificación de autores, afiliación de la EPN y agradecimiento." />
+            <LabelText text="• Planificación/cronograma de actividades académicas a recuperar, avalada por el represente del curso y el Jefe o Director de la Unidad Académica. O en el caso de que esta actividad se realice fuera del periodo de clases, aval del Jefe o Director de la Unidad Académica indicando este particular." />
+            <LabelText text="• Documento donde se puede verificar el costo, fechas de la inscripción o fechas de participación en el viaje técnico (NO factura/ NO invoice)." />
+            <LabelText text="• Formulario de pagos al exterior, según el caso, incluir el banco intermediario que corresponda." />
+            <LabelText text="• Quipux por parte del Director del Proyecto al Vicerrectorado de Investigación, Innovación y Vinculación, detallando el requerimiento de la salida al exterior." />
 
+            {/* Fin del formulario */}
           </div>
 
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-            <Button id="btn_enviar" type="submit" variant="primary">
+              <Button id="btn_enviar" type="submit" variant="primary" onClick={datos}>
                 Enviar
               </Button>
             </Col>
@@ -1202,18 +1515,12 @@ function EventParticipationOutsideProjectsForm() {
               <Row className="justify-content-center">
                 <Col md={4} className="text-center">
                   <DownloadButton
-                    onClick={handleGenerateMemo1}
-                    label="Descargar Memorando del Jefe del Departamento"
+                    onClick={handleGenerateDocx}
+                    label="Descargar Memorando"
                     icon="IconWord.png"
                   />
                 </Col>
-                <Col md={4} className="text-center">
-                  <DownloadButton
-                    onClick={handleGenerateMemo2}
-                    label="Descargar Memorando del Profesor al Jefe"
-                    icon="IconWord.png"
-                  />
-                </Col>
+
                 <Col md={4} className="text-center">
                   <DownloadButton
                     onClick={handleGeneratePdf}
@@ -1221,10 +1528,11 @@ function EventParticipationOutsideProjectsForm() {
                     icon="IconPdf.png"
                   />
                 </Col>
+
                 <Col md={4} className="text-center">
                   <DownloadButton
                     onClick={handleGeneratePdf2}
-                    label="Descargar Anexo 8"
+                    label="Descargar Anexo 2A"
                     icon="IconPdf.png"
                   />
                 </Col>
@@ -1233,10 +1541,10 @@ function EventParticipationOutsideProjectsForm() {
               {/* Botón para descargar todos los documentos */}
               <Row className="mt-3">
                 <Col className="text-center">
-                 <ActionButton
-                  onClick={handleDownloadAll}
-                  label="Desacargar Todo"
-                  variant="success"
+                  <ActionButton
+                    onClick={handleDownloadAll}
+                    label="Descargar Todo"
+                    variant="success"
                   />
                 </Col>
               </Row>
@@ -1247,9 +1555,9 @@ function EventParticipationOutsideProjectsForm() {
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
-              onClick={handleClearForm}
-              label="Limpiar Formulario"
-              variant="danger"
+                onClick={handleClearForm}
+                label="Limpiar Formulario"
+                variant="danger"
               />
             </Col>
           </Row>
@@ -1258,8 +1566,13 @@ function EventParticipationOutsideProjectsForm() {
     </FormProvider>
   );
 }
-export default EventParticipationOutsideProjectsForm;
-  
+// Opciones para roles
+const rolesOptions = [
+  { value: "Director", label: "Director" },
+  { value: "Codirector", label: "Codirector" },
+  { value: "Colaborador", label: "Colaborador" },
+];
+// Opciones para tipo de departamento
 const departamentoOptions = [
   {
     value: "DEPARTAMENTO DE AUTOMATIZACIÓN Y CONTROL INDUSTRIAL",
@@ -1352,47 +1665,44 @@ const departamentoOptions = [
     label: "INSTITUTO GEOFISICO",
   },
 ];
-
-const articuloOptions = [
+//opciones para tipo de evento
+const eventTypeOptions = [
+  { label: "Conferencia o congreso", value: "Conferencia o congreso" },
+  { label: "Taller", value: "Taller" },
+  { label: "Otro evento académico", value: "Otro evento académico" },
+];
+// Opciones para el radio group de participación en el evento
+const participationOptions = [
   {
-    value: "SI",
-    label: "SI",
+    label: "Presentación de artículo indexado",
+    value: "Presentación de artículo indexado",
   },
   {
-    value: "NO",
-    label: "NO",
+    label: "Presentación de póster, abstract, charla magistral u otros",
+    value: "Presentación de póster, abstract, charla magistral u otros",
   },
+  { label: "Asistencia", value: "Asistencia" },
 ];
 
-const participarElementosOptions = [
-  {
-    value: "SI",
-    label: "SI",
-  },
-  {
-    value: "NO",
-    label: "NO",
-  },
+// Opciones para pasajes aéreos
+const pasajesAereosOptions = [
+  { label: "SI", value: "SI" },
+  { label: "NO", value: "NO" },
 ];
 
-const declaracionOptions = [
-  {
-    value: "noCubre",
-    label: "Declaración si la organización NO cubre ningún rubro",
-  },
-  {
-    value: "siCubre",
-    label: "Declaración si la organización SI cubre algún rubro",
-  },
+// Opciones para viáticos y subsistencias
+const viaticosOptions = [
+  { label: "SI", value: "SI" },
+  { label: "NO", value: "NO" },
 ];
 
-const tipoCuentaOptions =[
-  {
-    value:"Ahorros", 
-    label:"Ahorros",
-  },
-  {
-    value: "Corriente",
-    label: "Corriente",
-  },
+// Opciones para inscripción
+const inscripcionOptions = [
+  { label: "SI", value: "SI" },
+  { label: "NO", value: "NO" },
 ];
+
+export default ProjectInternationalEventsForm;
+
+
+

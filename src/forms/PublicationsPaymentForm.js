@@ -4,14 +4,14 @@ import { Container, Button, Row, Col, Form } from "react-bootstrap";
 
 // Importación de los componentes del formulario
 
-import Label from "./Labels/Label.js";
-import LabelTitle from "./Labels/LabelTitle.js";
-import LabelText from "./Labels/LabelText.js";
-import InputSelect from "./Inputs/InputSelect";
-import InputText from "./Inputs/InputText";
-import InputTextArea from "./Inputs/InputTextArea";
-import ActionButton from "./Buttons/ActionButton";
-import DownloadButton from "./Buttons/DownloadButton";
+import Label from "../components/Labels/Label.js";
+import LabelTitle from "../components/Labels/LabelTitle.js";
+import LabelText from "../components/Labels/LabelText.js";
+import InputSelect from "../components/Inputs/InputSelect.js";
+import InputText from "../components/Inputs/InputText.js";
+import InputTextArea from "../components/Inputs/InputTextArea.js";
+import ActionButton from "../components/Buttons/ActionButton.js";
+import DownloadButton from "../components/Buttons/DownloadButton.js";
 // Importación de las funciones para generar documentos
 
 import {

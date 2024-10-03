@@ -22,7 +22,7 @@ function Home() {
             imageSrc="form.png"
             altText="Formulario"
             buttonText="Ir al formulario"
-            path="/EventParticipationWithinProjects"
+            path="/ProjectInternationalEvents"
             ariaLabel="Ir al formulario de participación dentro de proyectos"
           />
         </Col>
@@ -34,7 +34,7 @@ function Home() {
             imageSrc="form.png"
             altText="Formulario"
             buttonText="Ir al formulario"
-            path="/EventParticipationOutsideProjects"
+            path="/ExternalInternationalEvents"
             ariaLabel="Ir al formulario de participación fuera de proyectos"
           />
         </Col>
@@ -46,7 +46,7 @@ function Home() {
             imageSrc="form.png"
             altText="Formulario"
             buttonText="Ir al formulario"
-            path="/TechnicalTripWithinProjects"
+            path="/InternationalTechnicalTrips"
             ariaLabel="Ir al formulario de participación en viajes técnicos dentro de proyectos"
           />
         </Col>
@@ -70,7 +70,7 @@ function Home() {
             imageSrc="form.png"
             altText="Formulario"
             buttonText="Ir al formulario"
-            path="/NationalWithinProject"
+            path="/ProjectNationalEvents"
             ariaLabel="Ir al formulario de pago de inscripción dentro o fuera de proyectos"
           />
         </Col>
@@ -81,7 +81,7 @@ function Home() {
             imageSrc="form.png"
             altText="Formulario"
             buttonText="Ir al formulario"
-            path="/NationalOutsideProject"
+            path="/ExternalNationalEvents"
             ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
           />
         </Col>
@@ -104,7 +104,7 @@ function Home() {
             imageSrc="form.png"
             altText="Formulario"
             buttonText="Ir al formulario"
-            path="/SamplingTripWithinProject"
+            path="/NationalSamplingTrips"
             ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
           />
         </Col>

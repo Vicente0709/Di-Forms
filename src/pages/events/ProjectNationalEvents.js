@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
-import NationalWithinProjectForm from "../components/NationalWithinProjectForm";
+import ProjectNationalEventsForm from "../../forms/ProjectNationalEventsForm";
 
-function NationalWithinProject() {
+function ProjectNationalEvents() {
   useEffect(() => {
     document.title = "Forms DI | Participación Nacional Dentro de Proyectos"; // Título de la página de Participación Nacional en Proyectos
   }, []);
 
-  return <NationalWithinProjectForm />;
+  return <ProjectNationalEventsForm />;
 }
 
-export default NationalWithinProject;
+export default ProjectNationalEvents;

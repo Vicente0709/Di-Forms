@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import InstitutionalServicesForm from "../components/InstitutionalServicesForm";
+import InstitutionalServicesForm from "../../forms/InstitutionalServicesForm";
 
 function InstitutionalServices() {
   useEffect(() => {

@@ -63,3 +63,30 @@ export const validateFechaLlegadaIda = (value, fechaInicioEvento) => {
   }
   return true;
 };
+
+// Formatear la fecha en formato dd/mm/yyyy
+// Formatear la fecha en formato dd/mm/yyyy
+export function formatDate(dateString) {
+  if (!dateString) return "";
+  
+  // Si es un objeto Date, lo convertimos a formato ISO (yyyy-mm-dd)
+  if (dateString instanceof Date) {
+    dateString = dateString.toISOString().split('T')[0];
+  }
+  
+  // Convertimos cualquier valor a string para evitar errores
+  const [year, month, day] = String(dateString).split("-");
+  
+  if (!year || !month || !day) return ""; // Para casos donde no haya una fecha válida
+  
+  return `${day}-${month}-${year}`;
+}
+
+
+// Capitalizar cada palabra en una cadena
+export function capitalizeWords(str) {
+  return str
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
