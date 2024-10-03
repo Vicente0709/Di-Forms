@@ -25,7 +25,7 @@ import {
 import { validarCedulaEcuatoriana, validarFechaFin} from "../utils/validaciones.js";
 
 const formStorageKey = "formInscriptionPayment"; // Clave para almacenar el formulario en localStorage
-const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
 function InscriptionPaymentForm() {
   
@@ -56,7 +56,7 @@ function InscriptionPaymentForm() {
     reset(formData);
     // Suscribirse a los cambios en el formulario para guardar en localStorage y actualizar las secciones visibles
     const subscription = watch((data) => {
-      localStorage.setItem(formStorageKey, JSON.stringify(data));
+      sessionStorage.setItem(formStorageKey, JSON.stringify(data));
 
       // Lógica para mostrar u ocultar campos basados en los valores del formulario
       setShowInputParticipacion(data.participacionProyecto === "dentroProyecto");
@@ -152,7 +152,7 @@ function InscriptionPaymentForm() {
           });
   
           // Actualizar localStorage con los datos cargados
-          localStorage.setItem(formStorageKey, JSON.stringify(json));
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }
@@ -184,7 +184,7 @@ function InscriptionPaymentForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem(formStorageKey);
+    sessionStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };

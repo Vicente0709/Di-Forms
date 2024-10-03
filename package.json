@@ -6,7 +6,7 @@
     "@analytics/google-analytics": "^1.0.7",
     "@pdfme/generator": "^4.3.2",
     "@pdfme/schemas": "^4.3.2",
-    "@react-pdf/renderer": "^3.4.4",
+    "@react-pdf/renderer": "^3.4.5",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",

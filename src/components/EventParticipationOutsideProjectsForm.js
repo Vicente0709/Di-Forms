@@ -27,7 +27,7 @@ import {
 import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
 
 const formStorageKey = "formEventOutsideProject"; // Clave para almacenar el formulario en localStorage
-const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
 
 function EventParticipationOutsideProjectsForm() {
@@ -149,7 +149,7 @@ function EventParticipationOutsideProjectsForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem(formStorageKey);
+    sessionStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
@@ -179,7 +179,7 @@ function EventParticipationOutsideProjectsForm() {
             keepTouched: false,
             keepIsSubmitted: false,
           });
-          localStorage.setItem(formStorageKey, JSON.stringify(json));
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }

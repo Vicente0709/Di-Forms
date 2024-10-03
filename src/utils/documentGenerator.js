@@ -19,6 +19,8 @@ import { schemasAnexoA } from "./schemasAnexoA";
 import { basePdfAnexoA2 } from "./basePdfAnexoA2";
 import { schemasAnexoA2 } from "./schemasAnexoA2";
 
+
+
 // Registra la fuente Roboto desde Google Fonts
 Font.register({
   family: "Roboto",
@@ -1421,6 +1423,150 @@ export function generateMemoPublicationPaymentProject(data) {
       blob,
       `Memorando para Pago de Publicación ${formulario} ${codigoP}.docx`
     );
+  });
+}
+
+
+export function generateMemoInstitutionalServices(data) {
+  
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Formato de memorando de servicios institucionales",
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: " Informe de servicios ",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente se hace entrega del informe de servicios institucionales por la participación en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadServicio}, ${data.provinciaServicio}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}. `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text:
+                  data.nombreJefeInmediato.toUpperCase(),
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: data.cargoJefeInmediato,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, "Memorando de servicios institucionales.docx");
   });
 }
 
@@ -4022,6 +4168,485 @@ export async function generateAnexo2PublicationPaymentOutside(data) {
   // Descargar automáticamente el archivo PDF
   saveAs(blob, `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto.pdf`);
 }
+
+
+export async function generateAnexo4InstitutionalServices(data) {
+  
+  const ultimaFechaLlegada =
+    data.transporteRegreso.length > 0
+      ? data.transporteRegreso[data.transporteRegreso.length - 1]?.fechaLlegada
+      : "";
+  const ultimaHoraLlegada =
+    data.transporteRegreso.length > 0 ? data.transporteRegreso[data.transporteRegreso.length - 1]?.horaLlegada : "";
+
+
+
+  const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+        <Text style={styles.header}>Anexo 4 - Formato informe de viáticos EPN</Text>
+
+        <Text style={styles.sectionTitle}>INFORME DE SERVICIOS INSTITUCIONALES</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>Nro. SOLICITUD DE AUTORIZACIÓN PARA CUMPLIMIENTO DE SERVICIOS INSTITUCIONALES: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>FECHA DE INFORME  (dd-mmm-aaaa): </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}> </Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {formattedDate}
+              </Text>
+            </View>
+          </View>
+        </View>
+      
+        <Text style={styles.sectionTitle}>DATOS GENERALES</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>APELLIDOS - NOMBRES DE LA O EL SERVIDOR: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>PUESTO QUE OCUPA: </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellTextBlue}> {data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()} </Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.puesto}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>CIUDAD – PROVINCIA DEL SERVICIO INSTITUCIONAL: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>NOMBRE DE LA UNIDAD A LA QUE PERTENECE LA O EL SERVIDOR: </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellTextBlue}> {data.ciudadServicio+","+data.provinciaServicio}</Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.nombreUnidad}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCellText}>SERVIDORES QUE INTEGRAN EL SERVICIO INSTITUCIONAL:</Text>
+          </View>
+
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.servidores}
+              </Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>
+        INFORME DE ACTIVIDADES Y PRODUCTOS ALCANZADOS
+        </Text>
+
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol20}>
+                <Text style={styles.tableCellText}>Actividades:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.actividades}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol20}>
+                <Text style={styles.tableCellText}>Productos Alcanzados:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.productos}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol20}>
+                <Text style={styles.tableCellText}>Otras tareas realizadas para la EPN durante la comisión de servicios:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.otrasTareas}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>ITINERARIO</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>SALIDA</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>LLEGADA</Text>
+               </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>FECHA (dd-mmm-aaa)</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellTextBlue}>{formatDate(data.transporteIda[0]?.fechaSalida)}</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellTextBlue}>{formatDate(ultimaFechaLlegada)}</Text>
+               </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>HORA (hh:mm)</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellTextBlue}>{data.transporteIda[0]?.horaSalida}</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellTextBlue}>{ultimaHoraLlegada}</Text>
+               </View>
+              </View>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>NOTA: Estos datos se refieren al tiempo efectivamente utilizado en el cumplimiento del servicio institucional, desde la salida del lugar de residencia o trabajo habituales o del cumplimiento del servicio institucional según sea el caso, hasta su llegada de estos sitios.</Text>
+            </View>
+          </View>
+
+        </View>
+
+        <Text style={styles.sectionTitle}>
+        TRANSPORTE
+        </Text>
+
+        <View style={styles.table}>
+
+        <View style={styles.tableRow}>
+                <View style={styles.tableCol20}>
+                  <Text style={styles.tableCellText}>
+                  TIPO DE TRANSPORTE (Aéreo, terrestre, marítimo,  otros): 
+                  </Text>
+                </View>
+
+                <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                NOMBRE DE TRANSPORTE 
+                </Text>
+              </View>
+
+                <View style={styles.tableCol15}>
+                  <Text style={styles.tableCellText}>
+                  RUTA: 
+                  </Text>
+                </View>
+
+                    <View style={styles.tableCol}>
+                  
+                      <Text style={styles.tableCellText}>
+                      SALIDA:  
+                     </Text>
+                     
+                    <View style={styles.tableRow}>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>FECHA (dd - mmm - aaaa)</Text>                
+                      </View>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>HORA (hh : mm)</Text>
+                      </View>
+                    </View>
+                    </View>
+
+                    <View style={styles.tableCol}>
+                    <Text style={styles.tableCellText}>
+                    REGRESO:  
+                    </Text>
+                    <View style={styles.tableRow}>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>FECHA (dd - mmm - aaaa)</Text>                
+                      </View>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>HORA (hh : mm)</Text>
+                      </View>
+                    </View>
+                    </View>
+                    </View>
+
+                    
+
+                    <View style={styles.tableRow}>
+                      
+                    <View style={styles.tableCol20}>
+                      {data.transporteIda.map((transporteIda, index) => (
+                     <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableCellTextBlueCenter}>
+                         {transporteIda.tipoTransporte
+                        ? transporteIda.tipoTransporte: ""}
+                        </Text>
+                      </View>
+                       ))}
+                     </View>
+                    <View style={styles.tableCol15}>
+                      {data.transporteIda.map((transporteIda, index) => (
+                     <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableCellTextBlueCenter}>
+                        {transporteIda.nombreTransporte
+                       ? transporteIda.nombreTransporte: ""}
+                     </Text>
+                   </View>
+                    ))}
+                    </View>
+                      <View style={styles.tableCol15}>
+                        {data.transporteIda.map((transporteIda, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteIda.ruta
+                                ? transporteIda.ruta: ""}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                        <View style={styles.tableCol}>
+                              {data.transporteIda.map((transporteIda, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteIda.fechaSalida
+                                ? formatDate(transporteIda.fechaSalida): ""}
+                            </Text>
+                          </View>
+                          ))}
+                          </View>
+                          <View style={styles.tableCol}>
+                              {data.transporteIda.map((transporteIda, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteIda.horaSalida
+                                ? transporteIda.horaSalida: ""}
+                            </Text>
+                          </View>
+                          ))}
+                        </View>
+
+                        <View style={styles.tableCol}>
+                              {data.transporteIda.map((transporteIda, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteIda.fechaLlegada
+                                ? formatDate(transporteIda.fechaLlegada): ""}
+                            </Text>
+                          </View>
+                          ))}
+                              </View>
+
+                            <View style={styles.tableCol}>
+                            {data.transporteIda.map((transporteIda, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {transporteIda.horaLlegada
+                              ? transporteIda.horaLlegada: ""}
+                          </Text>
+                        </View>
+                        ))}
+                            </View>
+                  
+              
+                   </View>
+
+                   <View style={styles.tableRow}>
+                    <View style={styles.tableCol20}>
+                      {data.transporteRegreso.map((transporteRegreso, index) => (
+                     <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableCellTextBlueCenter}>
+                         {transporteRegreso.tipoTransporte
+                        ? transporteRegreso.tipoTransporte: ""}
+                        </Text>
+                      </View>
+                       ))}
+                     </View>
+                    <View style={styles.tableCol15}>
+                      {data.transporteRegreso.map((transporteRegreso, index) => (
+                     <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableCellTextBlueCenter}>
+                        {transporteRegreso.nombreTransporte
+                       ? transporteRegreso.nombreTransporte: ""}
+                     </Text>
+                   </View>
+                    ))}
+                    </View>
+                      <View style={styles.tableCol15}>
+                        {data.transporteRegreso.map((transporteRegreso, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteRegreso.ruta
+                                ? transporteRegreso.ruta: ""}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                        <View style={styles.tableCol}>
+                              {data.transporteRegreso.map((transporteRegreso, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteRegreso.fechaSalida
+                                ? formatDate(transporteRegreso.fechaSalida): ""}
+                            </Text>
+                          </View>
+                          ))}
+                          </View>
+                          <View style={styles.tableCol}>
+                              {data.transporteRegreso.map((transporteRegreso, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteRegreso.horaSalida
+                                ? transporteRegreso.horaSalida: ""}
+                            </Text>
+                          </View>
+                          ))}
+                        </View>
+
+                        <View style={styles.tableCol}>
+                              {data.transporteRegreso.map((transporteRegreso, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteRegreso.fechaLlegada
+                                ? formatDate(transporteRegreso.fechaLlegada): ""}
+                            </Text>
+                          </View>
+                          ))}
+                              </View>
+
+                            <View style={styles.tableCol}>
+                            {data.transporteRegreso.map((transporteRegreso, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {transporteRegreso.horaLlegada
+                              ? transporteRegreso.horaLlegada: ""}
+                          </Text>
+                        </View>
+                        ))}
+                            </View>
+                  
+              
+                   </View>
+
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCellText}> NOTA: En caso de haber utilizado transporte público, se deberá adjuntar obligatoriamente los pases a bordo o boletos</Text>
+            </View>
+              
+                
+     
+
+        <Text style={styles.sectionTitle}>OBSERVACIONES</Text>
+       
+
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+                  <View style={styles.tableRow}>
+                     <Text style={styles.tableCellTextCenter}>FIRMA DE LA O EL SERVIDOR COMISIONADO:</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                     <Text style={styles.tableCellTextCenter}> ________________________________ </Text>
+                  </View>
+            
+              <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextBlue}>{data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()} </Text>
+              </View>
+                 <View style={styles.tableRow}>
+                      <Text style={styles.tableCellTextBlue}>{data.puesto.toUpperCase()} </Text>
+                 </View>
+                 <View style={styles.tableRow}>
+                      <Text style={styles.tableCellTextBlue}>{data.cedula} </Text>
+                 </View>
+              </View>
+              <View style={styles.tableCol}>
+            <Text style={styles.tableCellText}>NOTA: El presente informe deberá presentarse dentro del término de 4 días del cumplimiento de servicios institucionales, caso contrario la liquidación se demorará e incluso de no presentarlo tendría que restituir los valores percibidos. Cuando el cumplimiento de servicios institucionales sea superior al número de días autorizados, se deberá adjuntar la autorización por escrito de la Máxima Autoridad o su Delegado</Text>
+          </View>
+          </View>
+          
+
+        </View>
+
+
+        <Text style={styles.sectionTitle}>FIRMAS DE APROBACIÓN</Text>
+       
+       
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>FIRMA DEL JEFE INMEDIATO:</Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextCenter}> ________________________________ </Text>
+                 </View>
+            
+             <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextBlueCenter}>{data.nombreJefeInmediato.toUpperCase()+""} </Text>
+                  </View>
+                 <View style={styles.tableRow}>
+                 <Text style={styles.tableCellTextBlueCenter}>{data.cargoJefeInmediato.toUpperCase()} </Text>
+                  </View>
+            </View>
+          
+          <View style={styles.tableCol}>
+           
+          <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>FIRMA DE LA MAXIMA AUTORIDAD DE INVESTIGACIÓN:</Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextCenter}>________________________________</Text>
+                 </View>
+            
+            <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextCenter}>PhD. Alexandra Alvarado </Text>
+                  </View>
+                 <View style={styles.tableRow}>
+                 <Text style={styles.tableCellTextCenter}>Vicerrectora de Investigación, Innovación y Vinculación</Text>
+                   </View>
+                   </View>
+           
+           </View>
+           </View>
+      
+      </Page>
+    </PDFDocument>
+  );
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
+
+  // Descargar automáticamente el archivo PDF
+  saveAs(blob, `Anexo 4 - Servicios Institucionales.pdf`);
+
+}
+
 
 //formatear la fecha en formato dd/mm/yyyy
 function formatDate(dateString) {

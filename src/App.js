@@ -17,7 +17,7 @@ import NationalWithinProject from "./pages/NationalWithinProject";
 import NationalOutsideProject from "./pages/NationalOutsideProject";
 import PublicationsPayment from "./pages/PublicationsPayment";
 import SamplingTripWithinProject from "./pages/SamplingTripWithinProject";
-
+import InstitutionalServices from "./pages/InstitutionalServices";
 // Importación del archivo CSS para los estilos de la aplicación
 import "./App.css";
 
@@ -56,6 +56,7 @@ function MainApp() {
           <Route path="/NationalOutsideProject" element={<NationalOutsideProject />} />
           <Route path="/PublicationsPayment" element={<PublicationsPayment />} />
           <Route path="/SamplingTripWithinProject" element={<SamplingTripWithinProject />} />
+          <Route path="/InstitutionalServices" element={<InstitutionalServices />} />
         </Routes>
       </div>
       <Footer />

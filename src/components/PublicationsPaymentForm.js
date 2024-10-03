@@ -21,7 +21,7 @@ import {
 } from "../utils/documentGenerator.js";
 import { validarCedulaEcuatoriana } from "../utils/validaciones.js";
 const formStorageKey = "formPublicationsPayment"; // Clave para almacenar el formulario en localStorage
-const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
 function PublicationsPaymentForm() {
  
@@ -55,7 +55,7 @@ function PublicationsPaymentForm() {
 
     // Suscribirse a los cambios en el formulario para guardar en localStorage
     const subscription = watch((data) => {
-      localStorage.setItem(formStorageKey, JSON.stringify(data));
+      sessionStorage.setItem(formStorageKey, JSON.stringify(data));
 
       // Lógica para mostrar u ocultar campos basados en los valores del formulario
       setShowInputParticipacion(data.participacionProyecto === "dentroProyecto");
@@ -150,7 +150,7 @@ function PublicationsPaymentForm() {
           });
   
           // Actualizar localStorage con los datos cargados
-          localStorage.setItem(formStorageKey, JSON.stringify(json));
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }

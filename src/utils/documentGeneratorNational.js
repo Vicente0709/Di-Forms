@@ -609,8 +609,26 @@ export async function generateAnexo10NationalOutsideProject(data) {
       {/* 2. Datos del evento*/}
 
       <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO Y REQUERIMIENTO </Text>
+      <View style={styles.subSectionTitle}>
+          <Text>Marque con una "X" la opción y complete la información según corresponda</Text>
+        </View>
+        
+    <View style={styles.table}>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+            <Text style={styles.tableCellText}>Titulo del Evento:</Text>
+        </View>
+      <View style={styles.tableCol}>
+             <Text style={styles.tableCellTextBlue}>
+              {data.tituloEvento}
+      </Text>
+     </View>
+    </View>
+    </View>
+  
 
-  <View style={styles.table}>
+
+<View style={styles.table}>
   <View style={styles.tableRow}>
     <View style={styles.tableCol25}>
       <Text style={styles.tableCellText}>Titulo del Evento:</Text>
@@ -621,7 +639,6 @@ export async function generateAnexo10NationalOutsideProject(data) {
       </Text>
     </View>
   </View>
-
   <View style={styles.tableRow}>
     <View style={styles.tableCol25}>
       <Text style={styles.tableCellText}>Lugar del Evento:</Text>
