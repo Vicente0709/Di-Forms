@@ -1,6 +1,8 @@
 import React, { useState, useEffect,useCallback } from "react";
 import { useForm, FormProvider, useFieldArray} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 // Importación de los componentes Props
 import Label from "../components/Labels/Label.js";
@@ -18,16 +20,16 @@ import DownloadButton from "../components/Buttons/DownloadButton.js";
 import today from "../utils/date.js";
 import { generateDateRange } from "../utils/dataRange.js";
 import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
-import { generateAnexoAWithinProject, generateMemoWithinProject, generateAnexo2WithinProject } from "../utils/documentGeneratorNational.js";
+import { generateAnexoAWithinProject, generateMemoWithinProject, generateAnexo2WithinProject } from "../utils/generatorDocuments/event/nationalEventDocuments.js";
 
 //Constaltes globales para el formulario
 const formStorageKey = "formNationalWithinProjects";
 const daysStorageKey = "diasNationalWithinProjects";
-const formNationalWithinProjects = JSON.parse(localStorage.getItem(formStorageKey)) || {};
 
 function NationalWithinProjectsForm() {
+  const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {};
   // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
-  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formNationalWithinProjects });
+  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formData });
   const { register, control, watch, setValue, reset, clearErrors, formState: { errors }} = methods;
   
   //FielsdArray para tablas de transporte y actividades
@@ -69,28 +71,35 @@ function NationalWithinProjectsForm() {
   };
 
   const handleGenerateDocx = () => {
-    const formNationalWithinProjects = methods.getValues();
-    generateMemoWithinProject(formNationalWithinProjects);
+    const formData = methods.getValues();
+    generateMemoWithinProject(formData);
     setShowDownloadSection(false);
   };
 
   const handleGeneratePdf = () => {
-    const formNationalWithinProjects = methods.getValues();
-    generateAnexoAWithinProject(formNationalWithinProjects);
+    const formData = methods.getValues();
+    generateAnexoAWithinProject(formData);
     setShowDownloadSection(false);
   };
 
   const handleGeneratePdf2 = () => {
-    const formNationalWithinProjects = methods.getValues();
-    generateAnexo2WithinProject(formNationalWithinProjects);
+    const formData = methods.getValues();
+    generateAnexo2WithinProject(formData);
     setShowDownloadSection(false);
   };
 
-  const handleDownloadAll = () => {
-    handleGenerateDocx();
-    handleGeneratePdf();
-    handleGeneratePdf2();
-    setShowDownloadSection(false);
+  const handleDownloadAll = async() => {
+    const formData = methods.getValues();
+    const docxBlob = await generateMemoWithinProject(formData,true);
+    const pdfBlob = await generateAnexoAWithinProject(formData,true);
+    const pdfBlob2 = await generateAnexo2WithinProject(formData,true);
+    const zip = new JSZip();
+    zip.file(`Memorando solicitud para participar en evento académico.docx`, docxBlob);
+    zip.file(`Anexo A - Solicitud de Viaticos EPN ${formData.codigoProyecto}.pdf`, pdfBlob);
+    zip.file(`Anexo2_Formulario para salidas nacionales ${formData.codigoProyecto}.pdf`, pdfBlob2);
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "Documentos participacion en eventos nacionales dentro de proyectos.zip");
+  
   };
 
   const handleClearForm = () => {
@@ -203,9 +212,9 @@ function NationalWithinProjectsForm() {
   
   // UseEffect principal y separado para la suscripción de cambios en el formulario
   useEffect(() => {
-    reset(formNationalWithinProjects);
-    setSeleccionInscripcion(formNationalWithinProjects.inscripcion || "");
-    extraerYCalcularFechas(formNationalWithinProjects);
+    reset(formData);
+    setSeleccionInscripcion(formData.inscripcion || "");
+    extraerYCalcularFechas(formData);
     
     const subscription = watch((data) => {
       localStorage.setItem(formStorageKey, JSON.stringify(data));

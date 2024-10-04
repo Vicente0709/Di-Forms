@@ -65,7 +65,6 @@ export const validateFechaLlegadaIda = (value, fechaInicioEvento) => {
 };
 
 // Formatear la fecha en formato dd/mm/yyyy
-// Formatear la fecha en formato dd/mm/yyyy
 export function formatDate(dateString) {
   if (!dateString) return "";
   

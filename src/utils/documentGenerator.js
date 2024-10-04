@@ -15,9 +15,6 @@ import {
 //basepdf and schemas AnexoA
 import { basePdfAnexoA } from "./basePdfAnexoA";
 import { schemasAnexoA } from "./schemasAnexoA";
-//basepdf and schemas AnexoA2
-import { basePdfAnexoA2 } from "./basePdfAnexoA2";
-import { schemasAnexoA2 } from "./schemasAnexoA2";
 
 
 

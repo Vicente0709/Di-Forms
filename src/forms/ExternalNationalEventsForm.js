@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
-
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 // Importación de los componentes del formulario
 import Label from "../components/Labels/Label.js";
 import LabelTitle from "../components/Labels/LabelTitle.js";
@@ -22,7 +23,7 @@ import {
   generateMemoNationalOutsideProject2,
   generateAnexo10NationalOutsideProject,
   generateAnexoANationalOutsideProject,
-} from "../utils/documentGeneratorNational.js";
+} from "../utils/generatorDocuments/event/nationalEventDocuments.js";
 import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
 
 const formStorageKey = "formNationalOutsideProject"; // Clave para almacenar el formulario en localStorage
@@ -177,11 +178,20 @@ function ExternalNationalEventsForm() {
 
   // Función para descargar todos los documentos
 
-  const handleDownloadAll = () => {
-    handleGenerateMemo1();
-    handleGenerateMemo2();
-    handleGeneratePdf();
-    handleGeneratePdf2();
+  const handleDownloadAll = async() => {
+    const formData = methods.getValues();
+    const docxBlob1 = await generateMemoNationalOutsideProject1(formData,true);
+    const docxBlob2 = await generateMemoNationalOutsideProject2(formData,true);
+    const pdfBlob1 = await generateAnexoANationalOutsideProject(formData,true);
+    const pdfBlob2 = await generateAnexo10NationalOutsideProject(formData,true);
+    const zip = new JSZip();
+
+    zip.file(`Memorando para Jefe del Departamento al VIIV.docx`, docxBlob1);
+    zip.file(`Memorando del Profesor al Jefe.docx`, docxBlob2);
+    zip.file(`Anexo 10 - Formulario salidas nacionales fuera de proyecto.pdf`, pdfBlob1);
+    zip.file(`Anexo 1 - Solicitud de viáticos EPN.pdf`, pdfBlob2);
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "Documentos participacion en eventos nacionales fuera de proyectos.zip");
     setShowDownloadSection(false);
   };
 
