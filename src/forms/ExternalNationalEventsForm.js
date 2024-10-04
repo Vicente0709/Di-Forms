@@ -26,12 +26,12 @@ import {
 } from "../utils/generatorDocuments/event/nationalEventDocuments.js";
 import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
 
-const formStorageKey = "formNationalOutsideProject"; // Clave para almacenar el formulario en localStorage
-const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+const formStorageKey = "formNationalOutsideProject"; // Clave para almacenar el formulario en sessionStorage
 
 function ExternalNationalEventsForm() {
+  const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde sessionStorage
   
-  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
+  // Configuración del formulario con react-hook-form y valores predeterminados desde sessionStorage
   const methods = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -60,6 +60,16 @@ function ExternalNationalEventsForm() {
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
   const [showInputArticulo, setShowInputArticulo] = useState(false);
+  const [loading, setLoading] = useState(false); //para el spinner de carga
+
+  // UseEffect principal y separado para la suscrioción de cambios en el formulario
+  useEffect(() => {
+    reset(formData);
+    const subscription = watch((data) => {
+      sessionStorage.setItem(formStorageKey, JSON.stringify(data));
+    });
+    return () => subscription.unsubscribe();
+  }, [reset, watch,]);
 
   // Efecto para manejar la visibilidad de secciones y limpieza de campos
   useEffect(() => {
@@ -112,11 +122,12 @@ function ExternalNationalEventsForm() {
   };
 
   // Función para descargar el formulario como JSON
-  const handleDownloadJson = () => {
+  const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues(); // Obtiene los datos actuales del formulario
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
+    if (returnDocument) return blob;
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Participación Nacional Fuera de Proyectos.json"; // Nombre del archivo
@@ -141,7 +152,7 @@ function ExternalNationalEventsForm() {
             keepIsSubmitted: false,
           });
   
-          // Actualizar localStorage con los datos cargados
+          // Actualizar sessionStorage con los datos cargados
           sessionStorage.setItem(formStorageKey, JSON.stringify(json));
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
@@ -179,19 +190,22 @@ function ExternalNationalEventsForm() {
   // Función para descargar todos los documentos
 
   const handleDownloadAll = async() => {
+    setLoading(true); // Activar spinner
     const formData = methods.getValues();
+    const jsonBlob = handleDownloadJson(true);
     const docxBlob1 = await generateMemoNationalOutsideProject1(formData,true);
     const docxBlob2 = await generateMemoNationalOutsideProject2(formData,true);
     const pdfBlob1 = await generateAnexoANationalOutsideProject(formData,true);
     const pdfBlob2 = await generateAnexo10NationalOutsideProject(formData,true);
     const zip = new JSZip();
-
+    zip.file(`Formulario Participacion en evento Nacional Fuera de Proyectos.json`, jsonBlob);
     zip.file(`Memorando para Jefe del Departamento al VIIV.docx`, docxBlob1);
     zip.file(`Memorando del Profesor al Jefe.docx`, docxBlob2);
-    zip.file(`Anexo 10 - Formulario salidas nacionales fuera de proyecto.pdf`, pdfBlob1);
-    zip.file(`Anexo 1 - Solicitud de viáticos EPN.pdf`, pdfBlob2);
+    zip.file(`Anexo 1 - Solicitud de viaticos EPN.pdf`, pdfBlob1);
+    zip.file(`Anexo 10 - Formulario salidas nacionales fuera de proyecto.pdf`, pdfBlob2);
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, "Documentos participacion en eventos nacionales fuera de proyectos.zip");
+    setLoading(false); // Desactivar spinner
     setShowDownloadSection(false);
   };
 
@@ -1227,6 +1241,7 @@ function ExternalNationalEventsForm() {
                   onClick={handleDownloadAll}
                   label="Descargar Todo"
                   variant="success"
+                  loading={loading} // Usar el prop loading
                   />
                 </Col>
               </Row>

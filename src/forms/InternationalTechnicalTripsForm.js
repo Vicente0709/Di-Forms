@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useForm, FormProvider,useFieldArray} from "react-hook-form";
+import React, { useState, useEffect } from "react";
+import { useForm, FormProvider,useFieldArray, set} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 // Importación de los componentes Props
 import Label from "../components/Labels/Label.js";
@@ -18,24 +20,24 @@ import DownloadButton from "../components/Buttons/DownloadButton.js";
 import { generateDateRange } from "../utils/dataRange.js";
 import today from "../utils/date.js";
 import {validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso} from "../utils/validaciones.js";
-import { generateAnexoATripWithingProject, generateMemoTripWithinProjec1, generateMemoTripWithinProjec2, generateAnexoB2WithinProject } from "../utils/documentGenerator.js";
+import { generateAnexoATripWithingProject, generateMemoTrip, generateAnexoB2WithinProject } from "../utils/generatorDocuments/trip/internationalTripDocuments";
 
 //Constantes globales para el formulario
 const formStorageKey = "formTechnicalTripWithinProjects";
-const daysStorageKey = "diferenciaDiasViajeTecnicoDeProyectos";
-const formTechnicalTripWithinProjects = JSON.parse(localStorage.getItem(formStorageKey)) || {};
 
 function InternationalTechnicalTrips() {
+  const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {};
   
-  // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
-  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formTechnicalTripWithinProjects });
+  // Configuración del formulario con react-hook-form y valores predeterminados desde sessionStorage
+  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formData });
   const {register,control, watch, setValue, reset, clearErrors, formState: { errors },} = methods;
   
   //FielsdArray para tablas de transporte y actividades
   const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
-  const { fields: immutableFields, replace } = useFieldArray({ control, name: "actividadesInmutables" });
+  const { fields: immutableFields, replace: replaceInmutableFields } = useFieldArray({ control, name: "actividadesInmutables" });
   
+  const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
 
   // Visualizadores con watch
   const rolEnProyecto = watch("rolEnProyecto");
@@ -48,13 +50,15 @@ function InternationalTechnicalTrips() {
   
   // Manejadores de estado para showSections
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [showInputDirector, setShowInputDirector] = useState(false);
-  const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
-  const [showInputJustificacion, setshowInputJustificacion] = useState(false);
 
-  const [fechaInicioEventoActividades, setFechaInicioEvento] = useState("");
-  const [fechaFinEventoActividades, setFechaFinEvento] = useState(""); 
-  
+ //manejadores de estado para actividades
+ const [loading, setLoading] = useState(false); //para el spinner de carga
+ const [fechaInicioActividades, setFechaInicioActividades] = useState("");
+ const [fechaFinActividades, setFechaFinActividades] = useState("");
+ const [prevFechaInicio, setPrevFechaInicio] = useState("");
+ const [prevFechaFin, setPrevFechaFin] = useState("");
+ const [cantidadDias, setCantidadDias] = useState(0);  
+
   // Funciónes auxiliares y handlers para eventos
   const onSubmitTechnicalTrip = (data) => {
     console.log(data);
@@ -63,17 +67,9 @@ function InternationalTechnicalTrips() {
 
   const handleGenerateDocx = () => {
     const formTripWothinProject = methods.getValues();
-    if (formTripWothinProject.rolEnProyecto === "Director") {
-      generateMemoTripWithinProjec1(formTripWothinProject);
+    generateMemoTrip(formTripWothinProject);
       setShowDownloadSection(false);
-    }
-    if (
-      formTripWothinProject.rolEnProyecto === "Codirector" ||
-      formTripWothinProject.rolEnProyecto === "Colaborador"
-    ) {
-      generateMemoTripWithinProjec2(formTripWothinProject);
-      setShowDownloadSection(false);
-    }
+
   };
 
   const handleGeneratePdf = () => {
@@ -88,46 +84,39 @@ function InternationalTechnicalTrips() {
     setShowDownloadSection(false);
   };
 
-  const handleDownloadAll = () => {
-    console.log("Descargando todos los documentos");
-    const formTripWothinProject = methods.getValues();
-    handleGenerateDocx(formTripWothinProject);
-    handleGeneratePdf(formTripWothinProject);
-    handleGeneratePdf2(formTripWothinProject);
+  const handleDownloadAll = async () => {
+    setLoading(true);
+    const zip = new JSZip();
+    const formTripData = methods.getValues();
+    const jsonBlob = handleDownloadJson(true);
+  
+    const memo = await generateMemoTrip(formTripData, true);
+    const anexoA = await generateAnexoATripWithingProject(formTripData, true);
+    const anexoB2 = await generateAnexoB2WithinProject(formTripData, true);
+    zip.file("Formulario para participación en viajes técnicos dentro de proyectos.json", jsonBlob);
+    zip.file("Memorando - Solicitud para viaje técnico.docx", memo);
+    zip.file("AnexoA - Solicitud de viaticos EPN.pdf", anexoA);
+    zip.file("Anexo 2B - Formulario para participación en viajes técnicos dentro de proyectos.pdf", anexoB2);
+  
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "Documentos Viaje Técnico Dentro de Proyectos.zip"); 
+    setLoading(false);
+    setShowDownloadSection(false);
   };
+  
 
   const handleClearForm = () => {
-    localStorage.removeItem(formStorageKey);
-    localStorage.removeItem(daysStorageKey);
+    sessionStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
 
-  const extraerYCalcularFechas = useCallback((formData) => {
-    const { transporteIda = [], transporteRegreso = [] } = formData;
-    const fechaInicio = transporteIda[0]?.fechaSalida || "";
-    const fechaFin = transporteRegreso[transporteRegreso.length - 1]?.fechaLlegada || "";
-    calcularDiferenciaEnDias(fechaInicio, fechaFin);
-  },[]);
-
-  const calcularDiferenciaEnDias = (fechaInicioString, fechaFinString) => {
-    const fechaInicio = new Date(fechaInicioString);
-    const fechaFin = new Date(fechaFinString);
-    if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-      setDiferenciaEnDias(0);
-      localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: 0 }));
-      return;
-    }
-    const diferenciaEnDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
-    setDiferenciaEnDias(diferenciaEnDias);
-    localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: diferenciaEnDias }));
-  };
-
-  const handleDownloadJson = () => {
+  const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
+    if (returnDocument) return blob;
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Viajes Técnicos Dentro de Proyectos.json";
@@ -148,7 +137,7 @@ function InternationalTechnicalTrips() {
             keepTouched: false,
             keepIsSubmitted: false,
           });
-          localStorage.setItem(formStorageKey, JSON.stringify(json));
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }
@@ -157,58 +146,10 @@ function InternationalTechnicalTrips() {
     }
   };
   
-  const manejarTablas = useCallback(() => {
-    const initialTransporte = {
-      tipoTransporte: "Aéreo",
-      nombreTransporte: "",
-      ruta: "",
-      fechaSalida: "",
-      horaSalida: "",
-      fechaLlegada: "",
-      horaLlegada: "",
-    };
-    if (fieldsIda.length === 0) appendIda(initialTransporte);
-    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
-  },[appendIda,appendRegreso,fieldsIda,fieldsRegreso]);
-  
-  // Efecto para sincronizar con localStorage
-  useEffect(() => {
-    reset(formTechnicalTripWithinProjects);
-    extraerYCalcularFechas(formTechnicalTripWithinProjects);
-
-    // Suscribirse a los cambios en el formulario en tiempo real.
-    const subscription = watch((data) => {
-      localStorage.setItem(formStorageKey, JSON.stringify(data));
-      extraerYCalcularFechas(data);
-    });
-    return () => subscription.unsubscribe();
-  }, [extraerYCalcularFechas, watch, reset]);
-  
   //aqui el use efect donde van todo a el control de las validaciones entre los imputs
   useEffect(() => {
-    manejarTablas();
-    const sincronizarFechasCronogramaActividades = () => {
-      const formData = JSON.parse(localStorage.getItem(formStorageKey));
-      
-      if (formData) {
-        const fechaInicio = formData.transporteIda?.[0]?.fechaSalida || "";
-        const fechaFin = formData.transporteRegreso?.[formData.transporteRegreso.length - 1]?.fechaLlegada || "";
-        setFechaInicioEvento(fechaInicio);
-        setFechaFinEvento(fechaFin);
-      }
-      const diferenciaDias = JSON.parse(localStorage.getItem(daysStorageKey));
-      if (diferenciaDias) setDiferenciaEnDias(diferenciaDias.diferencia);
-    };
-    
-    
-    
-    // Mostrar el campo 'nombreDirector' solo para ciertos roles en el proyecto
-    if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
-      setShowInputDirector(true);
-    } else {
-      setShowInputDirector(false);
-      setValue("nombreDirector", ""); // Limpiar campo 'nombreDirector' cuando no aplica
-    }
+    if (fieldsIda.length === 0) appendIda(initialTransporte);
+    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
 
     // Limpiar los campos de cuenta bancaria si no se requieren viáticos
     if (!habilitarCampos) {
@@ -220,41 +161,67 @@ function InternationalTechnicalTrips() {
       clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
     }
 
-    if (diferenciaEnDias > 15) {
-      setshowInputJustificacion(true);
-       
-    } else {
-      setshowInputJustificacion(false);
-      setValue("justificacionComision", "No Aplica"); // Limpia el campo si la diferencia es 15 días o menos
-      setValue("justificacionComision", "");
-    }
-
-    sincronizarFechasCronogramaActividades();
-    const intervalId = setInterval(sincronizarFechasCronogramaActividades, 1000); // Cada 1 segundo
-    return () => clearInterval(intervalId);
   }, [
-    manejarTablas,
-    diferenciaEnDias,
     rolEnProyecto,
     habilitarCampos,
-    fieldsIda.length,
-    fieldsRegreso.length,
-    setShowInputDirector,
+    fieldsIda,
+    fieldsRegreso,
     setValue,
     clearErrors,
   ]);
 
-  //Actividades fijas inmutables
+    // UseEffect principal y separado para la suscrioción de cambios en el formulario
+  useEffect(() => {
+    reset(formData);
+    const subscription = watch((data) => {
+      sessionStorage.setItem(formStorageKey, JSON.stringify(data));
+      // Obtener las fechas de inicio y fin
+      const fechaInicio = data.transporteIda?.[0]?.fechaSalida || "";
+      const fechaFin = data.transporteRegreso?.length
+        ? data.transporteRegreso[data.transporteRegreso.length - 1]
+            ?.fechaLlegada
+        : "";
+      // Actualizar solo si las fechas han cambiado y no están vacías
+      if (fechaInicio !== prevFechaInicio && fechaInicio !== "" && fechaInicio !== fechaInicioActividades ) {
+        console.log("Fecha de inicio de actividades actualizada:", fechaInicio);
+        setFechaInicioActividades(fechaInicio);
+        setPrevFechaInicio(fechaInicio);
+      }
+      if (fechaFin !== prevFechaFin && fechaFin !== "" && fechaFin !== fechaFinActividades) {
+        console.log("Fecha de fin de actividades actualizada:", fechaFin);
+        setFechaFinActividades(fechaFin);
+        setPrevFechaFin(fechaFin);
+      }
+    });
+    
+
+    return () => subscription.unsubscribe();
+  }, [watch, reset, fechaFinActividades,fechaInicioActividades]);
+
+  // Segundo useEffect
   useEffect(() => { 
-    if (fechaInicioEventoActividades && fechaFinEventoActividades) {
-      const dates = generateDateRange(fechaInicioEventoActividades, fechaFinEventoActividades);
-      const newFields = dates.map(date => ({
-        fecha: date,
-        descripcion: ""
-      }));
-      replace(newFields); // Reemplaza las actividades inmutables con las nuevas fechas
+    if (fechaInicioActividades && fechaFinActividades && fechaInicioActividades !== "" && fechaFinActividades !== "") {
+      console.log(
+        "Esto se ejecuta solo si hay un cambio en las ,fechas de inicio o fin de actividades"
+      );
+      const currentFields = methods.getValues("actividadesInmutables") || [];
+      const dates = generateDateRange(
+        fechaInicioActividades,
+        fechaFinActividades
+      );
+      const newFields = dates.map((date) => {
+        const existingField = currentFields.find(
+          (field) => field.fecha === date
+        );
+        return {
+          fecha: date,
+          descripcion: existingField ? existingField.descripcion : "",
+        };
+      });
+      replaceInmutableFields(newFields);
+      setCantidadDias(newFields.length);
     }
-  }, [replace, fechaInicioEventoActividades, fechaFinEventoActividades]);
+  }, [fechaInicioActividades, fechaFinActividades]);
 
   return (
     <FormProvider {...methods}>
@@ -361,12 +328,12 @@ function InternationalTechnicalTrips() {
             />
 
             {/* Nombre del Director (si es necesario) */}
-            {showInputDirector && (
+            {watch("rolEnProyecto")!== "Director" && (
               <InputText
                 name="nombreDirector"
                 label="Nombre del Director del proyecto:"
                 rules={{ required: "El nombre del Director es requerido" }}
-                disabled={false}
+                disabled={watch("rolEnProyecto") === "Director"}
               />
             )}
 
@@ -499,7 +466,7 @@ function InternationalTechnicalTrips() {
                 caso."
             />
             <Label text="TRANSPORTE DE IDA" />
-            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento." />
+            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento, salida de campo." />
 
             <div className="scroll-table-container">
               <table className="activity-schedule-table">
@@ -649,14 +616,19 @@ function InternationalTechnicalTrips() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
-                                    value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-                                  
+                                    value >= fechaSalida ||
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+
                                   // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
                                   validateFechaLlegadaIda: (value) =>
                                     index === fieldsIda.length - 1
-                                      ? validateFechaLlegadaIda(value, fechaInicioEvento)
+                                      ? validateFechaLlegadaIda(
+                                          value,
+                                          fechaInicioEvento
+                                        )
                                       : true, // Si no es el último campo, no aplica esta validación
                                 },
                               }
@@ -696,7 +668,12 @@ function InternationalTechnicalTrips() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeIda(index)}
+                            onClick={() => {
+                              if(fieldsIda.length > 1){
+
+                                removeIda(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -706,9 +683,9 @@ function InternationalTechnicalTrips() {
                   })}
                 </tbody>
               </table>
-
               <ActionButton
                 onClick={() => {
+                  
                   appendIda({
                     tipoTransporte: "Aéreo",
                     nombreTransporte: "",
@@ -832,15 +809,21 @@ function InternationalTechnicalTrips() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
                                     value >= fechaLlegadaAnterior ||
                                     "La fecha de salida debe ser posterior a la fecha de llegada anterior",
-                                  
+
                                   // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
                                   validateRegreso: (value) =>
-                                    index === 0 ? validateFechaSalidaRegreso(value, fechaFinEvento) : true,
+                                    index === 0
+                                      ? validateFechaSalidaRegreso(
+                                          value,
+                                          fechaFinEvento
+                                        )
+                                      : true,
                                 },
                               }
                             )}
@@ -888,7 +871,7 @@ function InternationalTechnicalTrips() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today()||
+                                    value >= today() ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida ||
@@ -931,7 +914,12 @@ function InternationalTechnicalTrips() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeRegreso(index)}
+                            onClick={() => {
+                              if(fieldsRegreso.length > 1){
+
+                                removeRegreso(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -958,111 +946,103 @@ function InternationalTechnicalTrips() {
               />
             </div>
             
-            <div >
+            
+            <div>
             <LabelTitle text="CRONOGRAMA DE ACTIVIDADES" />
-                <LabelText
-                  text="Incluir desde la fecha de salida del país y días de traslado
-                  hasta el día de llegada al destino. <br />
-                  Hasta incluir la fecha de llegada al país."
-                />
 
-                {/* Tabla de actividades inmutables */}
-                <LabelText text="Fechas del Evento" />
-                <table className="activity-schedule-table">
-                  <thead>
-                    <tr>
-                      <th>Nro.</th>
-                      <th>Fecha</th>
-                      <th>Descripción de la Actividad a Realizar</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {immutableFields.map((field, index) => (
-                      <tr key={field.id}>
-                        <td>
-                          <input
-                            type="number"
-                            value={index + 1} // Asigna el número basado en el índice (1, 2, 3, etc.)
-                            readOnly
-                            className="form-input"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="date"
-                            id={`fechaInmutable-${index}`}
-                            className="form-input"
-                            {...register(
-                              `actividadesInmutables[${index}].fecha`,
-                              {
-                                required: "Este campo es requerido",
-                              }
-                            )}
-                            readOnly // Campo de fecha de solo lectura
-                          />
-                          {errors.actividadesInmutables &&
-                            errors.actividadesInmutables[index]?.fecha && (
-                              <span className="error-text">
-                                {
-                                  errors.actividadesInmutables[index].fecha
-                                    .message
-                                }
-                              </span>
-                            )}
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            id={`descripcionInmutable-${index}`}
-                            className="form-input"
-                            {...register(
-                              `actividadesInmutables[${index}].descripcion`,
-                              {
-                                required: "Este campo es requerido",
-                              }
-                            )}
-                            placeholder="Describe la actividad a realizar"
-                          />
-                          {errors.actividadesInmutables &&
-                            errors.actividadesInmutables[index]
-                              ?.descripcion && (
-                              <span className="error-text">
-                                {
-                                  errors.actividadesInmutables[index]
-                                    .descripcion.message
-                                }
-                              </span>
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <LabelText
+              text="Incluir desde la fecha de salida del país y días de traslado
+              hasta el día de llegada al destino. <br />
+              Hasta incluir la fecha de llegada al país."
+            />
+            <table className="activity-schedule-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción de la Actividad a Realizar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {immutableFields.map((field, index) => (
+                  <tr
+                    key={field.id}
+                    className={index % 2 === 0 ? "row-even" : "row-odd"}
+                  >
+                    {/* Campo de Fecha */}
+                    <td>
+                      <input
+                        type="date"
+                        id={`actividadesInmutables[${index}].fecha`}
+                        className="form-input"
+                        {...register(`actividadesInmutables[${index}].fecha`, {
+                          required: "La fecha es requerida",
+                        })}
+                        value={field.fecha} // Valor predefinido de la fecha
+                        readOnly
+                      />
+                      {errors.actividadesInmutables &&
+                        errors.actividadesInmutables[index]?.fecha && (
+                          <span className="error-text">
+                            {errors.actividadesInmutables[index].fecha.message}
+                          </span>
+                        )}
+                    </td>
 
-              {/* Sección para justificar la comisión mayor a 15 días */}
-              {showInputJustificacion && (
-               <div>
-               <LabelTitle
-                 text=" Justificar la necesidad de la comisión de servicios mayor
-                 a 15 días"
-               />
-               <LabelText
-                 text="Completar esta sección solo en caso de que la participación al
-                 evento requiera más de quince días de comisión de servicio."
-               />
-               <InputTextArea
-                 name="justificacionComision"
-                 label="Justificación de la comisión de servicios mayor a 15 días"
-                 placeholder="Escriba aquí la justificación."
-                 rules={{
-                   required: "Este campo es requerido",
-                 }}
-                 disabled={diferenciaEnDias <= 15}
-                 defaultValue="No Aplica"
-               />
-             </div>
-              ) }
+                    <td style={{ width: "100%" }}>
+                      <input
+                        type="text"
+                        id={`actividadesInmutables[${index}].descripcion`}
+                        className="form-input"
+                        placeholder={
+                          cantidadDias > 15
+                            ? "Descripción obligatoria de la actividad" // Placeholder si cantidadDias > 15
+                            : "No es necesario rellenar este campo solo se habilita si se supera los 15 dias "    // Placeholder si cantidadDias <= 15
+                        }
+                        {...register(
+                          `actividadesInmutables[${index}].descripcion`,
+                          {
+                            required: "La descripción es requerida" ,
+                          }
+                        )}
+                      />
+                      {errors.actividadesInmutables &&
+                        errors.actividadesInmutables[index]?.descripcion && (
+                          <span className="error-text">
+                            {
+                              errors.actividadesInmutables[index].descripcion
+                                .message
+                            }
+                          </span>
+                        )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
             </div>
+          
+            {cantidadDias>15 &&
+            <div>
+                <LabelTitle
+                  text=" Justificar la necesidad de la comisión de servicios mayor
+                  a 15 días"
+                />
+                <LabelText
+                  text="Completar esta sección solo en caso de que la participación al
+                  evento requiera más de quince días de comisión de servicio."
+                />
+                <InputTextArea
+                  name="justificacionComision"
+                  label="Justificación de la comisión de servicios mayor a 15 días"
+                  rules={{
+                    required: "Este campo es requerido",
+                  }}
+                  defaultValue={"No Aplica"} // Valor por defecto si está deshabilitado
+                  disabled={cantidadDias <= 15}
+                />
+              </div>
+            }
+            
             <LabelTitle text="CUENTA BANCARIA DEL SERVIDOR PARA RECIBIR LOS VIÁTICOS" />
             <LabelText text="Obligatorio si marcó viáticos" />
 
@@ -1165,6 +1145,7 @@ function InternationalTechnicalTrips() {
                     onClick={handleDownloadAll}
                     label="Descargar Todo"
                     variant="success"
+                    loading={loading} // Usar el prop loading
                   />
                 </Col>
               </Row>

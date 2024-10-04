@@ -115,9 +115,10 @@ function NationalSamplingTripsForm() {
     console.log(data);
   };
 
-  const handleDownloadJson = () => {
+  const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json", });
+    if (returnDocument) return blob;
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Viajes de Muestreo Dentro de Proyectos.json";

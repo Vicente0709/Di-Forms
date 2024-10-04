@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider, useFieldArray } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray, set } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import JSZip from "jszip";
 
@@ -54,6 +54,7 @@ function ExternalInternationalEventsForm() {
   const habilitarCampos = seleccionViaticosSubsistencias === "SI";
   const metodoPago = watch("metodoPago");
    
+  const [loading, setLoading] = useState(false); //para el spinner de carga
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
   const [showInputArticulo, setShowInputArticulo] = useState(false);
@@ -136,18 +137,22 @@ function ExternalInternationalEventsForm() {
 
   // Función para descargar todos los documentos
   const handleDownloadAll = async() => {
+    setLoading(true); // Activar spinner
     const formData = methods.getValues();
+    const jsonBlob = handleDownloadJson(true);
     const docxBlob1 = await generateMemoOutsideProject1(formData,true);
     const docxBlob2 = await generateMemoOutsideProject2(formData,true);
     const pdfBlob1 = await generateAnexoAOutsideProject(formData,true);
     const pdfBlob2 = await generateAnexo8(formData,true);
     const zip = new JSZip();
+    zip.file("Datos Participación en Eventos Fuera de Proyecto.json", jsonBlob);
     zip.file("Memorando del Jefe del Departamento.docx", docxBlob1);
     zip.file("Memorando del profesor al jefe.docx", docxBlob2);
     zip.file("Anexo A - Solicitud de Viaticos EPN .pdf", pdfBlob1);
     zip.file("Anexo 8 - Participacion en eventos fuera de proyectos.pdf", pdfBlob2);
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, "Documentos de Participación en Eventos Fuera de Proyecto.zip");
+    setLoading(false); // Desactivar spinner
     setShowDownloadSection(false);
   };
 
@@ -159,9 +164,10 @@ function ExternalInternationalEventsForm() {
   };
 
   
-  const handleDownloadJson = () => {
+  const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues(); // Obtiene los datos actuales del formulario
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    if (returnDocument) return blob;
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Participación en Eventos Fuera de Proyecto.json"; // Nombre del archivo
@@ -1241,6 +1247,7 @@ function ExternalInternationalEventsForm() {
                   onClick={handleDownloadAll}
                   label="Desacargar Todo"
                   variant="success"
+                  loading={loading} // Usar el prop loading
                   />
                 </Col>
               </Row>

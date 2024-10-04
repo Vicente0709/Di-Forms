@@ -27,7 +27,7 @@ const formStorageKey = "formNationalWithinProjects";
 const daysStorageKey = "diasNationalWithinProjects";
 
 function NationalWithinProjectsForm() {
-  const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {};
+  const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {};
   // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
   const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formData });
   const { register, control, watch, setValue, reset, clearErrors, formState: { errors }} = methods;
@@ -56,6 +56,7 @@ function NationalWithinProjectsForm() {
   const habilitarInscripcion = seleccionInscripcionform === "SI";
   
   // Estados locales para mostrar/ocultar campos
+  const [loading, setLoading] = useState(false); //para el spinner de carga
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
   const [showInputDirector, setShowInputDirector] = useState(false);
@@ -89,31 +90,38 @@ function NationalWithinProjectsForm() {
   };
 
   const handleDownloadAll = async() => {
+    setLoading(true); // Activar spinner
     const formData = methods.getValues();
+    const jsonBlob = handleDownloadJson(true);
     const docxBlob = await generateMemoWithinProject(formData,true);
     const pdfBlob = await generateAnexoAWithinProject(formData,true);
     const pdfBlob2 = await generateAnexo2WithinProject(formData,true);
     const zip = new JSZip();
+    zip.file(`Formulario para participacion en evento Nacional dentro de proyectos.json`, jsonBlob);
     zip.file(`Memorando solicitud para participar en evento académico.docx`, docxBlob);
     zip.file(`Anexo A - Solicitud de Viaticos EPN ${formData.codigoProyecto}.pdf`, pdfBlob);
     zip.file(`Anexo2_Formulario para salidas nacionales ${formData.codigoProyecto}.pdf`, pdfBlob2);
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, "Documentos participacion en eventos nacionales dentro de proyectos.zip");
-  
+    setLoading(false); // Desactivar
+    setShowDownloadSection(false);
   };
 
   const handleClearForm = () => {
-    localStorage.removeItem(formStorageKey);
-    localStorage.removeItem(daysStorageKey);
+    sessionStorage.removeItem(formStorageKey);
+    sessionStorage.removeItem(daysStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
   
-  const handleDownloadJson = () => {
+  const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
+
+    if (returnDocument) return blob;
+    if (returnDocument) return blob;
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Participación Nacional Dentro de Proyectos.json";
@@ -134,7 +142,7 @@ function NationalWithinProjectsForm() {
             keepTouched: false,
             keepIsSubmitted: false,
           });
-          localStorage.setItem(formStorageKey, JSON.stringify(json));
+          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
         } catch (err) {
           console.error("Error al cargar el archivo JSON:", err);
         }
@@ -155,12 +163,12 @@ function NationalWithinProjectsForm() {
     const fechaFin = new Date(fechaFinString);  
     if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
       setDiferenciaEnDias(0);
-      localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: 0 }));
+      sessionStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: 0 }));
       return;
     }
     const diferenciaEnDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
     setDiferenciaEnDias(diferenciaEnDias);
-    localStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: diferenciaEnDias }));
+    sessionStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: diferenciaEnDias }));
   };
 
   // Funciones auxiliares
@@ -217,7 +225,7 @@ function NationalWithinProjectsForm() {
     extraerYCalcularFechas(formData);
     
     const subscription = watch((data) => {
-      localStorage.setItem(formStorageKey, JSON.stringify(data));
+      sessionStorage.setItem(formStorageKey, JSON.stringify(data));
       setSeleccionInscripcion(data.inscripcion || "");
       extraerYCalcularFechas(data);
     });
@@ -263,7 +271,7 @@ function NationalWithinProjectsForm() {
     }
 
     const sincronizarFechasCronogramaActividades = () => {
-      const formData = JSON.parse(localStorage.getItem(formStorageKey));
+      const formData = JSON.parse(sessionStorage.getItem(formStorageKey));
       
       if (formData) {
         const fechaInicio = formData.transporteIda?.[0]?.fechaSalida || "";
@@ -271,7 +279,7 @@ function NationalWithinProjectsForm() {
         setFechaInicioEvento(fechaInicio);
         setFechaFinEvento(fechaFin);
       }
-      const diferenciaDias = JSON.parse(localStorage.getItem(daysStorageKey));
+      const diferenciaDias = JSON.parse(sessionStorage.getItem(daysStorageKey));
       if (diferenciaDias) setDiferenciaEnDias(diferenciaDias.diferencia);
     };
     
@@ -1513,6 +1521,7 @@ function NationalWithinProjectsForm() {
                     onClick={handleDownloadAll}
                     label="Descargar Todo"
                     variant="success"
+                    loading={loading} // Usar el prop loading
                   />
                 </Col>
               </Row>

@@ -747,10 +747,7 @@ export async function generateAnexo2WithinProject(data, returnDocument = false )
 }
 
 //Documentos de eventos Nacionales fuera de Proyectos
-export async function generateMemoNationalOutsideProject1(
-  data,
-  returnDocument = false
-) {
+export async function generateMemoNationalOutsideProject1( data, returnDocument = false) {
   const departament = capitalizeWords(data.departamento.toLowerCase());
   // Array para almacenar las solicitudes
   let solicitudes = [];
@@ -912,16 +909,16 @@ export async function generateMemoNationalOutsideProject1(
       },
     ],
   });
+  if (returnDocument) {
+    return Packer.toBlob(doc);
+  }
 
   Packer.toBlob(doc).then((blob) => {
     saveAs(blob, "Memorando para Jefe del Departamento al VIIV.docx");
   });
 }
 
-export async function generateMemoNationalOutsideProject2(
-  data,
-  returnDocument = false
-) {
+export async function generateMemoNationalOutsideProject2( data, returnDocument = false) {
   let solicitudes = [];
 
   // Verificar si se debe incluir "viáticos y subsistencias"
@@ -1083,16 +1080,17 @@ export async function generateMemoNationalOutsideProject2(
       },
     ],
   });
+  if (returnDocument) {
+    return Packer.toBlob(doc);
+  }
+
 
   Packer.toBlob(doc).then((blob) => {
     saveAs(blob, "Memorando del Profesor al Jefe.docx");
   });
 }
 
-export async function generateAnexo10NationalOutsideProject(
-  data,
-  returnDocument = false
-) {
+export async function generateAnexo10NationalOutsideProject(data, returnDocument = false) {
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
@@ -1137,17 +1135,6 @@ export async function generateAnexo10NationalOutsideProject(
             Marque con una "X" la opción y complete la información según
             corresponda
           </Text>
-        </View>
-
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Titulo del Evento:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>{data.tituloEvento}</Text>
-            </View>
-          </View>
         </View>
 
         <View style={styles.table}>
@@ -1464,7 +1451,9 @@ export async function generateAnexo10NationalOutsideProject(
   );
   // Convertir el documento PDF a un Blob
   const blob = await pdf(MyPDFDocument).toBlob();
-
+  if (returnDocument) {
+    return blob;
+  }
   // Descargar automáticamente el archivo PDF
   saveAs(
     blob,
@@ -1472,10 +1461,7 @@ export async function generateAnexo10NationalOutsideProject(
   );
 }
 
-export async function generateAnexoANationalOutsideProject(
-  data,
-  returnDocument = false
-) {
+export async function generateAnexoANationalOutsideProject( data, returnDocument = false) {
   const template = {
     schemas: schemasAnexoANational,
     basePdf: basePdfAnexoANational,
@@ -1588,5 +1574,9 @@ export async function generateAnexoANationalOutsideProject(
   const pdf = await generate({ template, plugins, inputs });
 
   const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  if (returnDocument) {
+    return blob;
+  }
+
   saveAs(blob, "Anexo 1 - Solicitud de viáticos EPN.pdf");
 }

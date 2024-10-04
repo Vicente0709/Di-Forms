@@ -25,7 +25,7 @@ import {
 } from "../utils/documentGenerator.js";
 import { validarCedulaEcuatoriana,validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
 const formStorageKey = "formInstitutionalServices"; // Clave para almacenar el formulario en localStorage
-const formData = JSON.parse(localStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
 function InstitutionalServicesForm(){
     const methods = useForm({
@@ -142,11 +142,12 @@ function InstitutionalServicesForm(){
 
    
   // Función para descargar el formulario como JSON
-  const handleDownloadJson = () => {
+  const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues(); // Obtiene los datos actuales del formulario
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
+    if (returnDocument) return blob;
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Pago de Publicaciones.json"; // Nombre del archivo

@@ -120,11 +120,12 @@ function PublicationsPaymentForm() {
   };
 
   // Función para descargar el formulario como JSON
-  const handleDownloadJson = () => {
+  const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues(); // Obtiene los datos actuales del formulario
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
     });
+    if (returnDocument) return blob;
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Pago de Publicaciones.json"; // Nombre del archivo
@@ -197,7 +198,7 @@ function PublicationsPaymentForm() {
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
-    localStorage.removeItem(formStorageKey);
+    sessionStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };

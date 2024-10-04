@@ -58,6 +58,7 @@ function ProjectInternationalEventsForm() {
   const [showDownloadSection, setShowDownloadSection] = useState(false);
 
   //manejadores de estado para actividades
+  const [loading, setLoading] = useState(false); //para el spinner de carga
   const [fechaInicioActividades, setFechaInicioActividades] = useState("");
   const [fechaFinActividades, setFechaFinActividades] = useState("");
   const [prevFechaInicio, setPrevFechaInicio] = useState("");
@@ -95,16 +96,20 @@ function ProjectInternationalEventsForm() {
   };
 
   const handleDownloadAll = async () => {
+    setLoading(true); // Activar spinner
+    const jsonBlob = handleDownloadJson(true);
     const formData = methods.getValues();
     const docxBlob = await generateMemorandoA(formData,true);
     const pdfBlob = await generateAnexoA(formData,true);
     const pdfBlob2 = await generateAnexo2A(formData,true);
     const zip = new JSZip();
+    zip.file("Formulario participación en eventos dentro de proyectos.json", jsonBlob);
     zip.file(`Memorando solicitud para participar en evento académico ${formData.codigoProyecto}.docx`, docxBlob);
     zip.file(`Anexo A - Solicitud de Viaticos EPN ${formData.codigoProyecto}.pdf`, pdfBlob);
     zip.file(`Anexo 2A - Formulario para participacion en eventos dentro de proyectos ${formData.codigoProyecto}.pdf`, pdfBlob2);
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, "Documentos participacion en eventos dentro de proyectos.zip");
+    setLoading(false); // Desactivar spinner
     setShowDownloadSection(false);
   };
   
@@ -114,9 +119,11 @@ function ProjectInternationalEventsForm() {
     window.location.reload();
   };
   
-  const handleDownloadJson = () => {
+  const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues(); // Obtiene los datos actuales del formulario
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+
+    if (returnDocument) return blob;
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "Participación en Eventos Dentro Proyectos.json"; // Nombre del archivo
@@ -256,13 +263,6 @@ function ProjectInternationalEventsForm() {
           Formulario para participación en eventos dentro de proyectos
         </h1>
         <div className="form-container">
-          <Label text="Descargar datos actuales en (.json)" />
-          {/* Botón para descargar el formulario como .json */}
-          <ActionButton
-            onClick={handleDownloadJson}
-            label="Descargar datos como JSON"
-            variant="success"
-          />
           <Label text="Cargar datos desde archivo (.json)" />
           {/* Input nativo para cargar un archivo JSON */}
           <input
@@ -1508,6 +1508,13 @@ function ProjectInternationalEventsForm() {
               </Button>
             </Col>
           </Row>
+           <Label text="Descargar datos actuales en (.json)" />
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
 
           {/* Sección de descarga de documentos, visible tras enviar el formulario */}
           {showDownloadSection && (
@@ -1545,6 +1552,7 @@ function ProjectInternationalEventsForm() {
                     onClick={handleDownloadAll}
                     label="Descargar Todo"
                     variant="success"
+                    loading={loading} // Usar el prop loading
                   />
                 </Col>
               </Row>
