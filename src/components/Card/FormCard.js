@@ -2,7 +2,7 @@ import React from "react";
 import { Card, Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-const FormCard = ({ title, description, imageSrc, altText, buttonText, path, ariaLabel }) => {
+const FormCard = ({ title, description, imageSrc, altText, buttonText, path, ariaLabel, documentDetails, style, className }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -10,8 +10,8 @@ const FormCard = ({ title, description, imageSrc, altText, buttonText, path, ari
   };
 
   return (
-    <Card border="primary" style={{ width: "100%", marginBottom: "20px" }}>
-      <Card.Body>
+    <Card border="primary" style={{ width: "100%", marginBottom: "20px", ...style }} className={className}>
+      <Card.Body className="d-flex flex-column">
         <Card.Title>{title}</Card.Title>
         <Card.Img
           variant="top"
@@ -20,7 +20,17 @@ const FormCard = ({ title, description, imageSrc, altText, buttonText, path, ari
           style={{ width: "100%", height: "150px", objectFit: "contain" }}
         />
         <Card.Text>{description}</Card.Text>
-        <Button variant="outline-primary" onClick={handleCardClick} aria-label={ariaLabel}>
+        {documentDetails && documentDetails.length > 0 && (
+          <div>
+            <strong>Documentos que se generarán:</strong>
+            <ul>
+              {documentDetails.map((detail, index) => (
+                <li key={index}>{detail}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <Button variant="outline-primary" onClick={handleCardClick} aria-label={ariaLabel} className="mt-auto">
           {buttonText}
         </Button>
       </Card.Body>

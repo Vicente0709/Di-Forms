@@ -9,15 +9,15 @@ import Footer from "./components/Footer";
 // Importación de las páginas de la aplicación
 import Home from "./pages/Home";
 import About from "./pages/About";
-import EventParticipationWithinProjects from "./pages/EventParticipationWithinProjects";
-import EventParticipationOutsideProjects from "./pages/EventParticipationOutsideProjects";
-import TechnicalTripWithinProjects from "./pages/TechnicalTripWithinProjects";
-import InscriptionPayment from "./pages/InscriptionPayment";
-import NationalWithinProject from "./pages/NationalWithinProject";
-import NationalOutsideProject from "./pages/NationalOutsideProject";
-import PublicationsPayment from "./pages/PublicationsPayment";
-import SamplingTripWithinProject from "./pages/SamplingTripWithinProject";
-
+import ProjectInternationalEvents from "./pages/events/ProjectInternationalEvents";
+import ExternalInternationalEvents from "./pages/events/ExternalInternationalEvents";
+import InternationalTechnicalTrips from "./pages/trips/InternationalTechnicalTrips";
+import InscriptionPayment from "./pages/services/InscriptionPayment";
+import ProjectNationalEvents from "./pages/events/ProjectNationalEvents";
+import ExternalNationalEvents from "./pages/events/ExternalNationalEvents";
+import PublicationsPayment from "./pages/services/PublicationsPayment";
+import NationalSamplingTrips from "./pages/trips/NationalSamplingTrips";
+import InstitutionalServices from "./pages/services/InstitutionalServices";
 // Importación del archivo CSS para los estilos de la aplicación
 import "./App.css";
 
@@ -48,14 +48,15 @@ function MainApp() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
-          <Route path="/EventParticipationWithinProjects" element={<EventParticipationWithinProjects />} />
-          <Route path="/EventParticipationOutsideProjects" element={<EventParticipationOutsideProjects />} />
-          <Route path="/TechnicalTripWithinProjects" element={<TechnicalTripWithinProjects />} />
+          <Route path="/ProjectInternationalEvents" element={<ProjectInternationalEvents />} />
+          <Route path="/ExternalInternationalEvents" element={<ExternalInternationalEvents />} />
+          <Route path="/InternationalTechnicalTrips" element={<InternationalTechnicalTrips />} />
           <Route path="/InscriptionPayment" element={<InscriptionPayment />} />
-          <Route path="/NationalWithinProject" element={<NationalWithinProject />} />
-          <Route path="/NationalOutsideProject" element={<NationalOutsideProject />} />
+          <Route path="/ProjectNationalEvents" element={<ProjectNationalEvents />} />
+          <Route path="/ExternalNationalEvents" element={<ExternalNationalEvents />} />
           <Route path="/PublicationsPayment" element={<PublicationsPayment />} />
-          <Route path="/SamplingTripWithinProject" element={<SamplingTripWithinProject />} />
+          <Route path="/NationalSamplingTrips" element={<NationalSamplingTrips />} />
+          <Route path="/InstitutionalServices" element={<InstitutionalServices />} />
         </Routes>
       </div>
       <Footer />

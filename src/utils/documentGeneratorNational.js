@@ -1,24 +1,15 @@
 import React from "react";
 import { Font } from "@react-pdf/renderer";
-import {
-  Page,
-  Text,
-  View,
-  Document as PDFDocument,
-  StyleSheet,
-  PDFDownloadLink,
-  pdf,
-} from "@react-pdf/renderer";
+import { Page, Text, View, Document as PDFDocument, StyleSheet, pdf,} from "@react-pdf/renderer";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { saveAs } from "file-saver";
 import { generate } from "@pdfme/generator";
 import { text, image, barcodes } from "@pdfme/schemas";
+import JSZip from "jszip";
 
-import { basePdfAnexo10 } from "../utilsNational/basePdfAnexo10";
-import { schemasAnexo10 } from "../utilsNational/schemasAnexo10";
 
-import { basePdfAnexoANational } from "../utilsNational/basePdfAnexoANational";
-import { schemasAnexoANational } from "../utilsNational/schemasAnexoANational";
+import { basePdfAnexoANational } from "../utils/basePdfAnexoANational";
+import { schemasAnexoANational } from "../utils/schemasAnexoANational";
 
 
 // Registra la fuente Roboto desde Google Fonts
@@ -237,541 +228,12 @@ const month = String(today.getMonth() + 1).padStart(2, "0"); // Los meses son 0-
 const year = today.getFullYear();
 const formattedDate = `${day}/${month}/${year}`;
 
-export async function generateMemoNationalOutsideProject1(data) {
-  const departament = capitalizeWords(data.departamento.toLowerCase());
-  // Array para almacenar las solicitudes
-  let solicitudes = [];
 
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push(" la asignación de viáticos y subsistencias");
-  }
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "pago de inscripción"
-  if (data.inscripcion === "SI") {
-    solicitudes.push(" el pago de inscripción");
-  }
 
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Formato de memorando para Jefe del Departamento al VIIV",
-                bold: true,
-                size: 24,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 300 },
-            alignment: "start",
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PARA:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Dr. Marco Santorum",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "ASUNTO:\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje nacional",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "De mi consideración:",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${departament}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, Ecuador, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}.`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Se adjunta la documentación correspondiente",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Con sentimientos de distinguida consideración.",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Atentamente,",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: data.nombreJefeInmediato.toUpperCase(),
-                size: 20,
-                bold: true,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: data.cargoJefeInmediato.toUpperCase(),
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando para Jefe del Departamento al VIIV.docx");
-  });
-}
-
-export async function generateMemoNationalOutsideProject2(data) {
-  let solicitudes = [];
-
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push(" la asignación de viáticos y subsistencias");
-  }
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "pago de inscripción"
-  if (data.inscripcion === "SI") {
-    solicitudes.push(" el pago de inscripción");
-  }
-
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Formato de memorando del Profesor al Jefe",
-                bold: true,
-                size: 24,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 300 },
-            alignment: "start",
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PARA:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: data.nombreJefeInmediato,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `\t\t${data.cargoJefeInmediato}`,
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "ASUNTO:\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje nacional",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "De mi consideración:",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Por medio del presente solicito el aval y permiso para participar en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, Ecuador, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}.`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Se adjunta la documentación correspondiente",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Con sentimientos de distinguida consideración.",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Atentamente,",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text:
-                  data.nombres.toUpperCase() +
-                  " " +
-                  data.apellidos.toUpperCase(),
-                size: 20,
-                bold: true,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Profesor",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando del Profesor al Jefe.docx");
-  });
-}
-
-export async function generateAnexo10NationalOutsideProject(data) {
-  const template = {
-    schemas: schemasAnexo10,
-    basePdf: basePdfAnexo10,
-  };
-
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-
-  let valorInscripcionStr = "";
-  let fechaPagoInscripcionStr = "";
-
-  if (data && data.inscripciones && Array.isArray(data.inscripciones)) {
-    data.inscripciones.forEach((inscripcion) => {
-      if (data.inscripcion === "SI") {
-        if (inscripcion.valorInscripcion) {
-          valorInscripcionStr += `$${inscripcion.valorInscripcion}\n`;
-        }
-
-        if (inscripcion.pagoLimite && inscripcion.limiteFecha) {
-          fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${formatDate(
-            inscripcion.limiteFecha
-          )}\n`;
-        }
-      } else if (data.inscripcion === "NO") {
-        // Manejo del caso en que data.inscripcion es "NO"
-        valorInscripcionStr += "\n";
-        fechaPagoInscripcionStr += "\n";
-      }
-    });
-  }
-
-  const inputs = [
-    {
-      nombresApellidos:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      fechaPedido: formattedDate,
-      departamento: data.departamento,
-      tituloEvento: data.tituloEvento,
-      ciudadPaisEvento: data.ciudadEvento + ", Ecuador",
-      fechaInicioEvento: formatDate(data.fechaInicioEvento),
-      fechaFinEvento: formatDate(data.fechaFinEvento),
-      RelevanciaAcademica: data.RelevanciaAcademica,
-      tituloPonencia: data.tituloPonencia,
-      tipoPonencia: data.tipoPonencia,
-      detalleArticuloSI: data.detalleArticuloSI,
-      articuloPublicadoSi: data.articuloPublicado === "SI" ? "X" : "",
-      articuloPublicadoNo: data.articuloPublicado === "NO" ? "X" : "",
-      pasajesAereosSi: data.pasajesAereos === "SI" ? "X" : "",
-      pasajesAereosNo: data.pasajesAereos === "NO" ? "X" : "",
-      viaticosSubsistenciasSi: data.viaticosSubsistencias === "SI" ? "X" : "",
-      viaticosSubsistenciasNo: data.viaticosSubsistencias === "NO" ? "X" : "",
-      inscripcionSi: data.inscripcion === "SI" ? "X" : "",
-      inscripcionNo: data.inscripcion === "NO" ? "X" : "",
-      valorInscripcion: valorInscripcionStr.trim(),
-      pagoLimiteFecha: fechaPagoInscripcionStr.trim(),
-      metodoPagoTransferencia:
-        data.metodoPago === "Transferencia" && data.inscripcion === "SI"
-          ? "X"
-          : "",
-      metodoPagoOtra:
-        data.metodoPago === "Otra" && data.inscripcion === "SI" ? "X" : "",
-      nombresAp:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      departament: data.puesto.toUpperCase(),
-    },
-  ];
-
-  const pdf = await generate({ template, plugins, inputs });
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-
-  saveAs(
-    blob,
-    "Anexo 10 - Formulario salidas nacionales fuera de proyecto EPN.pdf"
-  );
-}
-
-export async function generateAnexoANationalOutsideProject(data) {
-  const template = {
-    schemas: schemasAnexoANational,
-    basePdf: basePdfAnexoANational,
-  };
-
-  // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
-  const transporte = data.transporteIda.concat(data.transporteRegreso);
-
-  const ultimaFechaLlegada =
-    transporte.length > 0
-      ? transporte[transporte.length - 1]?.fechaLlegada
-      : "";
-  const ultimaHoraLlegada =
-    transporte.length > 0 ? transporte[transporte.length - 1]?.horaLlegada : "";
-
-  var ponentciaText = "";
-  if (
-    data.tituloPonencia &&
-    data.tituloPonencia.trim() !== "" &&
-    data.tituloPonencia.trim() !== "No aplica"
-  ) {
-    ponentciaText =
-      " Para la presentación de la ponencia '" +
-      data.tituloPonencia +
-      "' del tipo " +
-      data.tipoPonencia;
-  } else {
-    ponentciaText = "";
-  }
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-  const transporteInfo = {};
-
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-  for (let i = 0; i < 6; i++) {
-    transporteInfo[`transporteTipo${i + 1}`] =
-      transporte[i]?.tipoTransporte || "";
-    transporteInfo[`transporteNombre${i + 1}`] =
-      transporte[i]?.nombreTransporte || "";
-    transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
-    transporteInfo[`transporteFechaS${i + 1}`] =
-      formatDate(transporte[i]?.fechaSalida) || "";
-    transporteInfo[`transporteFechaSH${i + 1}`] =
-      transporte[i]?.horaSalida || "";
-    transporteInfo[`transporteFechaL${i + 1}`] =
-      formatDate(transporte[i]?.fechaLlegada) || "";
-    transporteInfo[`transporteFechaLH${i + 1}`] =
-      transporte[i]?.horaLlegada || "";
-  }
-
-  const inputs = [
-    {
-      fechaSolicitud: formattedDate,
-      viaticos: data.viaticosSubsistencias === "SI" ? "X" : "",
-      movilizacion: data.viaticosSubsistencias === "SI" ? "X" : "",
-      subsistencias: data.viaticosSubsistencias === "SI" ? "X" : "",
-      alimentacion: data.viaticosSubsistencias === "SI" ? "X" : "",
-      nombresCompletos:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      lugar: data.ciudadEvento + ", Ecuador",
-      puesto: data.puesto,
-      unidadPerteneciente: data.departamento,
-
-      fechaSalida: formatDate(data.transporteIda[0]?.fechaSalida),
-      horaSalida: data.transporteIda[0]?.horaSalida,
-
-      fechaLlegada: formatDate(ultimaFechaLlegada),
-      horaLlegada: ultimaHoraLlegada,
-
-      servidores:
-        data.apellidos.toUpperCase() +
-        " " +
-        data.nombres.toUpperCase() +
-        ". " +
-        data.servidores.toUpperCase(),
-
-      actividades:
-        "Asistencia al evento '" +
-        data.tituloEvento +
-        "', que tendrá lugar del " +
-        data.fechaInicioEvento +
-        " al " +
-        data.fechaFinEvento +
-        " en la ciudad de " +
-        data.ciudadEvento +
-        ", Ecuador." +
-        ponentciaText,
-
-      ...transporteInfo,
-
-      banco: data.nombreBanco,
-      bancoTipoCuenta: data.tipoCuenta,
-      numeroCuenta: data.numeroCuenta,
-
-      nombresCompletos2:
-        data.nombres.toUpperCase() +
-        " " +
-        data.apellidos.toUpperCase() +
-        "\n" +
-        data.puesto.toUpperCase() +
-        "\n" +
-        data.cedula,
-
-      nombresCompletosJefeInmediato:
-        data.nombreJefeInmediato.toUpperCase() +
-        "\n" +
-        data.cargoJefeInmediato.toUpperCase(),
-    },
-  ];
-
-  const pdf = await generate({ template, plugins, inputs });
-
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(blob, "Anexo 1 - Solicitud de viáticos EPN.pdf");
-}
-
-export function generateMemoWithinProject(data) {
-  const nombresApellidos = capitalizeWords(
-    (data.nombres + " " + data.apellidos).toLowerCase()
-  );
+export function generateMemoSamplingTripWithinProject(data,returnDocument = false) {
+  // Crear un texto de solicitud en función de los campos pasajesAereos, viaticosSubsistencias e inscripción
   let solicitudOracion = "Para lo cual solicito ";
-
-  // Array para almacenar las solicitudes
+  
   let solicitudes = [];
   if (data.pasajesAereos === "SI") {
     solicitudes.push("la compra de pasajes aéreos");
@@ -783,38 +245,36 @@ export function generateMemoWithinProject(data) {
     solicitudes.push("el pago de inscripción");
   }
 
-  // Construir la oración final
   if (solicitudes.length > 0) {
-    solicitudOracion += solicitudes.join(", ") + ".";
+    solicitudOracion += solicitudes.join(" y ") + ".";
   } else {
     solicitudOracion = "";
   }
 
-  // Determinar el texto según el rol en el proyecto
-  let cuerpoMemorando;
-  if (data.rolEnProyecto === "Director") {
-    cuerpoMemorando = `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`;
-  } else {
-    cuerpoMemorando = `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr./Sra. "${nombresApellidos}", ${data.rolEnProyecto} del proyecto, pueda participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`;
-  }
+  // Generar el cuerpo del memorando
+  const cuerpoMemorando = `En mi calidad de Director del Proyecto ${data.codigoProyecto}, solicito se realicen los trámites pertinentes para la salida de campo y de muestreo, a realizarse del ${data.fechaInicioViaje} al ${data.fechaFinViaje} en la ciudad de ${data.ciudad}, para lo cual autorizo el gasto para que se gestione ${solicitudOracion}`;
 
+  // Crear el documento .docx
   const doc = new Document({
     sections: [
       {
         properties: {},
         children: [
+          // Título del memorando
           new Paragraph({
             children: [
               new TextRun({
-                text: "Formato de memorando PARTICIPACION EN EVENTO NACIONAL DENTRO DE PROYECTO",
+                text: "MEMORANDO - SALIDA DE CAMPO Y DE MUESTREO",
                 bold: true,
                 size: 24,
                 font: "Aptos (Cuerpo)",
               }),
             ],
             spacing: { after: 300 },
-            alignment: "start",
+            alignment: "center",
           }),
+
+          // "PARA:" sección
           new Paragraph({
             children: [
               new TextRun({
@@ -831,17 +291,8 @@ export function generateMemoWithinProject(data) {
             ],
             spacing: { after: 100 },
           }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
+
+          // Asunto del memorando
           new Paragraph({
             children: [
               new TextRun({
@@ -851,13 +302,15 @@ export function generateMemoWithinProject(data) {
                 font: "Aptos (Cuerpo)",
               }),
               new TextRun({
-                text: `Solicitud para participar en evento académico/${data.codigoProyecto}`,
+                text: `Autorización de gasto y solicitud para salida de campo y de muestreo/${data.codigoProyecto}`,
                 size: 22,
                 font: "Aptos (Cuerpo)",
               }),
             ],
             spacing: { after: 200 },
           }),
+
+          // Cuerpo del memorando
           new Paragraph({
             children: [
               new TextRun({
@@ -868,6 +321,8 @@ export function generateMemoWithinProject(data) {
             ],
             spacing: { after: 300 },
           }),
+
+          // Despedida
           new Paragraph({
             children: [
               new TextRun({
@@ -888,6 +343,8 @@ export function generateMemoWithinProject(data) {
             ],
             spacing: { after: 200 },
           }),
+
+          // Firma
           new Paragraph({
             children: [
               new TextRun({
@@ -898,15 +355,12 @@ export function generateMemoWithinProject(data) {
             ],
             spacing: { after: 200 },
           }),
+
+          // Nombre del director del proyecto
           new Paragraph({
             children: [
               new TextRun({
-                text:
-                  data.rolEnProyecto === "Director"
-                    ? data.nombres.toUpperCase() +
-                      " " +
-                      data.apellidos.toUpperCase()
-                    : data.nombreDirector.toUpperCase(),
+                text: data.nombreDirector.toUpperCase(),
                 size: 20,
                 bold: true,
                 font: "Times New Roman",
@@ -914,6 +368,8 @@ export function generateMemoWithinProject(data) {
             ],
             spacing: { after: 100 },
           }),
+
+          // Cargo del firmante
           new Paragraph({
             children: [
               new TextRun({
@@ -928,15 +384,97 @@ export function generateMemoWithinProject(data) {
     ],
   });
 
+  // Guardar el archivo como .docx
   Packer.toBlob(doc).then((blob) => {
     saveAs(
       blob,
-      `Memorando solicitud para participar en evento académico ${data.codigoProyecto}.docx`
+      `Memorando solicitud salida de campo ${data.codigoProyecto}.docx`
     );
   });
 }
 
-export async function generateAnexoAWithinProject(data) {
+export async function NationalSamplingTrips(data,returnDocument = false) {
+  const template = {
+    schemas: schemasAnexoANational,
+    basePdf: basePdfAnexoANational,
+  };
+
+  const transporte = data.transporteIda.concat(data.transporteRegreso);
+  const ultimaFechaLlegada = transporte.length > 0 ? transporte[transporte.length - 1]?.fechaLlegada : "";
+  const ultimaHoraLlegada = transporte.length > 0 ? transporte[transporte.length - 1]?.horaLlegada : "";
+
+
+  let servidoresText = "";
+  for (const participante of data.participante) {
+    if (servidoresText) {
+      servidoresText += ", ";
+    }
+    servidoresText += participante.nombre.toUpperCase();
+  }
+
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+
+  const zip = new JSZip();
+
+  for (const participante of data.participante) {
+    const transporteInfo = {};
+    for (let i = 0; i < 8; i++) {
+      transporteInfo[`transporteTipo${i + 1}`] = transporte[i]?.tipoTransporte || "";
+      transporteInfo[`transporteNombre${i + 1}`] = transporte[i]?.nombreTransporte || "";
+      transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
+      transporteInfo[`transporteFechaS${i + 1}`] = formatDate(transporte[i]?.fechaSalida) || "";
+      transporteInfo[`transporteFechaSH${i + 1}`] = transporte[i]?.horaSalida || "";
+      transporteInfo[`transporteFechaL${i + 1}`] = formatDate(transporte[i]?.fechaLlegada) || "";
+      transporteInfo[`transporteFechaLH${i + 1}`] = transporte[i]?.horaLlegada || "";
+    }
+
+    const inputs = [
+      {
+        fechaSolicitud: formattedDate,
+        viaticos: participante.viaticos ? "X" : "",
+        movilizacion: participante.viaticos ? "X" : "",
+        subsistencias: participante.viaticos ? "X" : "",
+        alimentacion: participante.viaticos ? "X" : "",
+
+        nombresCompletos: participante.nombre.toUpperCase(),
+        lugar: data.ciudad + ", Ecuador",
+        puesto: participante.cargo,
+        unidadPerteneciente: participante.departamento,
+
+        fechaSalida: formatDate(data.transporteIda[0]?.fechaSalida),
+        horaSalida: data.transporteIda[0]?.horaSalida,
+
+        fechaLlegada: formatDate(ultimaFechaLlegada),
+        horaLlegada: ultimaHoraLlegada,
+
+        servidores: participante.nombre.toUpperCase() + servidoresText.toUpperCase(),
+
+        actividades: "Dentro de las actividades del proyecto  " + data.codigoProyecto + " titulado  '" + data.tituloProyecto + "', que tendrá lugar del  " + data.fechaInicioEvento + "  al  " + data.fechaFinEvento + " en la ciudad de  " + data.ciudadEvento + ", Ecuador. ",
+
+        ...transporteInfo,
+
+        banco: participante.viaticos? participante.banco: "",
+        bancoTipoCuenta: participante.viaticos? participante.tipoCuenta: "",
+        numeroCuenta: participante.viaticos? participante.numeroCuenta: "",
+
+        nombresCompletos2: participante.nombre.toUpperCase() + "\n" + participante.cargo.toUpperCase() + "\n" + participante.cedula,
+
+        nombresCompletosJefeInmediato: participante.nombreJefeInmediato.toUpperCase() + "\n" + participante.cargoJefeInmediato.toUpperCase(),
+      },
+    ];
+
+    const pdf = await generate({ template, plugins, inputs });
+    const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+
+    zip.file(`AnexoA_${participante.nombre.replace(/\s+/g, '_')}.pdf`, blob);
+  }
+
+  const zipBlob = await zip.generateAsync({ type: "blob" });
+  saveAs(zipBlob, "AnexosA.zip");
+}
+
+
+export async function generateAnexoASamplingTripWithinProject(data,returnDocument = false) {
   const template = {
     schemas: schemasAnexoANational,
     basePdf: basePdfAnexoANational,
@@ -963,9 +501,12 @@ export async function generateAnexoAWithinProject(data) {
     ponentciaText = "";
   }
 
-  var servidoresText = "";
-  if (data.servidores && data.servidores.trim() !== "") {
-    servidoresText = ", " + data.servidores;
+  // Concatenación de servidores/personal a trasladarse
+  let servidoresText = "";
+  if (data.participante && data.participante.length > 0) {
+    servidoresText = data.participante
+      .map((p) => p.nombre + " (" + p.rol + ")")
+      .join(", ");
   }
 
   const plugins = { text, image, qrcode: barcodes.qrcode };
@@ -996,9 +537,10 @@ export async function generateAnexoAWithinProject(data) {
       alimentacion: data.viaticosSubsistencias === "SI" ? "X" : "",
 
       nombresCompletos:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      lugar: data.ciudadEvento + ", " + data.paisEvento,
-      puesto: data.cargo,
+      data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
+
+      lugar: data.ciudad,
+      puesto: data.cargo ==="" ? "" : data.cargo,
       unidadPerteneciente: data.departamento,
 
       fechaSalida: formatDate(data.transporteIda[0]?.fechaSalida),
@@ -1007,35 +549,26 @@ export async function generateAnexoAWithinProject(data) {
       fechaLlegada: formatDate(ultimaFechaLlegada),
       horaLlegada: ultimaHoraLlegada,
 
-      servidores:
-        data.apellidos.toUpperCase() +
-        " " +
-        data.nombres.toUpperCase() +
-        servidoresText.toUpperCase(),
+      servidores: servidoresText.toUpperCase(),
 
       actividades:
         "Dentro de las actividades del proyecto  " +
         data.codigoProyecto +
         " titulado  '" +
         data.tituloProyecto +
-        "'  se llevará a cabo la participación en el evento  '" +
-        data.tituloEvento +
-        "', que tendrá lugar del  " +
-        data.fechaInicioEvento +
+        "'  se llevará a cabo la salida de campo y de muestreo, que tendrá lugar del  " +
+        data.fechaInicioViaje +
         "  al  " +
-        data.fechaFinEvento +
+        data.fechaFinViaje +
         " en la ciudad de  " +
-        data.ciudadEvento +
-        "," +
-        data.paisEvento +
-        ". " +
-        ponentciaText,
+        data.ciudad +
+        ".",
 
       ...transporteInfo,
 
-      banco: data.nombreBanco,
-      bancoTipoCuenta: data.tipoCuenta,
-      numeroCuenta: data.numeroCuenta,
+      banco: data.nombreBanco || "",
+      bancoTipoCuenta: data.tipoCuenta || "",
+      numeroCuenta: data.numeroCuenta || "",
 
       nombresCompletos2:
         data.nombres.toUpperCase() +
@@ -1062,204 +595,127 @@ export async function generateAnexoAWithinProject(data) {
   );
 }
 
-export async function generateAnexo2WithinProject(data) {
+// color: '#2573ca',
+
+export async function generateAnexo7WithinProject(data,returnDocument = false) {
   const MyPDFDocument = (
     <PDFDocument>
-      <Page style={styles.page}>
-        {/* Título del formulario */}
-        <Text style={styles.header}>
-          Anexo 2 – Formulario para salidas nacionales dentro de proyectos
-        </Text>
-        {/* 1. Datos Generales */}
+  <Page style={styles.page}>
+    {/* Título del formulario */}
+    <Text style={styles.header}>
+      Anexo 7 – Formulario para salidas de campo y de muestreo y/o viajes
+      técnicos dentro de proyectos
+    </Text>
 
-        <Text style={styles.sectionTitle}>
-          1. DATOS DEL PROYECTO Y DEL INVESTIGADOR PARTICIPANTE
-        </Text>
+    {/* 1. Datos Generales */}
+    <View style={styles.sectionTitle}>
+      <Text>1. DATOS GENERALES PARA LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE TÉCNICO</Text>
+    </View>
+    <View style={styles.subSectionTitle}>
+      <Text>Complete según corresponda la siguiente información</Text>
+    </View>
+    <View style={styles.table}>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Código del Proyecto:</Text>
+        </View>
+        <View style={styles.tableColAuto}>
+          <Text style={styles.tableCellTextBlue}>
+            {data.codigoProyecto || "_________"}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Título de Proyecto:</Text>
+        </View>
+        <View style={styles.tableColAuto}>
+          <Text style={styles.tableCellTextBlue}>
+            {data.tituloProyecto || "_________"}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Departamento / Instituto:</Text>
+        </View>
+        <View style={styles.tableCol}>
+          <Text style={styles.tableCellTextBlue}>
+            {data.departamento || "_________"}
+          </Text>
+        </View>
+      </View>
 
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol40}>
-              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
-            </View>
-            <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.codigoProyecto || "_________"}
-              </Text>
-            </View>
+      {/* Fila de encabezado (títulos) */}
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol50}>
+          <Text style={styles.tableCellText}>Personal a trasladarse:</Text>
+        </View>
+        <View style={styles.tableCol50}>
+          <Text style={styles.tableCellText}>Rol en el Proyecto:</Text>
+        </View>
+      </View>
+
+      {/* Filas dinámicas generadas con map */}
+      {data.participante.map((person, index) => (
+        <View key={index} style={styles.tableRow}>
+          <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlueCenter}>
+              {person.nombre || "_________"}
+            </Text>
           </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol40}>
-              <Text style={styles.tableCellText}>Título de Proyecto:</Text>
-            </View>
-            <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.tituloProyecto || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol40}>
-              <Text style={styles.tableCellText}>
-                Nombres Completo del Participante:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {(data.apellidos ? data.apellidos.toUpperCase() : "_________") +
-                  " " +
-                  (data.nombres ? data.nombres.toUpperCase() : "_________")}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol40}>
-              <Text style={styles.tableCellText}>Rol en el Proyecto:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.rolEnProyecto || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol40}>
-              <Text style={styles.tableCellText}>
-                Departamento / Instituto:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.departamento || "_________"}
-              </Text>
-            </View>
+          <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlueCenter}>
+              {person.rol || "_________"}
+            </Text>
           </View>
         </View>
+      ))}
+    </View>
 
-        {/* 1. Datos del evento*/}
-
-        <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO</Text>
-
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Titulo del Evento:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.tituloEvento || "_________"}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Lugar del Evento:</Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.tableCellText}>Ciudad:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.ciudadEvento.toUpperCase() || "_________"}
-              </Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.tableCellText}>País:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.ciudadEvento.toUpperCase() || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Fecha del evento:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.textBlueCenter}>
-                {"Desde el  "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.fechaInicioEvento || "_________"}
-                  <Text style={styles.textBlueCenter}>
-                    {" hasta el "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.fechaFinEvento || "_________"}
-                    </Text>
-                  </Text>
-                </Text>
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Tipo de Evento:</Text>
-            </View>
-
-            <View style={styles.tableCol}>
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>
-                    - Conferencia o congreso:
-                  </Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.tipoEvento === "Conferencia o congreso" ? "X" : ""}
-                      <Text style={styles.baseText}>{" )"}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>- Taller:</Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.tipoEvento === "Taller" ? "X" : ""}
-                      <Text style={styles.baseText}>{" )"}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>
-                    - Otro evento académico::
-                  </Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.tipoEvento === "Otro evento académico" ? "X" : ""}
-                      <Text style={styles.baseText}>
-                        {" ) "}
-                        <Text style={styles.tableCellTextBlue}>
-                          {data.otroEventoEspecificar
-                            ? data.otroEventoEspecificar
-                            : " "}
-                        </Text>
-                      </Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.tableRow}>
+    {/* 2. Datos De la Salida de Campo */}
+    <View style={styles.sectionTitle}>
+      <Text>2. DATOS DE LA SALIDA DE CAMPO Y DE MUESTREO</Text>
+    </View>
+    <View style={styles.subSectionTitle}>
+      <Text>Complete según corresponda la siguiente información</Text>
+    </View>
+    <View style={styles.table}>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Lugar de la movilización:</Text>
+        </View>
+        <View style={styles.tableCol}>
+          <Text style={styles.tableCellTextBlue}>
+            {data.ciudad || "_________"}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Fecha de movilización:</Text>
+        </View>
+        <View style={styles.tableCol}>
+          <Text style={styles.baseText}>
+            {"Inicio: "}
+            <Text style={styles.tableCellTextBlue}>
+              {data.fechaInicioViaje || "_________"}
+            </Text>
+          </Text>
+        </View>
+        <View style={styles.tableCol}>
+          <Text style={styles.baseText}>
+            {"Fin: "}
+            <Text style={styles.tableCellTextBlue}>
+              {data.fechaFinViaje || "_________"}
+            </Text>
+          </Text>
+        </View>
+      </View>
+      <View style={styles.tableRow}>
             <View style={styles.tableCol25}>
               <Text style={styles.tableCellText}>
-                Solicita para participar en el evento:
+                Solicita:
               </Text>
             </View>
 
@@ -1272,8 +728,8 @@ export async function generateAnexo2WithinProject(data) {
                   <Text style={styles.baseText}>
                     {"( "}
                     <Text style={styles.tableCellTextBlue}>
-                      {data.participacionEvento ===
-                      "Presentación de artículo indexado"
+                      {data.pasajesAereos ===
+                      "SI"
                         ? "X"
                         : ""}
                       <Text style={styles.baseText}>{" )"}</Text>
@@ -1292,8 +748,8 @@ export async function generateAnexo2WithinProject(data) {
                   <Text style={styles.baseText}>
                     {"( "}
                     <Text style={styles.tableCellTextBlue}>
-                      {data.participacionEvento ===
-                      "Presentación de póster, abstract, charla magistral u otros"
+                      {data.viaticosSubsistencias ===
+                      "SI"
                         ? "X"
                         : ""}
                       <Text style={styles.baseText}>{" )"}</Text>
@@ -1301,520 +757,74 @@ export async function generateAnexo2WithinProject(data) {
                   </Text>
                 </View>
               </View>
-
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>- Inscripción:</Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.participacionEvento === "Asistencia" ? "X" : ""}
-                      <Text style={styles.baseText}>{" ) "}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
             </View>
           </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Título de la Ponencia:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.tituloPonencia ? data.tituloPonencia : "No Aplica"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>
-                Participación en el evento:
-              </Text>
-            </View>
+    </View>
 
-            <View style={styles.tableCol}>
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>- Inscripción:</Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.pasajesAereos === "SI" ? "X" : ""}
-                      <Text style={styles.baseText}>{" )"}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
+    {/* 3. Actividades */}
+    <View style={styles.sectionTitle}>
+      <Text>3. ACTIVIDADES DE LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE TÉCNICO</Text>
+    </View>
+    <View style={styles.subSectionTitle}>
+      <Text>Complete según corresponda la siguiente información</Text>
+    </View>
 
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>
-                    - Viáticos y subsistencias:
-                  </Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.viaticosSubsistencias === "SI" ? "X" : ""}
-                      <Text style={styles.baseText}>{" )"}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.tableRow}>
-                <View style={styles.tableCol40}>
-                  <Text style={styles.tableCellText}>- Inscripción:</Text>
-                </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.baseText}>
-                    {"( "}
-                    <Text style={styles.tableCellTextBlue}>
-                      {data.inscripcion === "SI" ? "X" : ""}
-                      <Text style={styles.baseText}>{" ) "}</Text>
-                    </Text>
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
+    {/* Encabezado de la tabla de actividades */}
+    <View style={styles.table}>
+      <View style={styles.tableRow}>
+        <View style={styles.tableCol25}>
+          <Text style={styles.tableCellText}>Fecha:</Text>
         </View>
-
-        {/* 1. Datos De la Salida de Campo*/}
-
-        <Text style={styles.sectionTitle}>
-          3. JUSTIFICACIÓN Y RELEVANCIA DE LA PARTICIPACIÓN{" "}
-        </Text>
-
-        <Text style={styles.baseText}>
-          3.1 Objetivo, resultado o producto del proyecto al que aporta la
-          participación en el evento
-        </Text>
-        <Text style={styles.textBlue}>{data.objetivoProyecto}</Text>
-        <Text style={styles.baseText}>
-          3.2 Relevancia del evento para su proyecto
-        </Text>
-        <Text style={styles.textBlue}>{data.relevanciaEvento}</Text>
-
-        <View>
-          <Text style={styles.sectionTitle}>
-            4. INFORMACIÓN DEL PAGO DE INSCRIPCIÓN{" "}
-          </Text>
-
-          <View style={styles.table}>
-            <View style={styles.tableRow}>
-              <View style={styles.tableCol15}>
-                <Text style={styles.tableCellText}>
-                  Valor de la Inscripción:
-                </Text>
-              </View>
-              <View style={styles.tableCol}>
-                {data.inscripciones.map((inscripcion, index) => (
-                  <View key={index} style={styles.tableRow}>
-                    <Text style={styles.tableCellTextBlueCenter}>
-                      {inscripcion.monedaPago && data.inscripcion === "SI"
-                        ? inscripcion.monedaPago +
-                          " " +
-                          (inscripcion.valorInscripcion || " ")
-                        : ""}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-
-              <View style={styles.tableCol15}>
-                <Text style={styles.tableCellText}>
-                  Fechas de pago de inscripción:
-                </Text>
-              </View>
-              <View style={styles.tableCol}>
-                {data.inscripciones.map((inscripcion, index) => (
-                  <View key={index} style={styles.tableRow}>
-                    <Text style={styles.tableCellTextBlueCenter}>
-                      {data.inscripciones.map((inscripcion, index) => (
-                        <View key={index} style={styles.tableRow}>
-                          <Text style={styles.tableCellTextBlueCenter}>
-                            {inscripcion.pagoLimite && data.inscripcion === "SI"
-                              ? inscripcion.pagoLimite +
-                                " " +
-                                (inscripcion.limiteFecha || " ")
-                              : ""}
-                          </Text>
-                        </View>
-                      ))}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-            <View style={styles.tableRow}>
-              <View style={styles.tableCol15}>
-                <Text style={styles.tableCellText}>Método de pago:</Text>
-              </View>
-              <View style={styles.tableCol}>
-                <View style={styles.tableRow}>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.baseText}>
-                      - Transferencia:
-                      <Text style={styles.baseText}>
-                        {"( "}
-                        <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Transferencia" &&
-                          data.inscripcion === "SI"
-                            ? "X"
-                            : ""}
-                          <Text style={styles.baseText}>{" )"}</Text>
-                        </Text>
-                      </Text>
-                    </Text>
-                    <Text style={styles.baseText}>
-                      Adjuntar los siguientes documentos:
-                    </Text>
-                    <Text style={styles.baseText}>
-                      a)Formulariodepagosalexterior, ,segunelcaso(Anexo4)
-                    </Text>
-                    <Text style={styles.baseText}>
-                      b) Documento donde se puede verificar el costo y fechas de
-                      la inscripción al evento
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.tableRow}>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.baseText}>
-                      - Otra(tarjetadecrédito,efectivo,etc...):
-                      <Text style={styles.baseText}>
-                        {"( "}
-                        <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Otra" &&
-                          data.inscripcion === "SI"
-                            ? "X"
-                            : ""}
-                          <Text style={styles.baseText}>{" )"}</Text>
-                        </Text>
-                      </Text>
-                    </Text>
-                    <Text style={styles.baseText}>
-                      Adjuntar los siguientes documentos:
-                    </Text>
-                    <Text style={styles.baseText}>
-                      a) Solicitud de REEMBOLSO. Incluir texto con justificación
-                      en el mismo memorando del requerimiento.
-                    </Text>
-                    <Text style={styles.baseText}>
-                      b)Documento donde se puede verificar el costo y fechas de
-                      la inscripción al evento.
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </View>
+        <View style={styles.tableCol75}>
+          <Text style={styles.tableCellText}>Actividad:</Text>
         </View>
+      </View>
 
-        {/* Etiqueta de Firma */}
-        <Text style={styles.baseText}>Firma del Solicitante:</Text>
-
-        {/* Espacio en blanco para la firma */}
-        <Text>{"\n\n\n"}</Text>
-
-        {/* Nombre completo */}
-        <Text style={styles.baseTextCenter}>________________________</Text>
-
-        {/* Nombre completo */}
-        <Text style={styles.tableCellTextBlueCenter}>
-          {`${data.nombres || "Nombre de prueba"} ${
-            data.apellidos || "Apellido de prueba"
-          }`}
-        </Text>
-
-        {/* Nombre del director y código de proyecto */}
-        <Text style={styles.tableCellTextBlueCenter}>
-          {`${
-            data.rolEnProyecto === "Director"
-              ? "Director " +data.nombres + " " + data.apellidos
-              : data.nombreDirector.toUpperCase()
-          } - ${data.codigoProyecto || "Código de prueba"}`}
-        </Text>
-      </Page>
-    </PDFDocument>
-  );
-
-  // Convertir el documento PDF a un Blob
-  const blob = await pdf(MyPDFDocument).toBlob();
-
-  // Descargar automáticamente el archivo PDF
-  saveAs(blob, "Anexo2_Formulario para salidas nacionales.pdf");
-}
-
-// color: '#2573ca',
-
-export async function generateAnexo7WithinProject(data) {
-  const MyPDFDocument = (
-    <PDFDocument>
-      <Page style={styles.page}>
-        {/* Título del formulario */}
-        <Text style={styles.header}>
-          Anexo 7 – Formulario para salidas de campo y de muestreo y/o viajes
-          técnicos dentro de proyectos
-        </Text>
-        {/* 1. Datos Generales */}
-        <View style={styles.sectionTitle}>
-          <Text>
-            1. DATOS GENERALES PARA LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE
-            TÉCNICO
-          </Text>
-        </View>
-        <View style={styles.subSectionTitle}>
-          <Text>Complete según corresponda la siguiente información</Text>
-        </View>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
-            </View>
-            <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.projectCode || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Título de Proyecto:</Text>
-            </View>
-            <View style={styles.tableColAuto}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.projectTitle || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>
-                Departamento / Instituto:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.department || "_________"}
-              </Text>
-            </View>
-          </View>
-
-          {/* Fila de encabezado (títulos) */}
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>Personal a trasladarse:</Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>Rol en el Proyecto:</Text>
-            </View>
-          </View>
-
-          {/* Filas dinámicas generadas con map */}
-          {data.personnelData.map((person, index) => (
-            <View key={index} style={styles.tableRow}>
-              <View style={styles.tableCol50}>
-                <Text style={styles.tableCellTextBlueCenter}>
-                  {person.name || "_________"}
-                </Text>
-              </View>
-              <View style={styles.tableCol50}>
-                <Text style={styles.tableCellTextBlueCenter}>
-                  {person.role || "_________"}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-        {/* 1. Datos De la Salida de Campo*/}
-        <View style={styles.sectionTitle}>
-          <Text>2. DATOS DE LA SALIDA DE CAMPO Y DE MUESTREO</Text>
-        </View>
-        <View style={styles.subSectionTitle}>
-          <Text>Complete según corresponda la siguiente información</Text>
-        </View>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>
-                Lugar de la movilización:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellTextBlue}>
-                {data.destination || "_________"}
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Fecha de movilizacion:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"Inicio: "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.start || "_________"}
-                </Text>
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"Fin: "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.end || "_________"}
-                </Text>
-              </Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Solicita:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.tableCellText}>Pasajes aéreos:</Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.tableCellText}>
-                Viáticos y subsistencias:
-              </Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-            </View>
-            <View style={styles.tableCol15}>
-              <Text style={styles.tableCellText}>Inscripción:</Text>
-            </View>
-            <View style={styles.tableCol}>
-              <Text style={styles.baseText}>
-                {"SI( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-              <Text style={styles.baseText}>
-                {"NO( "}
-                <Text style={styles.tableCellTextBlue}>
-                  {data.date.example || "X"}
-                  <Text style={styles.baseText}>{" )"}</Text>
-                </Text>
-              </Text>
-            </View>
-          </View>
-        </View>
-        {/* 1. Detalle de actividades*/}
-        <View style={styles.sectionTitle}>
-          <Text>
-            3. ACTIVIDADES DE LA SALIDA DE CAMPO, DE MUESTREO Y/O VIAJE TÉCNICO
-          </Text>
-        </View>
-        <View style={styles.subSectionTitle}>
-          <Text>Complete según corresponda la siguiente información</Text>
-        </View>
-        {/* Encabezado de la tabla */}
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol25}>
-              <Text style={styles.tableCellText}>Fecha:</Text>
-            </View>
-            <View style={styles.tableCol75}>
-              <Text style={styles.tableCellText}>Actividad:</Text>
-            </View>
-          </View>
-
-          {/* Filas dinámicas de la tabla, basadas en el arreglo de actividades */}
-
-          {data.activities.map((activity, index) => (
-            <View key={index} style={styles.tableRow}>
-              <View style={styles.tableCol25}>
-                <Text style={styles.tableCellTextBlue}>
-                  {activity.date || "_________"}
-                </Text>
-              </View>
-              <View style={styles.tableCol75}>
-                <Text style={styles.tableCellTextBlue}>
-                  {activity.name || "_________"}
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-        {/* 1. Datos De la Salida de Campo*/}
-        <View style={styles.sectionTitle}>
-          <Text>4. PRODUCTOS DE LA SALIDA DE CAMPO Y DE MUESTREO </Text>
-        </View>
-        <View style={styles.subSectionTitle}>
-          <Text>Complete según corresponda la siguiente información</Text>
-        </View>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
+      {/* Filas dinámicas de la tabla de actividades */}
+      {data.actividadesInmutables.map((activity, index) => (
+        <View key={index} style={styles.tableRow}>
+          <View style={styles.tableCol25}>
             <Text style={styles.tableCellTextBlue}>
-              {data.objetivoProductos || "_________"}
+              {activity.fecha || "_________"}
+            </Text>
+          </View>
+          <View style={styles.tableCol75}>
+            <Text style={styles.tableCellTextBlue}>
+              {activity.descripcion || "_________"}
             </Text>
           </View>
         </View>
+      ))}
+    </View>
 
-        {/* Etiqueta de Firma */}
-        <Text style={styles.baseText}>Firma del Solicitante:</Text>
+    {/* 4. Objetivo del Proyecto */}
+    <View style={styles.sectionTitle}>
+      <Text>4. PRODUCTOS DE LA SALIDA DE CAMPO Y DE MUESTREO</Text>
+    </View>
+    <View style={styles.subSectionTitle}>
+      <Text>Complete según corresponda la siguiente información</Text>
+    </View>
+    
+    <Text style={styles.tableCellTextBlue}>
+      {data.objetivoViaje || "_________"}
+    </Text>
+      
 
-        {/* Espacio en blanco para la firma */}
-        <Text>{"\n\n\n"}</Text>
+    {/* Firma del Solicitante */}
+    <Text style={styles.baseText}>Firma del Solicitante:</Text>
+    <Text>{"\n\n\n"}</Text>
+    <Text>________________________</Text>
+    <Text style={styles.tableCellTextBlue}>
+      {data.nombreDirector || "_________"}
+    </Text>
 
-        {/* Nombre completo */}
-        <Text style={styles.baseText}>________________________</Text>
+    {/* Firma del Director */}
+    <Text style={styles.tableCellTextBlue}>
+      Director del Proyecto {data.codigoProyecto || "_________"}
+    </Text>
+  </Page>
+</PDFDocument>
 
-        {/* Nombre completo */}
-        <Text style={styles.tableCellTextBlue}>
-          {`${data.rolEnProyecto === "Director"
-              ? "Director " +data.nombres + " " + data.apellidos
-              : data.nombreDirector}`}
-        </Text>
-
-        {/* Nombre del director y código de proyecto */}
-        <Text style={styles.tableCellTextBlue}>
-          {`${ "Director del Proyecto " + data.codigoProyecto}`}
-        </Text>
-
-      </Page>
-    </PDFDocument>
   );
 
   // Convertir el documento PDF a un Blob

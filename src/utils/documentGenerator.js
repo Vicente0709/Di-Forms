@@ -9,28 +9,14 @@ import {
   View,
   Document as PDFDocument,
   StyleSheet,
-  PDFDownloadLink,
   pdf,
 } from "@react-pdf/renderer";
 
 //basepdf and schemas AnexoA
 import { basePdfAnexoA } from "./basePdfAnexoA";
 import { schemasAnexoA } from "./schemasAnexoA";
-//basepdf and schemas AnexoA2
-import { basePdfAnexoA2 } from "./basePdfAnexoA2";
-import { schemasAnexoA2 } from "./schemasAnexoA2";
-//basepdf and schemas Anexo8
-import { basepdfAnexo8 } from "./basepdfAnexo8";
-import { schemaAnexo8 } from "./schemaAnexo8";
 
-import { basePdfAnexo5 } from "./basePdfAnexo5";
-import { schemasAnexo5 } from "./schemasAnexo5";
 
-import { basePdfAnexo1P } from "./basePdfAnexo1P";
-import { schemasAnexo1P } from "./schemasAnexo1P";
-
-import { basePdfAnexo2P } from "./basePdfAnexo2P";
-import { schemasAnexo2P } from "./schemasAnexo2P";
 
 // Registra la fuente Roboto desde Google Fonts
 Font.register({
@@ -248,665 +234,8 @@ const month = String(today.getMonth() + 1).padStart(2, "0"); // Los meses son 0-
 const year = today.getFullYear();
 const formattedDate = `${day}/${month}/${year}`;
 
-export function generateMemoWithinProjec1(data) {
-  let solicitudOracion = "Para lo cual solicito ";
-  // Array para almacenar las solicitudes
-  let solicitudes = [];
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push("la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push("la asignación de viáticos y subsistencias");
-  }
-  // Verificar si se debe incluir "pago de inscripción"
-  if (data.inscripcion === "SI") {
-    solicitudes.push("el pago de inscripción");
-  }
 
-  // Construir la oración final
-  if (solicitudes.length > 0) {
-    solicitudOracion += solicitudes.join(", ") + ".";
-  } else {
-    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
-  }
-
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Formato de memorando PARTICIPACION EN EVENTO DENTRO DE PROYECTO ",
-                bold: true,
-                size: 24,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 300 },
-            alignment: "start",
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PARA:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Dr. Marco Santorum",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "ASUNTO:\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: `Solicitud para participar en evento académico/${data.codigoProyecto}`,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para participar en el evento titulado "${data.tituloEvento}" a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. Para lo cual, adjunto los correspondientes documentos.`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Se adjunta la documentación correspondiente",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Con sentimientos de distinguida consideración.",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Atentamente,",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text:
-                  data.nombres.toUpperCase() +
-                  " " +
-                  data.apellidos.toUpperCase(),
-                size: 20,
-                bold: true,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
-    saveAs(
-      blob,
-      "Memorando solicitud para participar en evento académico " +
-        data.codigoProyecto +
-        ".docx"
-    );
-  });
-}
-export function generateMemoWithinProjec2(data) {
-  const nombresApellidos = capitalizeWords(
-    (data.nombres + " " + data.apellidos).toLowerCase()
-  );
-  let solicitudOracion = "Para lo cual solicito ";
-
-  // Array para almacenar las solicitudes
-  let solicitudes = [];
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push("la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push("la asignación de viáticos y subsistencias");
-  }
-  // Verificar si se debe incluir "pago de inscripción"
-  if (data.inscripcion === "SI") {
-    solicitudes.push("el pago de inscripción");
-  }
-
-  // Construir la oración final
-  if (solicitudes.length > 0) {
-    solicitudOracion += solicitudes.join(", ") + ".";
-  } else {
-    solicitudOracion = ""; // No se solicita nada, por lo que la oración queda vacía.
-  }
-
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Formato de memorando PARTICIPACION EN EVENTO DENTRO DE PROYECTO ",
-                bold: true,
-                size: 24,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 300 },
-            alignment: "start",
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PARA:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Dr. Marco Santorum",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "ASUNTO:\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: `Solicitud para participar en evento académico/${data.codigoProyecto} `,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `En mi calidad de Director del Proyecto ${data.codigoProyecto}, autorizo el gasto y solicito a usted se realicen las gestiones correspondientes para que el Sr."${nombresApellidos}", ${data.rolEnProyecto} del proyecto pueda participar en el evento titulado "${data.tituloProyecto}", a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, desde ${data.fechaInicioEvento} hasta ${data.fechaFinEvento}. ${solicitudOracion}`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Se adjunta la documentación correspondiente",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Con sentimientos de distinguida consideración.",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Atentamente,",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: data.nombreDirector.toUpperCase(),
-                size: 20,
-                bold: true,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `DIRECTOR DEL PROYECTO ${data.codigoProyecto.toUpperCase()}`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
-    saveAs(
-      blob,
-      "Memorando solicitud para participar en evento académico " +
-        data.codigoProyecto +
-        ".docx"
-    );
-  });
-}
-export function generateMemoOutsideProject1(data) {
-  const departament = capitalizeWords(data.departamento.toLowerCase());
-  // Array para almacenar las solicitudes
-  let solicitudes = [];
-
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
-  }
-  // Verificar si se debe incluir "pasajes aéreos"
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "pago de inscripción"
-  if (data.inscripcion === "SI") {
-    solicitudes.push(" el pago de inscripción");
-  }
-
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Formato de memorando para Jefe del Departamento al VIIV",
-                bold: true,
-                size: 24,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 300 },
-            alignment: "start",
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PARA:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Dr. Marco Santorum",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "\t\tVicerrector de Investigación, Innovación y Vinculación",
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "ASUNTO:\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje al exterior",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "De mi consideración:",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Por medio del presente comunico a usted que, en mi calidad de ${data.cargoJefeInmediato}, se ha otorgado el aval y permiso al profesor(a) ${data.nombres} ${data.apellidos}, profesor titular adscrito al ${departament}, para que participe en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Por lo expuesto, solicito muy comedidamente, se realicen los trámites pertinentes para que el profesor ${data.nombres} ${data.apellidos}, pueda participar en la conferencia antes mencionada y de igual forma se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}.`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Se adjunta la documentación correspondiente",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Con sentimientos de distinguida consideración.",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Atentamente,",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: data.nombreJefeInmediato.toUpperCase(),
-                size: 20,
-                bold: true,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: data.cargoJefeInmediato.toUpperCase(),
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando para Jefe del Departamento al VIIV.docx");
-  });
-}
-export function generateMemoOutsideProject2(data) {
-  let solicitudes = [];
-
-  // Verificar si se debe incluir "viáticos y subsistencias"
-  if (data.viaticosSubsistencias === "SI") {
-    solicitudes.push(" la asignación de viáticos y subsistencias al exterior");
-  }
-  if (data.pasajesAereos === "SI") {
-    solicitudes.push(" la compra de pasajes aéreos");
-  }
-  // Verificar si se debe incluir "pago de inscripción"
-  if (data.inscripcion === "SI") {
-    solicitudes.push(" el pago de inscripción");
-  }
-
-  const doc = new Document({
-    sections: [
-      {
-        properties: {},
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Formato de memorando del Profesor al Jefe",
-                bold: true,
-                size: 24,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 300 },
-            alignment: "start",
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "PARA:\t\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: data.nombreJefeInmediato,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `\t\t${data.cargoJefeInmediato}`,
-                size: 22,
-                bold: true,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "ASUNTO:\t",
-                bold: true,
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-              new TextRun({
-                text: "Solicitud de auspicio institucional y solicitud de autorización para viaje al exterior",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "De mi consideración:",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Por medio del presente solicito el aval y permiso para participar en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}, para la presentación de la ponencia: " ${data.tituloPonencia} ". `,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Adicionalmente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación,${solicitudes}.`,
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 300 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Se adjunta la documentación correspondiente",
-                size: 22,
-                font: "Aptos (Cuerpo)",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Con sentimientos de distinguida consideración.",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Atentamente,",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 200 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text:
-                  data.nombres.toUpperCase() +
-                  " " +
-                  data.apellidos.toUpperCase(),
-                size: 20,
-                bold: true,
-                font: "Times New Roman",
-              }),
-            ],
-            spacing: { after: 100 },
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "Profesor",
-                size: 20,
-                font: "Times New Roman",
-              }),
-            ],
-          }),
-        ],
-      },
-    ],
-  });
-
-  Packer.toBlob(doc).then((blob) => {
-    saveAs(blob, "Memorando del Profesor al Jefe.docx");
-  });
-}
-
-export function generateMemoTripWithinProjec1(data) {
+export function generateMemoTripWithinProjec1(data, returnDocument = false) {
   let solicitudOracion = "Para lo cual solicito ";
 
   // Verificar si se debe incluir "pasajes aéreos"
@@ -1056,7 +385,7 @@ export function generateMemoTripWithinProjec1(data) {
     );
   });
 }
-export function generateMemoTripWithinProjec2(data) {
+export function generateMemoTripWithinProjec2(data, returnDocument = false) {
   const nombresApellidos = capitalizeWords(
     (data.nombres + " " + data.apellidos).toLowerCase()
   );
@@ -1207,7 +536,7 @@ export function generateMemoTripWithinProjec2(data) {
   });
 }
 
-export function generateMemoInscriptionPaymentOutProyect1(data) {
+export function generateMemoInscriptionPaymentOutProyect1(data, returnDocument = false) {
   // Array para almacenar las solicitudes
   let ponencias = [];
   // Verificar si se debe incluir "titulo ponencia"
@@ -1236,173 +565,174 @@ export function generateMemoInscriptionPaymentOutProyect1(data) {
   }
 
   let dirCargo = [];
-  if (data.nombreDirector === "") {
-    if (data.nombreDirector === "") {
-      dirCargo.push("Profesor");
-    } else {
-      dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
-    }
 
-    let formulario = [];
-    if (data.participacionProyecto === "fueraProyecto") {
-      formulario.push("Fuera de Proyecto");
-    } else {
-      formulario.push("Dentro de Proyecto");
-    }
-
-    let codigoP = [];
-    if (data.codigoProyecto === "") {
-      codigoP.push();
-    } else {
-      codigoP.push(`${data.codigoProyecto} `);
-    }
-
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Formato de memorando para pago de inscripción ${formulario}`,
-                  bold: true,
-                  size: 24,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 300 },
-              alignment: "start",
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "PARA:\t\t",
-                  bold: true,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-                new TextRun({
-                  text: "Dr. Marco Santorum",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "\t\tVicerector de Investigación, Innovación y Vinculación",
-                  size: 22,
-                  bold: true,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "ASUNTO:\t",
-                  bold: true,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-                new TextRun({
-                  text: `Solicitud para pago de inscripción ${codigo}`,
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "De mi consideración:",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
-                  text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 300 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Se adjunta la documentación correspondiente",
-                  size: 22,
-                  font: "Aptos (Cuerpo)",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Con sentimientos de distinguida consideración.",
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Atentamente,",
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${director}`,
-                  size: 20,
-                  bold: true,
-                  font: "Times New Roman",
-                }),
-              ],
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: `${dirCargo}`,
-                  size: 20,
-                  font: "Times New Roman",
-                }),
-              ],
-            }),
-          ],
-        },
-      ],
-    });
-
-    Packer.toBlob(doc).then((blob) => {
-      saveAs(
-        blob,
-        `Memorando para Pago de Inscripción ${formulario} ${codigoP}.docx`
-      );
-    });
+  if (
+    data.nombreDirector === "" &&
+    data.participacionProyecto === "fueraProyecto"
+  ) {
+    dirCargo.push("Profesor");
+  } else {
+    dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
   }
+
+  let formulario = [];
+  if (data.participacionProyecto === "fueraProyecto") {
+    formulario.push("Fuera de Proyecto");
+  } else {
+    formulario.push("Dentro de Proyecto");
+  }
+
+  let codigoP = [];
+  if (data.codigoProyecto === "") {
+    codigoP.push();
+  } else {
+    codigoP.push(`${data.codigoProyecto} `);
+  }
+
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Formato de memorando para pago de inscripción ${formulario}`,
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: `Solicitud para pago de inscripción ${codigo}`,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente solicito se realicen los trámites pertinentes para que se auspicie con presupuesto del Vicerrectorado de Investigación, Innovación y Vinculación, el pago de inscripción para el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadEvento}, ${data.paisEvento}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}${ponencias}. `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${director}`,
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${dirCargo}`,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
+
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(
+      blob,
+      `Memorando para Pago de Inscripción ${formulario} ${codigoP}.docx`
+    );
+  });
 }
 
-export function generateMemoPublicationPaymentProject(data) {
+export function generateMemoPublicationPaymentProject(data, returnDocument = false) {
   let codigo = [];
   if (data.codigoProyecto === "") {
     codigo.push();
@@ -1421,7 +751,10 @@ export function generateMemoPublicationPaymentProject(data) {
 
   let dirCargo = [];
 
-  if (data.nombreDirector === "") {
+  if (
+    data.nombreDirector === "" &&
+    data.participacionProyecto === "fueraProyecto"
+  ) {
     dirCargo.push("Profesor");
   } else {
     dirCargo.push(`Director del Proyecto ${data.codigoProyecto}`);
@@ -1584,128 +917,153 @@ export function generateMemoPublicationPaymentProject(data) {
   });
 }
 
-// Nueva función para generar el Anexo A en PDF
-export async function generateAnexoA(data) {
-  const template = {
-    schemas: schemasAnexoA,
-    basePdf: basePdfAnexoA,
-  };
 
-  // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
-  const transporte = data.transporteIda.concat(data.transporteRegreso);
-  console.log("Transporte Array:", transporte);
-  const ultimaFechaLlegada =
-    transporte.length > 0
-      ? transporte[transporte.length - 1]?.fechaLlegada
-      : "";
-  const ultimaHoraLlegada =
-    transporte.length > 0 ? transporte[transporte.length - 1]?.horaLlegada : "";
-  var ponentciaText = "";
-  if (
-    data.tituloPonencia &&
-    data.tituloPonencia.trim() !== "" &&
-    data.tituloPonencia.trim() !== "No Aplica"
-  ) {
-    ponentciaText =
-      "Para la participacion de la ponencia '" + data.tituloPonencia + "'";
-  } else {
-    ponentciaText = "";
-  }
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-  const transporteInfo = {};
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-  for (let i = 0; i < 8; i++) {
-    transporteInfo[`transporteTipo${i + 1}`] =
-      transporte[i]?.tipoTransporte || "";
-    transporteInfo[`transporteNombre${i + 1}`] =
-      transporte[i]?.nombreTransporte || "";
-    transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
-    transporteInfo[`transporteFechaS${i + 1}`] =
-      formatDate(transporte[i]?.fechaSalida) || "";
-    transporteInfo[`transporteFechaSH${i + 1}`] =
-      transporte[i]?.horaSalida || "";
-    transporteInfo[`transporteFechaL${i + 1}`] =
-      formatDate(transporte[i]?.fechaLlegada) || "";
-    transporteInfo[`transporteFechaLH${i + 1}`] =
-      transporte[i]?.horaLlegada || "";
-  }
-  const inputs = [
-    {
-      fechaSolicitud: formattedDate,
-      viaticos: data.viaticosSubsistencias === "SI" ? "X" : "",
-      movilizacion: data.viaticosSubsistencia === "SI" ? "X" : "",
-      subsistencias: data.viaticosSubsistencias === "SI" ? "X" : "",
-      alimentacion: data.viaticosSubsistencia === "SI" ? "X" : "",
+export function generateMemoInstitutionalServices(data) {
+  
+  const doc = new Document({
+    sections: [
+      {
+        properties: {},
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Formato de memorando de servicios institucionales",
+                bold: true,
+                size: 24,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 300 },
+            alignment: "start",
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "PARA:\t\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: "Dr. Marco Santorum",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "\t\tVicerector de Investigación, Innovación y Vinculación",
+                size: 22,
+                bold: true,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ASUNTO:\t",
+                bold: true,
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+              new TextRun({
+                text: " Informe de servicios ",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "De mi consideración:",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `Por medio del presente se hace entrega del informe de servicios institucionales por la participación en el evento " ${data.tituloEvento} " a realizarse en ${data.ciudadServicio}, ${data.provinciaServicio}, del ${data.fechaInicioEvento} al ${data.fechaFinEvento}. `,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 300 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Se adjunta la documentación correspondiente",
+                size: 22,
+                font: "Aptos (Cuerpo)",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Con sentimientos de distinguida consideración.",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Atentamente,",
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 200 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text:
+                  data.nombreJefeInmediato.toUpperCase(),
+                size: 20,
+                bold: true,
+                font: "Times New Roman",
+              }),
+            ],
+            spacing: { after: 100 },
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: data.cargoJefeInmediato,
+                size: 20,
+                font: "Times New Roman",
+              }),
+            ],
+          }),
+        ],
+      },
+    ],
+  });
 
-      nombresCompletos:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      lugar: data.ciudadEvento + ", " + data.paisEvento,
-      puesto: data.cargo,
-      unidadPerteneciente: data.departamento,
-
-      fechaSalida: formatDate(data.transporteIda[0]?.fechaSalida),
-      horaSalida: data.transporteIda[0]?.horaSalida,
-
-      fechaLlegada: formatDate(ultimaFechaLlegada),
-      horaLlegada: ultimaHoraLlegada,
-
-      servidores:
-        data.apellidos.toUpperCase() +
-        " " +
-        data.nombres.toUpperCase() +
-        data.servidores.toUpperCase(),
-
-      actividades:
-        "Dentro de las actividades del proyecto  " +
-        data.codigoProyecto +
-        " titulado  '" +
-        data.tituloProyecto +
-        "'  se llevará a cabo la participación en el evento  '" +
-        data.tituloEvento +
-        "', que tendrá lugar del  " +
-        data.fechaInicioEvento +
-        "  al  " +
-        data.fechaFinEvento +
-        " en la ciudad de  " +
-        data.ciudadEvento +
-        "," +
-        data.paisEvento +
-        ". " +
-        ponentciaText,
-
-      ...transporteInfo,
-
-      banco: data.nombreBanco,
-      bancoTipoCuenta: data.tipoCuenta,
-      numeroCuenta: data.numeroCuenta,
-
-      nombresCompletos2:
-        data.nombres.toUpperCase() +
-        " " +
-        data.apellidos.toUpperCase() +
-        "\n" +
-        data.cargo.toUpperCase() +
-        "\n" +
-        data.cedula,
-
-      nombresCompletosJefeInmediato:
-        data.nombreJefeInmediato.toUpperCase() +
-        "\n" +
-        data.cargoJefeInmediato.toUpperCase(),
-    },
-  ];
-
-  const pdf = await generate({ template, plugins, inputs });
-
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(
-    blob,
-    "Anexo 1 - Solicitud de viáticos EPN " + data.codigoProyecto + ".pdf"
-  );
+  Packer.toBlob(doc).then((blob) => {
+    saveAs(blob, "Memorando de servicios institucionales.docx");
+  });
 }
 
+
 // Nueva función para generar el Anexo A en PDF
-export async function generateAnexoATripWithingProject(data) {
+export async function generateAnexoATripWithingProject(data, returnDocument = false) {
   const template = {
     schemas: schemasAnexoA,
     basePdf: basePdfAnexoA,
@@ -1815,342 +1173,14 @@ export async function generateAnexoATripWithingProject(data) {
   );
 }
 
-// Nueva función para generar el Anexo A2 en PDF
-export async function generateAnexoA2(data) {
-  const template = {
-    schemas: schemasAnexoA2,
-    basePdf: basePdfAnexoA2,
-  };
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-  const diferencia =
-    JSON.parse(localStorage.getItem("diferenciaDias"))?.diferencia || 0;
-  const actividades = {};
-
-  // Genera dinámicamente las propiedades para activN, activFecha, y activDescripcion
-  for (let i = 0; i < 22; i++) {
-    actividades[`activN${i + 1}`] =
-      data.actividadesInmutables[i] && diferencia > 15
-        ? (i + 1).toString()
-        : "";
-    actividades[`activFecha${i + 1}`] =
-      diferencia < 16 ? "" : data.actividadesInmutables[i]?.fecha || "";
-    actividades[`activDescripcion${i + 1}`] =
-      diferencia < 16 ? "" : data.actividadesInmutables[i]?.descripcion || "";
-  }
-  let valorInscripcionStr = "";
-  let fechaPagoInscripcionStr = "";
-
-  // Iteramos sobre cada inscripción en el array 'inscripciones'
-  data.inscripciones.forEach((inscripcion) => {
-    // Concatenamos el valor de inscripción con un '$' y un salto de línea
-    if (data.inscripcion === "SI" && inscripcion.valorInscripcion) {
-      valorInscripcionStr += `${inscripcion.monedaPago}${inscripcion.valorInscripcion}\n`;
-    }
-
-    // Construimos la cadena de la fecha de pago dependiendo de cuál campo tiene valor
-    if (
-      data.inscripcion === "SI" &&
-      inscripcion.pagoLimite &&
-      inscripcion.limiteFecha
-    ) {
-      fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${inscripcion.limiteFecha}\n`;
-    }
-  });
-
-  const inputs = [
-    {
-      fechaPag1: formattedDate,
-      codigoProyecto: data.codigoProyecto,
-      tituloProyecto: data.tituloProyecto,
-      nombresParticipante:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      rolProyecto: data.rolEnProyecto,
-      departamento: data.departamento,
-      tituloEvento: data.tituloEvento,
-      ciudad: data.ciudadEvento.toUpperCase(),
-      pais: data.paisEvento.toUpperCase(),
-      fechasEvento:
-        "Desde el " +
-        data.fechaInicioEvento +
-        " hasta el " +
-        data.fechaFinEvento,
-      tipoEvento1: data.tipoEvento === "Conferencia o congreso" ? "X" : "",
-      tipoEvento2: data.tipoEvento === "Taller" ? "X" : "",
-      tipoEvento3: data.tipoEvento === "Otro evento académico" ? "X" : "",
-      tipoEvento3otro: data.otroEventoEspecificar,
-      participacion1:
-        data.participacionEvento === "Presentación de artículo indexado"
-          ? "X"
-          : "",
-      participacion2:
-        data.participacionEvento ===
-        "Presentación de póster, abstract, charla magistral u otros"
-          ? "X"
-          : "",
-      participacion3: data.participacionEvento === "Asistencia" ? "X" : "",
-      ponencia: data.tituloPonencia,
-      pasajesS: data.pasajesAereos === "SI" ? "X" : "",
-      viaticosS: data.viaticosSubsistencias === "SI" ? "X" : "",
-      inscripcionS: data.inscripcion === "SI" ? "X" : "",
-      pasajesN: data.pasajesAereos === "NO" ? "X" : "",
-      viaticosN: data.viaticosSubsistencias === "NO" ? "X" : "",
-      inscripciónN: data.inscripcion === "NO" ? "X" : "",
-
-      fechaPag2: formattedDate,
-      objetivoEvento: data.objetivoProyecto,
-      relevanciaEvento: data.relevanciaEvento,
-
-      valorInscripcion: valorInscripcionStr.trim(), // Removemos el último salto de línea
-      fechaPagoInscripcion: fechaPagoInscripcionStr.trim(), // Removemos el último salto de línea
-
-      transferencia:
-        data.metodoPago === "Transferencia" && data.inscripcion === "SI"
-          ? "X"
-          : "",
-      otroPago:
-        data.metodoPago === "Otra" && data.inscripcion === "SI" ? "X" : "",
-      hospedajeS: data.hospedaje === "SI" ? "X" : "",
-      hospedajeN: data.hospedaje === "NO" ? "X" : "",
-      movS: data.movilizacion === "SI" ? "X" : "",
-      movN: data.movilizacion === "NO" ? "X" : "",
-      alimentacionS: data.alimentacion === "SI" ? "X" : "",
-      alimentacionN: data.alimentacion === "NO" ? "X" : "",
-      declaraciónN: data.seleccionDeclaracion === "noCubre" ? "X" : "",
-      declaracioneS: data.seleccionDeclaracion === "siCubre" ? "X" : "",
-
-      fechaPag3: formattedDate,
-
-      ...actividades,
-
-      justificacionMas15:
-        diferencia < 16 ? "No aplica" : data.justificacionComision,
-      fechaSolicitud: formattedDate,
-      nombreDirector:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      codigoProyecto2: data.codigoProyecto,
-
-      fechaPag4: formattedDate,
-      calculo:
-        "Calculo dias de comision entre las fechas de salida y de regreso: " +
-        diferencia,
-    },
-  ];
-
-  const pdf = await generate({ template, plugins, inputs });
-
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(
-    blob,
-    "Anexo 2a-Participación en EVENTO dentro de Proyecto " +
-      data.codigoProyecto +
-      ".pdf"
-  );
-}
-
-export async function generateAnexoAOutsideProject(data) {
-  const template = {
-    schemas: schemasAnexoA,
-    basePdf: basePdfAnexoA,
-  };
-
-  // Fusionar los arrays transporteIda y transporteRegreso en un solo array llamado transporte
-  const transporte = data.transporteIda.concat(data.transporteRegreso);
-
-  const ultimaFechaLlegada =
-    transporte.length > 0
-      ? transporte[transporte.length - 1]?.fechaLlegada
-      : "";
-  const ultimaHoraLlegada =
-    transporte.length > 0 ? transporte[transporte.length - 1]?.horaLlegada : "";
-
-  var ponentciaText = "";
-  if (
-    data.tituloPonencia &&
-    data.tituloPonencia.trim() !== "" &&
-    data.tituloPonencia.trim() !== "No aplica"
-  ) {
-    ponentciaText =
-      " Para la presentación de la ponencia '" +
-      data.tituloPonencia +
-      "' del tipo " +
-      data.tipoPonencia;
-  } else {
-    ponentciaText = "";
-  }
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-  const transporteInfo = {};
-  // Genera dinámicamente las propiedades para transporteTipo, transporteNombre, transporteRuta, transporteFechaS, transporteFechaSH, transporteFechaL, y transporteFechaLH
-  for (let i = 0; i < 8; i++) {
-    transporteInfo[`transporteTipo${i + 1}`] =
-      transporte[i]?.tipoTransporte || "";
-    transporteInfo[`transporteNombre${i + 1}`] =
-      transporte[i]?.nombreTransporte || "";
-    transporteInfo[`transporteRuta${i + 1}`] = transporte[i]?.ruta || "";
-    transporteInfo[`transporteFechaS${i + 1}`] =
-      formatDate(transporte[i]?.fechaSalida) || "";
-    transporteInfo[`transporteFechaSH${i + 1}`] =
-      transporte[i]?.horaSalida || "";
-    transporteInfo[`transporteFechaL${i + 1}`] =
-      formatDate(transporte[i]?.fechaLlegada) || "";
-    transporteInfo[`transporteFechaLH${i + 1}`] =
-      transporte[i]?.horaLlegada || "";
-  }
-
-  const inputs = [
-    {
-      fechaSolicitud: formattedDate,
-      viaticos: data.viaticosSubsistencias === "SI" ? "X" : "",
-      movilizacion: data.viaticosSubsistencias === "SI" ? "X" : "",
-      subsistencias: data.viaticosSubsistencias === "SI" ? "X" : "",
-      alimentacion: data.viaticosSubsistencias === "SI" ? "X" : "",
-      nombresCompletos:
-        data.apellidos.toUpperCase() + " " + data.nombres.toUpperCase(),
-      lugar: data.ciudadEvento + ", " + data.paisEvento,
-      puesto: data.puesto,
-      unidadPerteneciente: data.departamento,
-
-      fechaSalida: formatDate(data.transporteIda[0]?.fechaSalida),
-      horaSalida: data.transporteIda[0]?.horaSalida,
-
-      fechaLlegada: formatDate(ultimaFechaLlegada),
-      horaLlegada: ultimaHoraLlegada,
-
-      servidores:
-        data.apellidos.toUpperCase() +
-        " " +
-        data.nombres.toUpperCase() +
-        ". " +
-        data.servidores.toUpperCase(),
-
-      actividades:
-        "Asistencia al evento '" +
-        data.tituloEvento +
-        "', que tendrá lugar del  " +
-        data.fechaInicioEvento +
-        "  al  " +
-        data.fechaFinEvento +
-        " en la ciudad de  " +
-        data.ciudadEvento +
-        ", " +
-        data.paisEvento +
-        ". " +
-        ponentciaText,
-
-      ...transporteInfo,
-
-      banco: data.nombreBanco,
-      bancoTipoCuenta: data.tipoCuenta,
-      numeroCuenta: data.numeroCuenta,
-
-      nombresCompletos2:
-        data.nombres.toUpperCase() +
-        " " +
-        data.apellidos.toUpperCase() +
-        "\n" +
-        data.puesto.toUpperCase() +
-        "\n" +
-        data.cedula,
-
-      nombresCompletosJefeInmediato:
-        data.nombreJefeInmediato.toUpperCase() +
-        "\n" +
-        data.cargoJefeInmediato.toUpperCase(),
-    },
-  ];
-
-  const pdf = await generate({ template, plugins, inputs });
-
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(blob, "Anexo 1 - Solicitud de viáticos EPN.pdf");
-}
-
-export async function generateAnexo8OutsideProject(data) {
-  const template = {
-    schemas: schemaAnexo8,
-    basePdf: basepdfAnexo8,
-  };
-  const plugins = { text, image, qrcode: barcodes.qrcode };
-
-  //Generacion de la constante
-  let valorInscripcionStr = "";
-  let fechaPagoInscripcionStr = "";
-
-  if (data && data.inscripciones && Array.isArray(data.inscripciones)) {
-    data.inscripciones.forEach((inscripcion) => {
-      if (data.inscripcion === "SI") {
-        if (inscripcion.valorInscripcion) {
-          valorInscripcionStr += `${inscripcion.monedaPago} ${inscripcion.valorInscripcion}\n`;
-        }
-
-        if (inscripcion.pagoLimite && inscripcion.limiteFecha) {
-          fechaPagoInscripcionStr += `${inscripcion.pagoLimite} ${formatDate(
-            inscripcion.limiteFecha
-          )}\n`;
-        }
-      } else if (data.inscripcion === "NO") {
-        // Manejo del caso en que data.inscripcion es "NO"
-        valorInscripcionStr += "\n";
-        fechaPagoInscripcionStr += "\n";
-      }
-    });
-  }
-
-  const inputs = [
-    {
-      nombres: data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      departamento: data.departamento,
-      tituloEvento: data.tituloEvento,
-      lugarEvento: data.ciudadEvento + ", " + data.paisEvento,
-      fechaInicioEvento: formatDate(data.fechaInicioEvento),
-      fechaFinEvento: formatDate(data.fechaFinEvento),
-      RelevanciaAcademica: data.RelevanciaAcademica,
-      tituloPonencia: data.tituloPonencia,
-      tipoPonencia: data.tipoPonencia,
-      detalleArticuloSI: data.detalleArticuloSI,
-      articuloPublicadoSi: data.articuloPublicado === "SI" ? "X" : "",
-      articuloPublicadoNo: data.articuloPublicado === "NO" ? "X" : "",
-      pasajesAereosSi: data.pasajesAereos === "SI" ? "X" : "",
-      pasajesAereosNo: data.pasajesAereos === "NO" ? "X" : "",
-      viaticosSubsistenciasSi: data.viaticosSubsistencias === "SI" ? "X" : "",
-      viaticosSubsistenciasNo: data.viaticosSubsistencias === "NO" ? "X" : "",
-      inscripsionSi: data.inscripcion === "SI" ? "X" : "",
-      inscripcionNo: data.inscripcion === "NO" ? "X" : "",
-      valorInscripcion: valorInscripcionStr.trim(),
-      limiteFecha: fechaPagoInscripcionStr.trim(),
-      metodoPagoTransferencia:
-        data.metodoPago === "Transferencia" && data.inscripcion === "SI"
-          ? "X"
-          : "",
-      metodoPagoOtra:
-        data.metodoPago === "Otra" && data.inscripcion === "SI" ? "X" : "",
-      hospedajeSi: data.hospedaje === "SI" ? "X" : "",
-      HospedajeNo: data.hospedaje === "NO" ? "X" : "",
-      alimentacionSi: data.alimentacion === "SI" ? "X" : "",
-      alimentacionNo: data.alimentacion === "NO" ? "X" : "",
-      movilizacionInternaSi: data.movilizacion === "SI" ? "X" : "",
-      movilizacionInternaNo: data.movilizacion === "NO" ? "X" : "",
-      seleccionDeclaracionNo:
-        data.seleccionDeclaracion === "noCubre" ? "X" : "",
-      seleccionDeclaracionSi:
-        data.seleccionDeclaracion === "siCubre" ? "X" : "",
-      nombre: data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      puesto: data.puesto.toUpperCase(),
-    },
-  ];
-
-  const pdf = await generate({ template, plugins, inputs });
-
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(blob, "Anexo 8 - Formulario fuera de proyecto EPN.pdf");
-}
-
-export async function generateAnexoB2WithinProject(data) {
+export async function generateAnexoB2WithinProject(data, returnDocument = false) {
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
         {/* Título del formulario */}
         <Text style={styles.header}>
-        Anexo 2B - FORMULARIO PARA SALIDAS AL EXTERIOR DENTRO DE PROYECTOS VIAJES TÉCNICOS
+          Anexo 2B - FORMULARIO PARA SALIDAS AL EXTERIOR DENTRO DE PROYECTOS
+          VIAJES TÉCNICOS
         </Text>
         {/* 1. Datos Generales */}
 
@@ -2377,19 +1407,20 @@ export async function generateAnexoB2WithinProject(data) {
           ))}
         </View>
 
-            <Text style={styles.baseText}>
-              4.2 Justificar la necesidad de la comisión de servicios mayor a 15
-              días{" "}
-            </Text>
-            <Text style={styles.textBlue}>
-              {data.justificacionComision || "No Aplica"}
-            </Text>
-          
-         <Text style={styles.sectionTitle}>
+        <Text style={styles.baseText}>
+          4.2 Justificar la necesidad de la comisión de servicios mayor a 15
+          días{" "}
+        </Text>
+        <Text style={styles.textBlue}>
+          {data.justificacionComision || "No Aplica"}
+        </Text>
+
+        <Text style={styles.sectionTitle}>
           5. CALCULO REFERENCIAL DE DÍAS DE LA COMISIÓN DE SERVICIOS{" "}
         </Text>
         <Text style={styles.textBlue}>
-          {'Calculo dias de comision entre las fechas de salida y de regreso al pais: '+ data.actividadesInmutables.length }
+          {"Calculo dias de comision entre las fechas de salida y de regreso al pais: " +
+            data.actividadesInmutables.length}
         </Text>
 
         {/* Etiqueta de Firma */}
@@ -2403,14 +1434,16 @@ export async function generateAnexoB2WithinProject(data) {
 
         {/* Nombre completo */}
         <Text style={styles.tableCellTextBlue}>
-          {`${data.rolEnProyecto === "Director"
-              ? "Director " +data.nombres + " " + data.apellidos
-              : data.nombreDirector}`}
+          {`${
+            data.rolEnProyecto === "Director"
+              ? data.nombres + " " + data.apellidos
+              : data.nombreDirector
+          }`}
         </Text>
 
         {/* Nombre del director y código de proyecto */}
         <Text style={styles.tableCellTextBlue}>
-          {`${ "Director del Proyecto " + data.codigoProyecto}`}
+          {`${"Director del Proyecto " + data.codigoProyecto}`}
         </Text>
       </Page>
     </PDFDocument>
@@ -2423,182 +1456,1319 @@ export async function generateAnexoB2WithinProject(data) {
   saveAs(blob, "Anexo2B_Formulario para viajes tecnicos.pdf");
 }
 
-export async function generateAnexo5InscriptionPayment(data) {
-  const template = {
-    schemas: schemasAnexo5,
-    basePdf: basePdfAnexo5,
-  };
+export async function generateAnexo5InscriptionPayment(data, returnDocument = false) {
+  const nombreCompleto =
+    data.rolEnProyecto === "Director" ||
+    data.participacionProyecto === "fueraProyecto"
+      ? `${data.nombres.toUpperCase()} ${data.apellidos.toUpperCase()}`
+      : data.nombreDirector.toUpperCase();
 
-  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const formulario =
+    data.participacionProyecto === "fueraProyecto"
+      ? "Fuera de Proyecto"
+      : "Dentro de Proyecto";
 
-  let formulario = [];
-  if (data.participacionProyecto === "fueraProyecto") {
-    formulario.push("Fuera de Proyecto");
-  } else {
-    formulario.push("Dentro de Proyecto");
-  }
+  let codigoP = data.codigoProyecto === "" ? "" : `${data.codigoProyecto} `;
 
-  let codigoP = [];
-  if (data.codigoProyecto === "") {
-    codigoP.push();
-  } else {
-    codigoP.push(`${data.codigoProyecto} `);
-  }
+  const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+        <Text style={styles.header}>
+          Anexo 5 - FORMULARIO PARA PAGOS DE INSCRIPCIÓN
+        </Text>
 
-  let valorInscripcionStr = "";
-  let fechaPagoInscripcionStr = "";
+        <Text style={styles.sectionTitle}>1. DATOS DEL INVESTIGADOR</Text>
 
-  data.inscripciones.forEach((inscripciones) => {
-    if (inscripciones.valorInscripcion) {
-      valorInscripcionStr += `${inscripciones.monedaPago}${inscripciones.valorInscripcion}\n`;
-    }
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Nombres Completos:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
+              </Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>{data.departamento}</Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.baseText}>
+                {"Fuera de Proyecto: ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.participacionProyecto === "fueraProyecto" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.tableCol25}>
+              <Text style={styles.baseText}>
+                {"Dentro de Proyecto: ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.participacionProyecto === "dentroProyecto" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.codigoProyecto}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-    if (inscripciones.pagoLimite && inscripciones.limiteFecha) {
-      fechaPagoInscripcionStr += `${inscripciones.pagoLimite} ${formatDate(
-        inscripciones.limiteFecha
-      )}\n`;
-    }
-  });
+        {/* 2. Datos del evento*/}
 
-  const inputs = [
-    {
-      nombresApellidos:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      departamento: data.departamento,
-      participacionProyectoFuera:
-        data.participacionProyecto === "fueraProyecto" ? "X" : "",
-      participacionProyectoDentro:
-        data.participacionProyecto === "dentroProyecto" ? "X" : "",
-      codigoProyecto: data.codigoProyecto,
-      tituloEvento: data.tituloEvento,
-      ciudadPaisEvento: data.ciudadEvento + ", " + data.paisEvento,
-      fechaInicioEvento: formatDate(data.fechaInicioEvento),
-      fechaFinEvento: formatDate(data.fechaFinEvento),
-      RelevanciaAcademica: data.RelevanciaAcademica,
-      tituloArticulo: data.tituloArticulo,
-      articuloPublicadoSi: data.articuloPublicado === "SI" ? "X" : "",
-      articuloPublicadoNo: data.articuloPublicado === "NO" ? "X" : "",
-      detalleArticuloSI: data.detalleArticuloSI,
-      valorInscripcion: valorInscripcionStr.trim(),
-      pagoLimiteFecha: fechaPagoInscripcionStr.trim(),
-      metodoPagoTransferencia: data.metodoPago === "Transferencia" ? "X" : "",
-      metodoPagoOtra: data.metodoPago === "Otra" ? "X" : "",
-      departament: data.departamento,
-      nombresAp:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-    },
-  ];
+        <Text style={styles.sectionTitle}>2. DATOS DEL EVENTO</Text>
 
-  const pdf = await generate({ template, plugins, inputs });
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Titulo del Evento:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.tituloEvento}</Text>
+            </View>
+          </View>
 
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Lugar del Evento:</Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>Ciudad:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.ciudadEvento.toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.tableCol15}>
+              <Text style={styles.tableCellText}>País:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.paisEvento.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Fecha del evento:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.textBlueCenter}>
+                {"Desde el  "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.fechaInicioEvento}
+                  <Text style={styles.textBlueCenter}>
+                    {" hasta el "}
+                    <Text style={styles.tableCellTextBlue}>
+                      {data.fechaFinEvento}
+                    </Text>
+                  </Text>
+                </Text>
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Relevancia académica del evento:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.RelevanciaAcademica}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Título del artículo:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloArticulo}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                ¿El artículo será publicado?
+              </Text>
+              <Text style={styles.baseText}>
+                {"SI ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.articuloPublicado === "SI" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+              <Text style={styles.baseText}>
+                {"NO ( "}
+                <Text style={styles.tableCellTextBlue}>
+                  {data.articuloPublicado === "NO" ? "X" : ""}
+                  <Text style={styles.baseText}>{" )"}</Text>
+                </Text>
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.detalleArticuloSI}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View>
+          <Text style={styles.sectionTitle}>
+            3. INFORMACIÓN DEL PAGO DE INSCRIPCIÓN{" "}
+          </Text>
+
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Valor de la Inscripción:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.inscripciones.map((inscripcion, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {inscripcion.monedaPago
+                        ? inscripcion.monedaPago +
+                          " " +
+                          (inscripcion.valorInscripcion || " ")
+                        : ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Fechas de pago de inscripción:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.inscripciones.map((inscripcion, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {data.inscripciones.map((inscripcion, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {inscripcion.pagoLimite
+                              ? inscripcion.pagoLimite +
+                                " " +
+                                (inscripcion.limiteFecha || " ")
+                              : ""}
+                          </Text>
+                        </View>
+                      ))}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Método de pago:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Transferencia:
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Transferencia" ? "X" : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a) Formulario de pagos al exterior (Anexo 6)
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b) Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Otra(tarjetadecrédito,efectivo,etc...):
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Otra" ? "X" : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a) Solicitud de REEMBOLSO. Incluir texto con justificación
+                      en el mismo memorando del requerimiento.
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b)Documento donde se puede verificar el costo y fechas de
+                      la inscripción al evento
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Etiqueta de Firma */}
+        <Text style={styles.baseText}>Firma del Solicitante:</Text>
+
+        {/* Espacio en blanco para la firma */}
+        <Text>{"\n\n\n"}</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.baseTextCenter}>________________________</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${nombreCompleto}`}
+        </Text>
+
+        {/* Nombre del director y código de proyecto */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${data.departamento}`}
+        </Text>
+      </Page>
+    </PDFDocument>
+  );
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
+
+  // Descargar automáticamente el archivo PDF
   saveAs(
     blob,
-    `Anexo 5 - Formulario Pago Inscripción ${formulario} ${codigoP} EPN.pdf`
+    `Anexo 5 - Formulario Pago Inscripción ${formulario} ${codigoP}.pdf`
   );
 }
 
-export async function generateAnexo1PublicationPaymentWithin(data) {
-  const template = {
-    basePdf: basePdfAnexo1P,
-    schemas: schemasAnexo1P,
-  };
+export async function generateAnexo1PublicationPaymentWithin(data, returnDocument = false) {
+  const nombreCompleto =
+    data.rolEnProyecto === "Director"
+      ? `${data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()}`
+      : data.nombreDirector.toUpperCase();
+  const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+        <Text style={styles.header}>
+          ANEXO 1 - FORMULARIO PARA EL PAGO DE ARTÍCULOS CIENTÍFICOS ACEPTADOS
+          EN REVISTAS DE ALTO IMPACTO-DENTRO DE PROYECTOS
+        </Text>
 
-  const plugins = { text, image, qrcode: barcodes.qrcode };
+        <Text style={styles.sectionTitle}>1. DATOS DEL INVESTIGADOR</Text>
 
-  let valorPublicacionStr = "";
-  let fechaPagoPublicacionStr = "";
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Nombres Completos:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
+              </Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>{data.departamento}</Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Código del Proyecto:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.codigoProyecto}
+              </Text>
+            </View>
+          </View>
+        </View>
 
-  data.publicaciones.forEach((publicaciones) => {
-    if (publicaciones.valorPublicacion) {
-      valorPublicacionStr += `${publicaciones.monedaPago}${publicaciones.valorPublicacion}\n`;
-    }
+        {/*2. DATOS DE LA PUBLICACIÓN  */}
 
-    if (publicaciones.limiteFecha) {
-      fechaPagoPublicacionStr += `${formatDate(publicaciones.limiteFecha)}\n`;
-    }
-  });
+        <Text style={styles.sectionTitle}>2. DATOS DE LA PUBLICACIÓN</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Título de la publicación:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloPublicacion}
+              </Text>
+            </View>
+          </View>
 
-  const inputs = [
-    {
-      nombresApellidos:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      depertamento: data.departamento,
-      codigoProyecto: data.codigoProyecto,
-      tituloPublicacion: data.tituloPublicacion,
-      nombreRevista: data.nombreRevista,
-      autoresEPN: data.autoresEPN,
-      autoresExternos: data.autoresExternos,
-      baseDatos: data.baseDatos,
-      cuartilPublicacion: data.cuartilPublicacion,
-      valorPublicacion: valorPublicacionStr.trim(),
-      limiteFecha: fechaPagoPublicacionStr.trim(),
-      metodoPagoTransferencia: data.metodoPago === "Transferencia" ? "X" : "",
-      metodoPagoOtra: data.metodoPago === "Otra" ? "X" : "",
-      nombreDirector: data.nombreDirector.toUpperCase(),
-      codigoProyecto2: data.codigoProyecto,
-    },
-  ];
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Nombre de la Revista:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.nombreRevista}</Text>
+            </View>
+          </View>
 
-  const pdf = await generate({ template, plugins, inputs });
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Autores de la EPN: (Titulares, Ocasionales, otros){" "}
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.autoresEPN}</Text>
+            </View>
+          </View>
 
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Autores externos:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.autoresExternos}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Base de datos de indexación:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.baseDatos}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Cuartil de la publicación:{" "}
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.cuartilPublicacion}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View>
+          <Text style={styles.sectionTitle}>
+            3. DETALLE DE LA FORMA DE PAGO DE PUBLICACIÓN{" "}
+          </Text>
+
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Valor de la publicación:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.publicaciones.map((publicaciones, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {publicaciones.monedaPago
+                        ? publicaciones.monedaPago +
+                          " " +
+                          (publicaciones.valorPublicacion || " ")
+                        : ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Fecha máxima de pago de la publicación:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.publicaciones.map((publicaciones, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {data.publicaciones.map((publicaciones, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {publicaciones.limiteFecha
+                              ? publicaciones.limiteFecha || " "
+                              : ""}
+                          </Text>
+                        </View>
+                      ))}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Método de pago:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Transferencia:
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Transferencia" ? "X" : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a)Formulario de registro de cuenta o formulario de giro al
+                      exterior (según corresponda)
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Otra(tarjetadecrédito,efectivo,etc...):
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Otra" ? "X" : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a)Solicitud de REEMBOLSO.
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b)Factura del solicitante a nombre de la Unidad de Gestión
+                      de Investigación y Proyección Social, adjuntando el
+                      respaldo de la transacción. *
+                    </Text>
+                    <Text style={styles.baseText}>
+                      *La Factura se entregará una vez que el investigador(a)
+                      solicite el pago de reembolso.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Etiqueta de Firma */}
+        <Text style={styles.baseText}>Firma del Director del Proyecto: </Text>
+
+        {/* Espacio en blanco para la firma */}
+        <Text>{"\n\n\n"}</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.baseTextCenter}>________________________</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${nombreCompleto}`}
+        </Text>
+
+        {/* Nombre del director y código de proyecto */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${data.codigoProyecto || "Código de prueba"}`}
+        </Text>
+      </Page>
+    </PDFDocument>
+  );
+
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
+
+  // Descargar automáticamente el archivo PDF
   saveAs(
     blob,
-    `Anexo 1 - Formulario Pago Publicación Dentro del Proyecto-${data.codigoProyecto}  EPN.pdf`
+    `Anexo 1 - Formulario Pago Publicación Dentro del Proyecto-${data.codigoProyecto} .pdf`
   );
 }
 
-export async function generateAnexo2PublicationPaymentOutside(data) {
-  const template = {
-    basePdf: basePdfAnexo2P,
-    schemas: schemasAnexo2P,
-  };
+export async function generateAnexo2PublicationPaymentOutside(data, returnDocument = false) {
+  const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+        <Text style={styles.header}>
+          ANEXO 2 - FORMULARIO PARA EL PAGO DE SUBVENCIONES PARA LA DIFUSIÓN DE
+          ARTÍCULOS CIENTÍFICOS ACEPTADOS EN REVISTAS DE ALTO IMPACTO
+        </Text>
 
-  const plugins = { text, image, qrcode: barcodes.qrcode };
+        <Text style={styles.sectionTitle}>1. DATOS DEL INVESTIGADOR</Text>
 
-  let valorPublicacionStr = "";
-  let fechaPagoPublicacionStr = "";
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>Nombres Completos:</Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.nombres.toUpperCase() +
+                  " " +
+                  data.apellidos.toUpperCase()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol40}>
+              <Text style={styles.tableCellText}>
+                Departamento / Instituto:
+              </Text>
+            </View>
+            <View style={styles.tableColAuto}>
+              <Text style={styles.tableCellTextBlue}>{data.departamento}</Text>
+            </View>
+          </View>
+        </View>
 
-  data.publicaciones.forEach((publicaciones) => {
-    if (publicaciones.valorPublicacion) {
-      valorPublicacionStr += `${publicaciones.monedaPago}${publicaciones.valorPublicacion}\n`;
-    }
+        {/*2. DATOS DE LA PUBLICACIÓN  */}
 
-    if (publicaciones.limiteFecha) {
-      fechaPagoPublicacionStr += `${formatDate(publicaciones.limiteFecha)}\n`;
-    }
-  });
+        <Text style={styles.sectionTitle}>2. DATOS DE LA PUBLICACIÓN</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Título de la publicación:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.tituloPublicacion}
+              </Text>
+            </View>
+          </View>
 
-  const inputs = [
-    {
-      nombresApellidos:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      departamento: data.departamento,
-      tituloPublicacion: data.tituloPublicacion,
-      nombreRevista: data.nombreRevista,
-      autoresEPN: data.autoresEPN,
-      autoresExternos: data.autoresExternos,
-      baseDatos: data.baseDatos,
-      cuartilPublicacion: data.cuartilPublicacion,
-      valorPublicacion: valorPublicacionStr.trim(),
-      limiteFecha: fechaPagoPublicacionStr.trim(),
-      metodoPagoTransferencia: data.metodoPago === "Transferencia" ? "X" : "",
-      metodoPagoOtra: data.metodoPago === "Otra" ? "X" : "",
-      nombresAp:
-        data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase(),
-      departament: data.departamento,
-    },
-  ];
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Nombre de la Revista:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.nombreRevista}</Text>
+            </View>
+          </View>
 
-  const pdf = await generate({ template, plugins, inputs });
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Autores de la EPN: (Titulares, Ocasionales, otros){" "}
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.autoresEPN}</Text>
+            </View>
+          </View>
 
-  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
-  saveAs(
-    blob,
-    `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto EPN.pdf`
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>Autores externos:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.autoresExternos}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Base de datos de indexación:
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.baseDatos}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol25}>
+              <Text style={styles.tableCellText}>
+                Cuartil de la publicación:{" "}
+              </Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>
+                {data.cuartilPublicacion}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View>
+          <Text style={styles.sectionTitle}>
+            3. DETALLE DE LA FORMA DE PAGO DE PUBLICACIÓN{" "}
+          </Text>
+
+          <View style={styles.table}>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Valor de la publicación:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.publicaciones.map((publicaciones, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {publicaciones.monedaPago
+                        ? publicaciones.monedaPago +
+                          " " +
+                          (publicaciones.valorPublicacion || " ")
+                        : ""}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                  Fecha máxima de pago de la publicación:
+                </Text>
+              </View>
+              <View style={styles.tableCol}>
+                {data.publicaciones.map((publicaciones, index) => (
+                  <View key={index} style={styles.tableRow}>
+                    <Text style={styles.tableCellTextBlueCenter}>
+                      {data.publicaciones.map((publicaciones, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {publicaciones.limiteFecha
+                              ? publicaciones.limiteFecha || " "
+                              : ""}
+                          </Text>
+                        </View>
+                      ))}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.tableRow}>
+              <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>Método de pago:</Text>
+              </View>
+              <View style={styles.tableCol}>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Transferencia:
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Transferencia" ? "X" : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a)Formulario de registro de cuenta o formulario de giro al
+                      exterior (según corresponda)
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.tableRow}>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.baseText}>
+                      - Otra(tarjetadecrédito,efectivo,etc...):
+                      <Text style={styles.baseText}>
+                        {"( "}
+                        <Text style={styles.tableCellTextBlue}>
+                          {data.metodoPago === "Otra" ? "X" : ""}
+                          <Text style={styles.baseText}>{" )"}</Text>
+                        </Text>
+                      </Text>
+                    </Text>
+                    <Text style={styles.baseText}>
+                      Adjuntar los siguientes documentos:
+                    </Text>
+                    <Text style={styles.baseText}>
+                      a)Solicitud de REEMBOLSO.
+                    </Text>
+                    <Text style={styles.baseText}>
+                      b)Factura del solicitante a nombre de la Unidad de Gestión
+                      de Investigación y Proyección Social, adjuntando el
+                      respaldo de la transacción. *
+                    </Text>
+                    <Text style={styles.baseText}>
+                      *La Factura se entregará una vez que el investigador(a)
+                      solicite el pago de reembolso.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Etiqueta de Firma */}
+        <Text style={styles.baseText}>Firma del solicitante: </Text>
+
+        {/* Espacio en blanco para la firma */}
+        <Text>{"\n\n\n"}</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.baseTextCenter}>________________________</Text>
+
+        {/* Nombre completo */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${data.nombres.toUpperCase() + " " + data.apellidos.toUpperCase()}`}
+        </Text>
+
+        {/* Nombre del director y código de proyecto */}
+        <Text style={styles.tableCellTextBlueCenter}>
+          {`${data.departamento || "Departamento de prueba"}`}
+        </Text>
+      </Page>
+    </PDFDocument>
   );
+
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
+
+  // Descargar automáticamente el archivo PDF
+  saveAs(blob, `Anexo 2 - Formulario Pago Publicación Fuera de Proyecto.pdf`);
 }
+
+
+export async function generateAnexo4InstitutionalServices(data) {
+  
+  const ultimaFechaLlegada =
+    data.transporteRegreso.length > 0
+      ? data.transporteRegreso[data.transporteRegreso.length - 1]?.fechaLlegada
+      : "";
+  const ultimaHoraLlegada =
+    data.transporteRegreso.length > 0 ? data.transporteRegreso[data.transporteRegreso.length - 1]?.horaLlegada : "";
+
+
+
+  const MyPDFDocument = (
+    <PDFDocument>
+      <Page style={styles.page}>
+        <Text style={styles.header}>Anexo 4 - Formato informe de viáticos EPN</Text>
+
+        <Text style={styles.sectionTitle}>INFORME DE SERVICIOS INSTITUCIONALES</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>Nro. SOLICITUD DE AUTORIZACIÓN PARA CUMPLIMIENTO DE SERVICIOS INSTITUCIONALES: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>FECHA DE INFORME  (dd-mmm-aaaa): </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}> </Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {formattedDate}
+              </Text>
+            </View>
+          </View>
+        </View>
+      
+        <Text style={styles.sectionTitle}>DATOS GENERALES</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>APELLIDOS - NOMBRES DE LA O EL SERVIDOR: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>PUESTO QUE OCUPA: </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellTextBlue}> {data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()} </Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.puesto}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>CIUDAD – PROVINCIA DEL SERVICIO INSTITUCIONAL: </Text>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>NOMBRE DE LA UNIDAD A LA QUE PERTENECE LA O EL SERVIDOR: </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellTextBlue}> {data.ciudadServicio+","+data.provinciaServicio}</Text>
+            </View>
+            <View style={styles.tableCol50}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.nombreUnidad}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCellText}>SERVIDORES QUE INTEGRAN EL SERVICIO INSTITUCIONAL:</Text>
+          </View>
+
+          <View style={styles.tableRow}>
+            <Text style={styles.tableCellTextBlue}>
+                {data.servidores}
+              </Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionTitle}>
+        INFORME DE ACTIVIDADES Y PRODUCTOS ALCANZADOS
+        </Text>
+
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol20}>
+                <Text style={styles.tableCellText}>Actividades:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.actividades}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol20}>
+                <Text style={styles.tableCellText}>Productos Alcanzados:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.productos}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol20}>
+                <Text style={styles.tableCellText}>Otras tareas realizadas para la EPN durante la comisión de servicios:</Text>
+            </View>
+            <View style={styles.tableCol}>
+              <Text style={styles.tableCellTextBlue}>{data.otrasTareas}</Text>
+            </View>
+          </View>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>ITINERARIO</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>SALIDA</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>LLEGADA</Text>
+               </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>FECHA (dd-mmm-aaa)</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellTextBlue}>{formatDate(data.transporteIda[0]?.fechaSalida)}</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellTextBlue}>{formatDate(ultimaFechaLlegada)}</Text>
+               </View>
+              </View>
+              <View style={styles.tableRow}>
+                <View style={styles.tableCol}>
+                  <Text style={styles.tableCellText}>HORA (hh:mm)</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellTextBlue}>{data.transporteIda[0]?.horaSalida}</Text>
+               </View>
+               <View style={styles.tableCol}>
+                  <Text style={styles.tableCellTextBlue}>{ultimaHoraLlegada}</Text>
+               </View>
+              </View>
+            </View>
+            <View style={styles.tableCol50}>
+              <Text style={styles.tableCellText}>NOTA: Estos datos se refieren al tiempo efectivamente utilizado en el cumplimiento del servicio institucional, desde la salida del lugar de residencia o trabajo habituales o del cumplimiento del servicio institucional según sea el caso, hasta su llegada de estos sitios.</Text>
+            </View>
+          </View>
+
+        </View>
+
+        <Text style={styles.sectionTitle}>
+        TRANSPORTE
+        </Text>
+
+        <View style={styles.table}>
+
+        <View style={styles.tableRow}>
+                <View style={styles.tableCol20}>
+                  <Text style={styles.tableCellText}>
+                  TIPO DE TRANSPORTE (Aéreo, terrestre, marítimo,  otros): 
+                  </Text>
+                </View>
+
+                <View style={styles.tableCol15}>
+                <Text style={styles.tableCellText}>
+                NOMBRE DE TRANSPORTE 
+                </Text>
+              </View>
+
+                <View style={styles.tableCol15}>
+                  <Text style={styles.tableCellText}>
+                  RUTA: 
+                  </Text>
+                </View>
+
+                    <View style={styles.tableCol}>
+                  
+                      <Text style={styles.tableCellText}>
+                      SALIDA:  
+                     </Text>
+                     
+                    <View style={styles.tableRow}>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>FECHA (dd - mmm - aaaa)</Text>                
+                      </View>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>HORA (hh : mm)</Text>
+                      </View>
+                    </View>
+                    </View>
+
+                    <View style={styles.tableCol}>
+                    <Text style={styles.tableCellText}>
+                    REGRESO:  
+                    </Text>
+                    <View style={styles.tableRow}>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>FECHA (dd - mmm - aaaa)</Text>                
+                      </View>
+                      <View style={styles.tableCol50}>
+                      <Text style={styles.tableCellText}>HORA (hh : mm)</Text>
+                      </View>
+                    </View>
+                    </View>
+                    </View>
+
+                    
+
+                    <View style={styles.tableRow}>
+                      
+                    <View style={styles.tableCol20}>
+                      {data.transporteIda.map((transporteIda, index) => (
+                     <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableCellTextBlueCenter}>
+                         {transporteIda.tipoTransporte
+                        ? transporteIda.tipoTransporte: ""}
+                        </Text>
+                      </View>
+                       ))}
+                     </View>
+                    <View style={styles.tableCol15}>
+                      {data.transporteIda.map((transporteIda, index) => (
+                     <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableCellTextBlueCenter}>
+                        {transporteIda.nombreTransporte
+                       ? transporteIda.nombreTransporte: ""}
+                     </Text>
+                   </View>
+                    ))}
+                    </View>
+                      <View style={styles.tableCol15}>
+                        {data.transporteIda.map((transporteIda, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteIda.ruta
+                                ? transporteIda.ruta: ""}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                        <View style={styles.tableCol}>
+                              {data.transporteIda.map((transporteIda, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteIda.fechaSalida
+                                ? formatDate(transporteIda.fechaSalida): ""}
+                            </Text>
+                          </View>
+                          ))}
+                          </View>
+                          <View style={styles.tableCol}>
+                              {data.transporteIda.map((transporteIda, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteIda.horaSalida
+                                ? transporteIda.horaSalida: ""}
+                            </Text>
+                          </View>
+                          ))}
+                        </View>
+
+                        <View style={styles.tableCol}>
+                              {data.transporteIda.map((transporteIda, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteIda.fechaLlegada
+                                ? formatDate(transporteIda.fechaLlegada): ""}
+                            </Text>
+                          </View>
+                          ))}
+                              </View>
+
+                            <View style={styles.tableCol}>
+                            {data.transporteIda.map((transporteIda, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {transporteIda.horaLlegada
+                              ? transporteIda.horaLlegada: ""}
+                          </Text>
+                        </View>
+                        ))}
+                            </View>
+                  
+              
+                   </View>
+
+                   <View style={styles.tableRow}>
+                    <View style={styles.tableCol20}>
+                      {data.transporteRegreso.map((transporteRegreso, index) => (
+                     <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableCellTextBlueCenter}>
+                         {transporteRegreso.tipoTransporte
+                        ? transporteRegreso.tipoTransporte: ""}
+                        </Text>
+                      </View>
+                       ))}
+                     </View>
+                    <View style={styles.tableCol15}>
+                      {data.transporteRegreso.map((transporteRegreso, index) => (
+                     <View key={index} style={styles.tableRow}>
+                        <Text style={styles.tableCellTextBlueCenter}>
+                        {transporteRegreso.nombreTransporte
+                       ? transporteRegreso.nombreTransporte: ""}
+                     </Text>
+                   </View>
+                    ))}
+                    </View>
+                      <View style={styles.tableCol15}>
+                        {data.transporteRegreso.map((transporteRegreso, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteRegreso.ruta
+                                ? transporteRegreso.ruta: ""}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+
+                        <View style={styles.tableCol}>
+                              {data.transporteRegreso.map((transporteRegreso, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteRegreso.fechaSalida
+                                ? formatDate(transporteRegreso.fechaSalida): ""}
+                            </Text>
+                          </View>
+                          ))}
+                          </View>
+                          <View style={styles.tableCol}>
+                              {data.transporteRegreso.map((transporteRegreso, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteRegreso.horaSalida
+                                ? transporteRegreso.horaSalida: ""}
+                            </Text>
+                          </View>
+                          ))}
+                        </View>
+
+                        <View style={styles.tableCol}>
+                              {data.transporteRegreso.map((transporteRegreso, index) => (
+                          <View key={index} style={styles.tableRow}>
+                            <Text style={styles.tableCellTextBlueCenter}>
+                              {transporteRegreso.fechaLlegada
+                                ? formatDate(transporteRegreso.fechaLlegada): ""}
+                            </Text>
+                          </View>
+                          ))}
+                              </View>
+
+                            <View style={styles.tableCol}>
+                            {data.transporteRegreso.map((transporteRegreso, index) => (
+                        <View key={index} style={styles.tableRow}>
+                          <Text style={styles.tableCellTextBlueCenter}>
+                            {transporteRegreso.horaLlegada
+                              ? transporteRegreso.horaLlegada: ""}
+                          </Text>
+                        </View>
+                        ))}
+                            </View>
+                  
+              
+                   </View>
+
+            </View>
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCellText}> NOTA: En caso de haber utilizado transporte público, se deberá adjuntar obligatoriamente los pases a bordo o boletos</Text>
+            </View>
+              
+                
+     
+
+        <Text style={styles.sectionTitle}>OBSERVACIONES</Text>
+       
+
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+                  <View style={styles.tableRow}>
+                     <Text style={styles.tableCellTextCenter}>FIRMA DE LA O EL SERVIDOR COMISIONADO:</Text>
+                  </View>
+                  <View style={styles.tableRow}>
+                     <Text style={styles.tableCellTextCenter}> ________________________________ </Text>
+                  </View>
+            
+              <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextBlue}>{data.nombres.toUpperCase()+ " "+ data.apellidos.toUpperCase()} </Text>
+              </View>
+                 <View style={styles.tableRow}>
+                      <Text style={styles.tableCellTextBlue}>{data.puesto.toUpperCase()} </Text>
+                 </View>
+                 <View style={styles.tableRow}>
+                      <Text style={styles.tableCellTextBlue}>{data.cedula} </Text>
+                 </View>
+              </View>
+              <View style={styles.tableCol}>
+            <Text style={styles.tableCellText}>NOTA: El presente informe deberá presentarse dentro del término de 4 días del cumplimiento de servicios institucionales, caso contrario la liquidación se demorará e incluso de no presentarlo tendría que restituir los valores percibidos. Cuando el cumplimiento de servicios institucionales sea superior al número de días autorizados, se deberá adjuntar la autorización por escrito de la Máxima Autoridad o su Delegado</Text>
+          </View>
+          </View>
+          
+
+        </View>
+
+
+        <Text style={styles.sectionTitle}>FIRMAS DE APROBACIÓN</Text>
+       
+       
+        <View style={styles.table}>
+
+          <View style={styles.tableRow}>
+            <View style={styles.tableCol50}>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>FIRMA DEL JEFE INMEDIATO:</Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextCenter}> ________________________________ </Text>
+                 </View>
+            
+             <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextBlueCenter}>{data.nombreJefeInmediato.toUpperCase()+""} </Text>
+                  </View>
+                 <View style={styles.tableRow}>
+                 <Text style={styles.tableCellTextBlueCenter}>{data.cargoJefeInmediato.toUpperCase()} </Text>
+                  </View>
+            </View>
+          
+          <View style={styles.tableCol}>
+           
+          <View style={styles.tableRow}>
+                  <Text style={styles.tableCellText}>FIRMA DE LA MAXIMA AUTORIDAD DE INVESTIGACIÓN:</Text>
+                </View>
+                <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextCenter}>________________________________</Text>
+                 </View>
+            
+            <View style={styles.tableRow}>
+                  <Text style={styles.tableCellTextCenter}>PhD. Alexandra Alvarado </Text>
+                  </View>
+                 <View style={styles.tableRow}>
+                 <Text style={styles.tableCellTextCenter}>Vicerrectora de Investigación, Innovación y Vinculación</Text>
+                   </View>
+                   </View>
+           
+           </View>
+           </View>
+      
+      </Page>
+    </PDFDocument>
+  );
+  // Convertir el documento PDF a un Blob
+  const blob = await pdf(MyPDFDocument).toBlob();
+
+  // Descargar automáticamente el archivo PDF
+  saveAs(blob, `Anexo 4 - Servicios Institucionales.pdf`);
+
+}
+
 
 //formatear la fecha en formato dd/mm/yyyy
 function formatDate(dateString) {
