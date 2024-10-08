@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider, useFieldArray, set } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import JSZip from "jszip";
 
@@ -58,6 +58,15 @@ function ExternalInternationalEventsForm() {
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
   const [showInputArticulo, setShowInputArticulo] = useState(false);
+
+  useEffect(() => {
+    const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde sessionStorage
+    reset(formData);
+    const subscription = watch((data) => {
+      sessionStorage.setItem(formStorageKey, JSON.stringify(data));
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, reset]);
 
   // Efecto para manejar la visibilidad de secciones y limpieza de campos
   useEffect(() => {
@@ -165,46 +174,35 @@ function ExternalInternationalEventsForm() {
 
   
   const handleDownloadJson = (returnDocument = false) => {
-    const data = methods.getValues(); // Obtiene los datos actuales del formulario
+    const data = methods.getValues();
+    if (!data || Object.keys(data).length === 0) return null;
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    if (returnDocument) return blob;
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "Participación en Eventos Fuera de Proyecto.json"; // Nombre del archivo
-    link.click();
+    if (returnDocument === true) return blob;
+    saveAs(blob, "Participación en Eventos Fuera de Proyecto.json");
   };
-
   
   const handleUploadJson = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader(); // Inicializa el FileReader para leer el archivo
-      reader.onload = (e) => {
-        try {
-          const json = JSON.parse(e.target.result); // Parsear el archivo JSON
-          reset(json, {
-            keepErrors: false,
-            keepDirty: false,
-            keepValues: false,
-            keepTouched: false,
-            keepIsSubmitted: false,
-          });
-          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-        } catch (err) {
-          console.error("Error al cargar el archivo JSON:", err);
-        }
-      };
-      reader.readAsText(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
+        sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+      } catch (err) {
+        console.error("Error al cargar el archivo JSON:", err);
+      }
+    };
+    reader.readAsText(file);
   };
-
-    const validarFechaLimiteInscripcion = (index) => {
-    const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
   
+
+  const validarFechaLimiteInscripcion = (index) => {
+    const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
     if (limiteFecha && fechaFinEvento && limiteFecha > fechaFinEvento) {
       return `La fecha no puede ser mayor que la fecha de finalización del evento (${fechaFinEvento})`;
     }
-  
     return true;
   };
   
@@ -217,26 +215,15 @@ function ExternalInternationalEventsForm() {
           Formulario para participacion en eventos fuera de proyectos
         </h1>
         <div className="form-container">
-          <Label text="Descargar datos actuales en (.json)"/>
-          {/* Botón para descargar el formulario como .json */}
-          <ActionButton
-            onClick={handleDownloadJson}
-            label="Descargar datos como JSON"
-            variant="success"
-          />
-          <Label text="Cargar datos desde archivo (.json)"/>
-          {/* Input nativo para cargar un archivo JSON */}
+          <Label text="Cargar datos desde archivo (.json)" />
           <input
             type="file"
             accept=".json"
-            onChange={handleUploadJson}  // Conectar con la función
-            style={{ marginTop: '20px' }}  // Estilos opcionales
+            onChange={handleUploadJson}
+            className="input-file"
           />
         </div>
-        <Form
-          onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}
-        >
-        
+        <Form onSubmit={methods.handleSubmit(onSubmitEventParticipationOutside)}>
           <div className="form-container">
             <LabelTitle text="Datos Personales" />
             <InputText
@@ -1205,6 +1192,13 @@ function ExternalInternationalEventsForm() {
               </Button>
             </Col>
           </Row>
+          <Label text="Descargar datos actuales en (.json)" />
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
 
           {/* Sección de descarga de documentos, visible tras enviar el formulario */}
           {showDownloadSection && (

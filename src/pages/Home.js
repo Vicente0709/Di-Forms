@@ -48,17 +48,35 @@ function Home() {
 
         <Col md={4} className="d-flex">
           <FormCard
-            title="Participación en Viaje Técnico al exterior Dentro de proyectos"
-            description="Este formulario está diseñado para la participación de viajes técnicos Dentro de proyectos. Ingrese la información necesaria a fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud de un docente titular a tiempo completo."
+            title="Participacion en Eventos Nacionales Dentro de Proyectos"
+            description="Este formulario está diseñado para la participación en eventos de investigación dentro de proyectos. Ingrese la información necesaria a fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud de un docente titular a tiempo completo para participar en un evento científico."
             imageSrc="form.png"
             altText="Formulario"
             buttonText="Ir al formulario"
-            path="/InternationalTechnicalTrips"
-            ariaLabel="Ir al formulario de participación en viajes técnicos dentro de proyectos"
+            path="/ProjectNationalEvents"
+            ariaLabel="Ir al formulario de pago de inscripción dentro o fuera de proyectos"
             documentDetails={[
-              "Memorando solicitud para participacion en viaje técnico dentro de proyectos",
-              "Anexo A - Solicitud de viaticos EPN",
-              "Anejo 2B - Formulario para participacion en viaje técnico dentro de proyectos"
+              "Memorando solicitud para participar en evento académico",
+              "Anexo A - Solicitud de Viaticos EPN",
+              "Anexo2 - Formulario para participar en evento académico nacional"
+            ]}
+          />
+        </Col>
+
+        <Col md={4} className="d-flex">
+          <FormCard
+            title="Participacion en Eventos Nacionales Fuera de Proyectos"
+            description="Este formulario está diseñado para la participación en eventos de investigación dentro de proyectos. Ingrese la información necesaria a fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud de un docente titular a tiempo completo para participar en un evento científico."
+            imageSrc="form.png"
+            altText="Formulario"
+            buttonText="Ir al formulario"
+            path="/ExternalNationalEvents"
+            ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
+            documentDetails={[
+              "Memorando del profesor-jefe",
+              "Memorando del jefe del departamento al VIIV",
+              "Anexo A - Solicitud de Viaticos EPN",
+              "Anexo 10 - Formulario para salidas nacionales fuera de proyectos "
             ]}
           />
         </Col>
@@ -81,34 +99,17 @@ function Home() {
 
         <Col md={4} className="d-flex">
           <FormCard
-            title="Participacion en Eventos Nacionales Dentro de Proyectos"
-            description="Este formulario está diseñado para la participación en eventos de investigación dentro de proyectos. Ingrese la información necesaria a fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud de un docente titular a tiempo completo para participar en un evento científico."
+            title="Participación en Viaje Técnico al exterior Dentro de proyectos"
+            description="Este formulario está diseñado para la participación de viajes técnicos Dentro de proyectos. Ingrese la información necesaria a fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud de un docente titular a tiempo completo."
             imageSrc="form.png"
             altText="Formulario"
             buttonText="Ir al formulario"
-            path="/ProjectNationalEvents"
-            ariaLabel="Ir al formulario de pago de inscripción dentro o fuera de proyectos"
+            path="/InternationalTechnicalTrips"
+            ariaLabel="Ir al formulario de participación en viajes técnicos dentro de proyectos"
             documentDetails={[
-              "Memorando solicitud para participar en evento académico",
-              "Anexo A - Solicitud de Viaticos EPN",
-              "Anexo2_Formulario para salidas nacionales"
-            ]}
-          />
-        </Col>
-
-        <Col md={4} className="d-flex">
-          <FormCard
-            title="Participacion en Eventos Nacionales Fuera de Proyectos"
-            description="Este formulario está diseñado para la participación en eventos de investigación dentro de proyectos. Ingrese la información necesaria a fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud de un docente titular a tiempo completo para participar en un evento científico."
-            imageSrc="form.png"
-            altText="Formulario"
-            buttonText="Ir al formulario"
-            path="/ExternalNationalEvents"
-            ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
-            documentDetails={[
-              "Documento 1: Descripción del evento",
-              "Documento 2: Detalles del proyecto",
-              "Documento 3: Información adicional"
+              "Memorando solicitud para participacion en viaje técnico dentro de proyectos",
+              "Anexo A - Solicitud de viaticos EPN",
+              "Anejo 2B - Formulario para participacion en viaje técnico dentro de proyectos"
             ]}
           />
         </Col>
@@ -123,9 +124,9 @@ function Home() {
             path="/PublicationsPayment"
             ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
             documentDetails={[
-              "Documento 1: Comprobante de pago",
-              "Documento 2: Detalles del proyecto",
-              "Documento 3: Información adicional"
+              "Memorando pago de publicacion",
+              "Anexo1 - Formulario para el pago de artículos científicos en revistas de alto impacto dentro de proyecto",
+              "Anexo2 - formulario para el pago de subvenciones para la difusión de artículos científicos aceptados en revistas de alto impacto"
             ]}
           />
         </Col>
@@ -140,9 +141,9 @@ function Home() {
             path="/NationalSamplingTrips"
             ariaLabel="Ir al formulario para salidas nacionales fuera de proyectos"
             documentDetails={[
-              "Documento 1: Descripción del viaje",
-              "Documento 2: Detalles del proyecto",
-              "Documento 3: Información adicional"
+              "Memorando salida de campo y de muestreo y/o viaje técnico dentro de proyectos",
+              "Anexo A - Solicitud de Viaticos EPN de cada uno del personal a trasladarse",
+              "Anexo 7 - Formulario para salidas de campo y de muestreo y/o viajes técnicos dentro de proyectos",
             ]}
           />
         </Col>
@@ -157,9 +158,8 @@ function Home() {
             path="/InstitutionalServices"
             ariaLabel="Ir al formulario para informe de servicios institucionales"
             documentDetails={[
-              "Documento 1: Descripción del servicio",
-              "Documento 2: Detalles del proyecto",
-              "Documento 3: Información adicional"
+              "Memoranado informe de servicios institucionales",
+              "Anexo 4 - Formulario para informe de servicios institucionales",
             ]}
           />
         </Col>

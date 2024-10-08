@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider,useFieldArray, set} from "react-hook-form";
+import { useForm, FormProvider,useFieldArray} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -89,7 +89,6 @@ function InternationalTechnicalTrips() {
     const zip = new JSZip();
     const formTripData = methods.getValues();
     const jsonBlob = handleDownloadJson(true);
-  
     const memo = await generateMemoTrip(formTripData, true);
     const anexoA = await generateAnexoATripWithingProject(formTripData, true);
     const anexoB2 = await generateAnexoB2WithinProject(formTripData, true);
@@ -113,38 +112,26 @@ function InternationalTechnicalTrips() {
 
   const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    if (returnDocument) return blob;
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "Viajes Técnicos Dentro de Proyectos.json";
-    link.click();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    if (returnDocument === true) return blob;
+    saveAs(blob, "Viajes Técnicos Dentro de Proyectos.json");
   };
   
   const handleUploadJson = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const json = JSON.parse(e.target.result);
-          reset(json, {
-            keepErrors: false,
-            keepDirty: false,
-            keepValues: false,
-            keepTouched: false,
-            keepIsSubmitted: false,
-          });
-          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-        } catch (err) {
-          console.error("Error al cargar el archivo JSON:", err);
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
+        sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+      } catch (err) {
+        console.error("Error al cargar el archivo JSON:", err);
+      }
+    };
+    reader.readAsText(file);
+  };  
   
   //aqui el use efect donde van todo a el control de las validaciones entre los imputs
   useEffect(() => {
@@ -193,8 +180,6 @@ function InternationalTechnicalTrips() {
         setPrevFechaFin(fechaFin);
       }
     });
-    
-
     return () => subscription.unsubscribe();
   }, [watch, reset, fechaFinActividades,fechaInicioActividades]);
 
@@ -230,20 +215,12 @@ function InternationalTechnicalTrips() {
           Formulario para participación en viajes técnicos dentro de proyectos
         </h1>
         <div className="form-container">
-          <Label text="Descargar datos actuales en (.json)"/>
-          {/* Botón para descargar el formulario como .json */}
-          <ActionButton
-            onClick={handleDownloadJson}
-            label="Descargar datos como JSON"
-            variant="success"
-          />
-          <Label text="Cargar datos desde archivo (.json)"/>
-          {/* Input nativo para cargar un archivo JSON */}
+          <Label text="Cargar datos desde archivo (.json)" />
           <input
             type="file"
             accept=".json"
-            onChange={handleUploadJson}  // Conectar con la función
-            style={{ marginTop: '20px' }}  // Estilos opcionales
+            onChange={handleUploadJson} // Conectar con la función
+            className="input-file"
           />
         </div>
         <Form onSubmit={methods.handleSubmit(onSubmitTechnicalTrip)}>
@@ -1107,6 +1084,15 @@ function InternationalTechnicalTrips() {
               </Button>
             </Col>
           </Row>
+
+          <Label text="Descargar datos actuales en (.json)" />
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+
 
           {/* Sección de descargas que aparece después de enviar el formulario */}
           {showDownloadSection && (
