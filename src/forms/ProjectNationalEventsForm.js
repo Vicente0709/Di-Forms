@@ -116,40 +116,27 @@ function NationalWithinProjectsForm() {
   
   const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-
-    if (returnDocument) return blob;
-    if (returnDocument) return blob;
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "Participación Nacional Dentro de Proyectos.json";
-    link.click();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    if (returnDocument === true) return blob;
+    saveAs(blob, "Participación Nacional Dentro de Proyectos.json");
   };
-
+  
   const handleUploadJson = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader(); 
-      reader.onload = (e) => {
-        try {
-          const json = JSON.parse(e.target.result);
-          reset(json, {
-            keepErrors: false,
-            keepDirty: false,
-            keepValues: false,
-            keepTouched: false,
-            keepIsSubmitted: false,
-          });
-          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-        } catch (err) {
-          console.error("Error al cargar el archivo JSON:", err);
-        }
-      };
-      reader.readAsText(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
+        sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+      } catch (err) {
+        console.error("Error al cargar el archivo JSON:", err);
+      }
+    };
+    reader.readAsText(file);
   };
+  
   
   const extraerYCalcularFechas = useCallback((formData) => {
     const { transporteIda = [], transporteRegreso = [] } = formData;
@@ -321,19 +308,11 @@ function NationalWithinProjectsForm() {
         Formulario para salidas nacionales dentro de proyectos
         </h1>
         <div className="form-container">
-          <Label text="Descargar datos actuales en (.json)"/>
-          {/* Botón para descargar el formulario como .json */}
-          <ActionButton
-            onClick={handleDownloadJson}
-            label="Descargar datos como JSON"
-            variant="success"
-          />
-          <Label text="Cargar datos desde archivo (.json)"/>
-          {/* Input nativo para cargar un archivo JSON */}
+          <Label text="Cargar datos desde archivo (.json)" />
           <input
             type="file"
             accept=".json"
-            onChange={handleUploadJson}  // Conectar con la función
+            onChange={handleUploadJson} // Conectar con la función
             className="input-file"
           />
         </div>
@@ -1484,6 +1463,15 @@ function NationalWithinProjectsForm() {
               </Button>
             </Col>
           </Row>
+          
+          <Label text="Descargar datos actuales en (.json)" />
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+          
 
           {/* Sección de descarga de documentos, visible tras enviar el formulario */}
           {showDownloadSection && (

@@ -121,46 +121,29 @@ function ExternalNationalEventsForm() {
     console.log(methods.getValues());
   };
 
-  // Función para descargar el formulario como JSON
   const handleDownloadJson = (returnDocument = false) => {
-    const data = methods.getValues(); // Obtiene los datos actuales del formulario
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: "application/json",
-    });
-    if (returnDocument) return blob;
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "Participación Nacional Fuera de Proyectos.json"; // Nombre del archivo
-    link.click();
+    const data = methods.getValues();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    if (returnDocument === true) return blob;
+    saveAs(blob, "Participación Nacional Fuera de Proyectos.json");
   };
 
-  // Función para cargar un archivo JSON y rellenar el formulario
   const handleUploadJson = (event) => {
-    const file = event.target.files[0];  // Verificar si hay archivo
-    if (file) {
-      const reader = new FileReader();  // Inicializa el FileReader para leer el archivo
-      reader.onload = (e) => {
-        try {
-          const json = JSON.parse(e.target.result);  // Parsear el archivo JSON
-  
-          // Reset del formulario con los datos del JSON
-          reset(json, {
-            keepErrors: false,
-            keepDirty: false,
-            keepValues: false,
-            keepTouched: false,
-            keepIsSubmitted: false,
-          });
-  
-          // Actualizar sessionStorage con los datos cargados
-          sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-        } catch (err) {
-          console.error("Error al cargar el archivo JSON:", err);
-        }
-      };
-      reader.readAsText(file);  // Leer el archivo como texto
-    }
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
+        sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+      } catch (err) {
+        console.error("Error al cargar el archivo JSON:", err);
+      }
+    };
+    reader.readAsText(file);
   };
+  
 
   const handleGenerateMemo1 = () => {
    const formNationalOutsideProject = methods.getValues();
@@ -235,20 +218,12 @@ function ExternalNationalEventsForm() {
           Formulario para participacion nacional en eventos fuera de proyectos
         </h1>
         <div className="form-container">
-          <Label text="Descargar datos actuales en (.json)"/>
-          {/* Botón para descargar el formulario como .json */}
-          <ActionButton
-            onClick={handleDownloadJson}
-            label="Descargar datos como JSON"
-            variant="success"
-          />
-          <Label text="Cargar datos desde archivo (.json)"/>
-          {/* Input nativo para cargar un archivo JSON */}
+          <Label text="Cargar datos desde archivo (.json)" />
           <input
             type="file"
             accept=".json"
-            onChange={handleUploadJson}  // Conectar con la función
-            style={{ marginTop: '20px' }}  // Estilos opcionales
+            onChange={handleUploadJson} // Conectar con la función
+            className="input-file"
           />
         </div>
         <Form
@@ -1199,6 +1174,13 @@ function ExternalNationalEventsForm() {
               </Button>
             </Col>
           </Row>
+          <Label text="Descargar datos actuales en (.json)" />
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+
 
           {/* Sección de descarga de documentos, visible tras enviar el formulario */}
           {showDownloadSection && (

@@ -313,6 +313,7 @@ export async function generateAnexoA(data,returnDocument = false) {
 }
 
 export async function generateAnexo2A(data,returnDocument = false) {
+  const justificacionComision = data.justificacionComision && data.justificacionComision.trim() !== "" ? data.justificacionComision : "No aplica";
 const MyPDFDocument = (
     <PDFDocument>
     <Page style={styles.page}>
@@ -936,7 +937,7 @@ const MyPDFDocument = (
         6.2 Justificar la necesidad de la comisión de servicios mayor a 15
         días
         </Text>
-        <Text style={styles.textBlue}>{data.justificacionComision}</Text>
+        <Text style={styles.textBlue}>{justificacionComision }</Text>
         <Text style={styles.sectionTitle}>7. CALCULO REFERENCIAL DE DÍAS DE LA COMISIÓN DE SERVICIOS </Text>
         <Text style={styles.textBlue}>
         {"Calculo dias de comision entre las fechas de salida y de regreso: " +data.actividadesInmutables.length}

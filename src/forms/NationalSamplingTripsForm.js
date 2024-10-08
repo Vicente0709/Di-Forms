@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
+import { saveAs } from "file-saver";
 
 // Importación de los componentes Props
 import Label from "../components/Labels/Label.js";
@@ -117,44 +118,28 @@ function NationalSamplingTripsForm() {
 
   const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json", });
-    if (returnDocument) return blob;
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "Viajes de Muestreo Dentro de Proyectos.json";
-    link.click();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    if (returnDocument === true) return blob;
+    saveAs(blob, "Viajes de Muestreo Dentro de Proyectos.json");
   };
 
   const handleUploadJson = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const json = JSON.parse(e.target.result);
-          console.log("Datos cargados:", json); // Verifica los datos cargados
-          reset(json, {
-            keepErrors: false,
-            keepDirty: false,
-            keepValues: false,
-            keepTouched: false,
-            keepIsSubmitted: false,
-          });
-          replaceInmutableFields(json.actividadesInmutables);
-          sessionStorage.removeItem(formStorageKey); // Eliminar el ítem existente
-          sessionStorage.setItem(formStorageKey, JSON.stringify(json)); // Cargar el nuevo JSON
-          console.log(
-            "Datos almacenados en sessionStorage:",
-            sessionStorage.getItem(formStorageKey)
-          ); // Verifica los datos almacenados
-        } catch (err) {
-          console.error("Error al cargar el archivo JSON:", err);
-        }
-      };
-      reader.readAsText(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
+        replaceInmutableFields(json.actividadesInmutables);
+        sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+      } catch (err) {
+        console.error("Error al cargar el archivo JSON:", err);
+      }
+    };
+    reader.readAsText(file);
   };
-
+  
   const handleGenerateDocx = () => {
     const data = methods.getValues();
     generateMemoSamplingTripWithinProject(data);
@@ -238,20 +223,12 @@ function NationalSamplingTripsForm() {
           dentro de proyectos
         </h1>
         <div className="form-container">
-          <Label text="Descargar datos actuales en (.json)" />
-          {/* Botón para descargar el formulario como .json */}
-          <ActionButton
-            onClick={handleDownloadJson}
-            label="Descargar datos como JSON"
-            variant="success"
-          />
           <Label text="Cargar datos desde archivo (.json)" />
-          {/* Input nativo para cargar un archivo JSON */}
           <input
             type="file"
             accept=".json"
             onChange={handleUploadJson} // Conectar con la función
-            style={{ marginTop: "20px" }} // Estilos opcionales
+            className="input-file"
           />
         </div>
         <Form onSubmit={methods.handleSubmit(onSubmitSamplingTrip)}>
@@ -1203,6 +1180,14 @@ function NationalSamplingTripsForm() {
               </Button>
             </Col>
           </Row>
+          <Label text="Descargar datos actuales en (.json)" />
+          {/* Botón para descargar el formulario como .json */}
+          <ActionButton
+            onClick={handleDownloadJson}
+            label="Descargar datos como JSON"
+            variant="success"
+          />
+
 
           {showDownloadSection && (
             <div className="mt-4">

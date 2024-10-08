@@ -1,8 +1,14 @@
+// Importaciones de docx
 import { Document, Packer, Paragraph, TextRun } from "docx";
+
+// Importación de file-saver
 import { saveAs } from "file-saver";
+
+// Importaciones de @pdfme
 import { generate } from "@pdfme/generator";
 import { text, image, barcodes } from "@pdfme/schemas";
-import { Font } from "@react-pdf/renderer";
+
+// Importaciones de @react-pdf/renderer
 import {
   Page,
   Text,
@@ -10,8 +16,8 @@ import {
   Document as PDFDocument,
   StyleSheet,
   pdf,
+  Font,
 } from "@react-pdf/renderer";
-
 //basepdf and schemas AnexoA
 import { basePdfAnexoA } from "./basePdfAnexoA";
 import { schemasAnexoA } from "./schemasAnexoA";

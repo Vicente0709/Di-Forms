@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import JSZip from "jszip";
+import { saveAs } from "file-saver";
+
 // Importación de props
 import Label from "../components/Labels/Label.js";
 import LabelTitle from "../components/Labels/LabelTitle.js";
@@ -15,11 +17,10 @@ import ActionButton from "../components/Buttons/ActionButton.js";
 import DownloadButton from "../components/Buttons/DownloadButton.js";
 
 // Importación de las funciones
-import { generateDateRange } from "../utils/dataRange.js";
 import today from "../utils/date.js";
+import { generateDateRange } from "../utils/dataRange.js";
 import { generateMemorandoA, generateAnexoA, generateAnexo2A } from "../utils/generatorDocuments/event/internationalEventDocuments.js";
 import {validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso} from "../utils/validaciones.js";
-import { saveAs } from "file-saver";
 
 //Constaltes globales para el formulario
 const formStorageKey = "formEventParticipationWithinProjects"; // Clave para almacenar el formulario en sessionStorage
@@ -35,9 +36,6 @@ function ProjectInternationalEventsForm() {
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
   const { fields: immutableFields, replace: replaceInmutableFields } = useFieldArray({ control, name: "actividadesInmutables" });
   const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
-  
-  const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "", };
-  const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
   
   // Observadores de campos
   const tipoEventoSeleccionado = watch("tipoEvento");
@@ -56,8 +54,6 @@ function ProjectInternationalEventsForm() {
 
   // Estados locales
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-
-  //manejadores de estado para actividades
   const [loading, setLoading] = useState(false); //para el spinner de carga
   const [fechaInicioActividades, setFechaInicioActividades] = useState("");
   const [fechaFinActividades, setFechaFinActividades] = useState("");
@@ -69,12 +65,6 @@ function ProjectInternationalEventsForm() {
   // Funciones auxiliares y handler de eventos
   const onSubmit = (data) => {
     setShowDownloadSection(true);
-    console.log(methods.getValues());
-  };
-
-  const datos = () => {
-    const data = methods.getValues();
-    console.log(data);
   };
 
   const handleGenerateDocx = () => {
@@ -118,42 +108,31 @@ function ProjectInternationalEventsForm() {
     setShowDownloadSection(false);
     window.location.reload();
   };
-  
-  const handleDownloadJson = (returnDocument = false) => {
-    const data = methods.getValues(); // Obtiene los datos actuales del formulario
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
 
-    if (returnDocument) return blob;
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "Participación en Eventos Dentro Proyectos.json"; // Nombre del archivo
-    link.click();
+  const handleDownloadJson = (returnDocument = false) => {
+    const data = methods.getValues();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    if (returnDocument === true) return blob;
+    saveAs(blob, "Participación en Eventos Dentro Proyectos.json");
   };
 
   const handleUploadJson = (event) => {
     const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const json = JSON.parse(e.target.result);
-          reset(json, {
-            keepErrors: false,
-            keepDirty: false,
-            keepValues: false,
-            keepTouched: false,
-            keepIsSubmitted: false,
-          });
-          replaceInmutableFields(json.actividadesInmutables);
-          sessionStorage.removeItem(formStorageKey); // Eliminar el ítem existente
-          sessionStorage.setItem(formStorageKey, JSON.stringify(json)); // Cargar el nuevo JSON
-        } catch (err) {
-          console.error("Error al cargar el archivo JSON:", err);
-        }
-      };
-      reader.readAsText(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const json = JSON.parse(e.target.result);
+        reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
+        replaceInmutableFields(json.actividadesInmutables);
+        sessionStorage.setItem(formStorageKey, JSON.stringify(json)); 
+      } catch (err) {
+        console.error("Error al cargar el archivo JSON:", err);
+      }
+    };
+    reader.readAsText(file);
   };
+  
 
   const validarFechaLimiteInscripcion = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
@@ -166,35 +145,25 @@ function ProjectInternationalEventsForm() {
 
   // UseEffect principal y separado para la suscrioción de cambios en el formulario
   useEffect(() => {
+    const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde sessionStorage
     reset(formData);
     const subscription = watch((data) => {
       sessionStorage.setItem(formStorageKey, JSON.stringify(data));
-      // Obtener las fechas de inicio y fin
       const fechaInicio = data.transporteIda?.[0]?.fechaSalida || "";
-      const fechaFin = data.transporteRegreso?.length
-        ? data.transporteRegreso[data.transporteRegreso.length - 1]
-            ?.fechaLlegada
-        : "";
-      console.log("fechas obtenidas con methods tiempo real",fechaInicio, fechaFin);
-      console.log("fechas previas",prevFechaInicio,prevFechaFin);
-      console.log("fechas almacenadas",fechaInicioActividades,fechaFinActividades);
-        
-      // Actualizar solo si las fechas han cambiado y no están vacías
+      const fechaFin = data.transporteRegreso?.length? data.transporteRegreso[data.transporteRegreso.length - 1]?.fechaLlegada: "";
+
       if (fechaInicio !== prevFechaInicio && fechaInicio !== "" && fechaInicio !== fechaInicioActividades ) {
-        console.log("Fecha de inicio de actividades actualizada:", fechaInicio);
         setFechaInicioActividades(fechaInicio);
         setPrevFechaInicio(fechaInicio);
       }
       if (fechaFin !== prevFechaFin && fechaFin !== "" && fechaFin !== fechaFinActividades) {
-        console.log("Fecha de fin de actividades actualizada:", fechaFin);
         setFechaFinActividades(fechaFin);
         setPrevFechaFin(fechaFin);
       }
     });
     
-
     return () => subscription.unsubscribe();
-  }, [watch, reset, fechaFinActividades,fechaInicioActividades]);
+  }, [watch, reset, prevFechaInicio, prevFechaFin, fechaFinActividades, fechaInicioActividades]);
 
   // Segundo useEffect
   useEffect(() => { 
@@ -219,7 +188,7 @@ function ProjectInternationalEventsForm() {
       replaceInmutableFields(newFields);
       setCantidadDias(newFields.length);
     }
-  }, [fechaInicioActividades, fechaFinActividades]);
+  }, [fechaInicioActividades, fechaFinActividades, methods, replaceInmutableFields]);
 
   // useEffect para controlar los campos del formulario
   useEffect(() => {
@@ -228,10 +197,11 @@ function ProjectInternationalEventsForm() {
     } else {
       setValue("seleccionDeclaracion", "noCubre");
     }
+    const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "", };
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
     if (fields.length === 0) append(initialInscripcion);
     if (fieldsIda.length === 0) appendIda(initialTransporte);
     if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
-
     if (participacionEvento === "Asistencia") clearErrors(["tituloPonencia"]);
     if (tipoEventoSeleccionado!== "Otro evento académico")setValue("otroEventoEspecificar", "");
     if (viaticos==="NO"){
@@ -245,13 +215,15 @@ function ProjectInternationalEventsForm() {
     fieldsIda,
     fieldsRegreso,
     fields, 
-    append,
     participacionEvento,
     tipoEventoSeleccionado,
     isAsistencia,
     hospedaje,
     movilizacion,
     alimentacion,
+    append,
+    appendIda,
+    appendRegreso,
     setValue,
     clearErrors,
   ]);
@@ -264,7 +236,6 @@ function ProjectInternationalEventsForm() {
         </h1>
         <div className="form-container">
           <Label text="Cargar datos desde archivo (.json)" />
-          {/* Input nativo para cargar un archivo JSON */}
           <input
             type="file"
             accept=".json"
@@ -545,16 +516,7 @@ function ProjectInternationalEventsForm() {
               }}
               infoText="Describa la relevancia del evento y aporte al cumplimiento del objetivo."
               disabled={false}
-            />
-
-            <LabelTitle text="Transporte" disabled={false} />
-            <LabelText
-              text="Por favor, considere que el itinerario es tentativo. Consulte el
-                itinerario del medio de transporte elegido en su página oficial
-                o sitios web de confianza. Seleccione la opción que ofrezca el
-                menor tiempo de viaje y el menor número de escalas de ser el
-                caso."
-            />
+            /> 
              <LabelTitle text="Transporte" disabled={false} />
             <LabelText
               text="Por favor, considere que el itinerario es tentativo. Consulte el
@@ -1503,7 +1465,7 @@ function ProjectInternationalEventsForm() {
           {/* Botón para enviar el formulario */}
           <Row className="mt-4">
             <Col className="text-center">
-              <Button id="btn_enviar" type="submit" variant="primary" onClick={datos}>
+              <Button id="btn_enviar" type="submit" variant="primary" >
                 Enviar
               </Button>
             </Col>
