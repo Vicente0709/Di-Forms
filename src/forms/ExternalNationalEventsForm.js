@@ -73,6 +73,11 @@ function ExternalNationalEventsForm() {
 
   // Efecto para manejar la visibilidad de secciones y limpieza de campos
   useEffect(() => {
+
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
+    if (fieldsIda.length === 0) appendIda(initialTransporte);
+    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
+
     // Manejar la lógica para mostrar/ocultar el campo de detalle del artículo
     setShowInputArticulo(seleccionArticulo === "SI");
     if (seleccionArticulo !== "SI") {
@@ -112,13 +117,8 @@ function ExternalNationalEventsForm() {
 
   }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, fields.length, setValue, clearErrors]);
 
-  
-
-  // Función que se ejecuta al enviar el formulario
   const onSubmitNationalOutside = (data) => {
-    console.log(data);
     setShowDownloadSection(true);
-    console.log(methods.getValues());
   };
 
   const handleDownloadJson = (returnDocument = false) => {
@@ -169,9 +169,6 @@ function ExternalNationalEventsForm() {
     setShowDownloadSection(false);
   };
   
-
-  // Función para descargar todos los documentos
-
   const handleDownloadAll = async() => {
     setLoading(true); // Activar spinner
     const formData = methods.getValues();
@@ -192,12 +189,12 @@ function ExternalNationalEventsForm() {
     setShowDownloadSection(false);
   };
 
-  // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
     sessionStorage.removeItem(formStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
+
   const validarFechaLimiteInscripcion = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
   
@@ -421,7 +418,7 @@ function ExternalNationalEventsForm() {
               disabled={false}
             />
 
-<LabelTitle text="Transporte" disabled={false} />
+            <LabelTitle text="Transporte" disabled={false} />
             <LabelText
               text="Por favor, considere que el itinerario es tentativo. Consulte el
                 itinerario del medio de transporte elegido en su página oficial
@@ -430,7 +427,7 @@ function ExternalNationalEventsForm() {
                 caso."
             />
             <Label text="TRANSPORTE DE IDA" />
-            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento." />
+            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento, salida de campo." />
 
             <div className="scroll-table-container">
               <table className="activity-schedule-table">
@@ -533,7 +530,7 @@ function ExternalNationalEventsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today ||
+                                    value >= today() ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
@@ -580,14 +577,19 @@ function ExternalNationalEventsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
-                                    value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-                                  
+                                    value >= fechaSalida ||
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+
                                   // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
                                   validateFechaLlegadaIda: (value) =>
                                     index === fieldsIda.length - 1
-                                      ? validateFechaLlegadaIda(value, fechaInicioEvento)
+                                      ? validateFechaLlegadaIda(
+                                          value,
+                                          fechaInicioEvento
+                                        )
                                       : true, // Si no es el último campo, no aplica esta validación
                                 },
                               }
@@ -627,7 +629,12 @@ function ExternalNationalEventsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeIda(index)}
+                            onClick={() => {
+                              if(fieldsIda.length > 1){
+
+                                removeIda(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -637,9 +644,9 @@ function ExternalNationalEventsForm() {
                   })}
                 </tbody>
               </table>
-
               <ActionButton
                 onClick={() => {
+                  
                   appendIda({
                     tipoTransporte: "Aéreo",
                     nombreTransporte: "",
@@ -763,15 +770,21 @@ function ExternalNationalEventsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
                                     value >= fechaLlegadaAnterior ||
                                     "La fecha de salida debe ser posterior a la fecha de llegada anterior",
-                                  
+
                                   // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
                                   validateRegreso: (value) =>
-                                    index === 0 ? validateFechaSalidaRegreso(value, fechaFinEvento) : true,
+                                    index === 0
+                                      ? validateFechaSalidaRegreso(
+                                          value,
+                                          fechaFinEvento
+                                        )
+                                      : true,
                                 },
                               }
                             )}
@@ -819,7 +832,7 @@ function ExternalNationalEventsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today ||
+                                    value >= today() ||
                                     "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida ||
@@ -862,7 +875,12 @@ function ExternalNationalEventsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeRegreso(index)}
+                            onClick={() => {
+                              if(fieldsRegreso.length > 1){
+
+                                removeRegreso(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />

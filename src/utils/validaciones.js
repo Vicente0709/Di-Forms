@@ -89,3 +89,9 @@ export function capitalizeWords(str) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(" ");
 }
+
+export function sumarDias(fecha, dias) {
+let nuevaFecha = new Date(fecha);
+nuevaFecha.setDate(nuevaFecha.getDate() + dias);
+return nuevaFecha;
+}

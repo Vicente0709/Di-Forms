@@ -28,6 +28,12 @@
   background-color: #fff;  /* Fondo blanco */
   transition: border-color 0.2s ease-in-out;  /* Transición suave al enfocar */
 }
+.form-select {
+  max-width: 100%; /* Asegura que el select no se desborde */
+  white-space: nowrap; /* Evita que el texto se envuelva */
+  overflow: hidden; /* Oculta el texto que se desborda */
+  text-overflow: ellipsis; /* Añade puntos suspensivos al texto desbordado */
+}
 
 .form-input:focus,
 .form-select:focus {

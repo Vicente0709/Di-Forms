@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider, useFieldArray } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray, set } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 // Importación de los componentes Props
 import Label from "../components/Labels/Label.js";
@@ -20,9 +21,7 @@ import today from "../utils/date.js";
 import { generateDateRange } from "../utils/dataRange.js";
 import {
   validarCedulaEcuatoriana,
-  validarFechaFin,
-  validateFechaLlegadaIda,
-  validateFechaSalidaRegreso,
+  sumarDias,
 } from "../utils/validaciones.js";
 
 // Importación de las funciones para generar documentos
@@ -30,7 +29,7 @@ import {
   generateAnexo7WithinProject,
   generateMemoSamplingTripWithinProject,
   NationalSamplingTrips,
-} from "../utils/documentGeneratorNational.js";
+} from "../utils/generatorDocuments/trip/nationalTripDocuments";
 
 //Constantes globales
 const formStorageKey = "formSamplingTripWithinProject"; // Clave para almacenar el formulario en sessionStorage
@@ -48,72 +47,21 @@ function NationalSamplingTripsForm() {
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
   const { fields: immutableFields, replace: replaceInmutableFields } = useFieldArray({ control, name: "actividadesInmutables" });
 
-  if (fieldsRegreso.length === 0) {
-      appendRegreso({
-        tipoTransporte: "",
-        nombreTransporte: "",
-        ruta: "",
-        fechaSalida: "",
-        horaSalida: "",
-        fechaLlegada: "",
-        horaLlegada: "",
-      });
-    }
-    if (participanteFields.length === 0) {
-      appendParticipante({
-        viaticos: false,               // Solicita Viáticos
-        nombre: "",                    // Personal nombre
-        cedula: "",                    // Cédula
-        rol: "",                       // Rol en el Proyecto
-        cargo: "",                     // Cargo
-        nombreJefeInmediato: "",       // Nombre Jefe Inmediato
-        cargoJefeInmediato: "",        // Cargo del Jefe Inmediato
-        banco: "",                     // Nombre del Banco
-        tipoCuenta: "",                // Tipo de Cuenta
-        numeroCuenta: "",              // Número de Cuenta
-        departamento: ""               // Departamento
-      });
-    }
-  
-    if (fieldsIda.length === 0) {
-      appendIda({
-        tipoTransporte: "",
-        nombreTransporte: "",
-        ruta: "",
-        fechaSalida: "",
-        horaSalida: "",
-        fechaLlegada: "",
-        horaLlegada: "",
-      });
-    }
-
   //visualizadores con watch
   const fechaInicioViaje = watch("fechaInicioViaje");
   const fechaFinViaje = watch("fechaFinViaje");
-  const transporteIdaValues = watch("transporteIda");
-  const transporteRegresoValues = watch("transporteRegreso");
-  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
 
   //manejadores de estado
   const [fechaInicioActividades, setFechaInicioActividades] = useState("");
   const [fechaFinActividades, setFechaFinActividades] = useState("");
   const [prevFechaInicio, setPrevFechaInicio] = useState("");
   const [prevFechaFin, setPrevFechaFin] = useState("");
-
+  const [loading, setLoading] = useState(false); //para el spinner de carga
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const rangoFechas = generateDateRange(
-    fechaInicioActividades,
-    fechaFinActividades
-  );
-  // const [rangoFechas, setRangoFechas] = useState([]);
-
+  
   const onSubmitSamplingTrip = (data) => {
     console.log(data);
     setShowDownloadSection(true);
-  };
-  const datos = () => {
-    const data = methods.getValues();
-    console.log(data);
   };
 
   const handleDownloadJson = (returnDocument = false) => {
@@ -146,9 +94,11 @@ function NationalSamplingTripsForm() {
     setShowDownloadSection(false);
   };
   const handleGeneratePdfAnexosA = () => {
+    setLoading(true);
     const data = methods.getValues();
     NationalSamplingTrips(data);
     setShowDownloadSection(false);
+    setLoading(false);
   };
 
   const handleGeneratePdf2 = () => {
@@ -162,58 +112,84 @@ function NationalSamplingTripsForm() {
     window.location.reload();
   };
 
+  const handleDownloadAll = async () => {
+    try {
+      setLoading(true); // Activar spinner
+      // Obtener los valores del formulario
+      const formData = methods.getValues();
+      // Generar los blobs de los documentos
+      const jsonBlob = handleDownloadJson(true);
+      const docxBlob = await generateMemoSamplingTripWithinProject(formData, true);
+      const pdfBlob1 = await generateAnexo7WithinProject(formData, true);
+      const pdfsZipBlob = await NationalSamplingTrips(formData, true); // Esta función retorna un blob en formato ZIP
+      // Crear un nuevo archivo ZIP y agregar los documentos
+      const zip = new JSZip();
+      zip.file("Viajes de Muestreo Dentro de Proyectos.json", jsonBlob);
+      zip.file("Memorando de Viaje.docx", docxBlob);
+      zip.file("Anexo 7 - Formulario de Salidas de Campo y de Muestreo.pdf", pdfBlob1);
+      zip.file("Anexos A.zip", pdfsZipBlob);
+      // Generar el archivo ZIP final y descargarlo
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, "Documentos_Viajes_de_Muestreo.zip");
+
+    } catch (error) {
+      console.error("Error al generar el archivo ZIP:", error);
+    } finally {
+      setLoading(false); // Desactivar spinner
+      setShowDownloadSection(false);
+    }
+  };
+
   // useEffect principal
   useEffect(() => {
-    reset(formData);
+    const formulario = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde sessionStorage
+    reset(formulario);
+
     const subscription = watch((data) => {
       sessionStorage.setItem(formStorageKey, JSON.stringify(data));
-
-      // Obtener las fechas de inicio y fin
       const fechaInicio = data.transporteIda?.[0]?.fechaSalida || "";
-      const fechaFin = data.transporteRegreso?.length
-        ? data.transporteRegreso[data.transporteRegreso.length - 1]
-            ?.fechaLlegada
-        : "";
+      const fechaFin = data.transporteRegreso?.length? data.transporteRegreso[data.transporteRegreso.length - 1]?.fechaLlegada: "";
 
-      // Actualizar solo si las fechas han cambiado y no están vacías
-      if (fechaInicio !== prevFechaInicio && fechaInicio !== "") {
-        console.log("Fecha de inicio de actividades actualizada:", fechaInicio);
+      if (fechaInicio !== prevFechaInicio && fechaInicio !== "" && fechaInicio !== fechaInicioActividades ) {
         setFechaInicioActividades(fechaInicio);
         setPrevFechaInicio(fechaInicio);
       }
-
-      if (fechaFin !== prevFechaFin && fechaFin !== "") {
-        console.log("Fecha de fin de actividades actualizada:", fechaFin);
+      if (fechaFin !== prevFechaFin && fechaFin !== "" && fechaFin !== fechaFinActividades) {
         setFechaFinActividades(fechaFin);
         setPrevFechaFin(fechaFin);
       }
     });
     return () => subscription.unsubscribe();
-  }, [watch, reset, prevFechaInicio, prevFechaFin]);
+  }, [watch, reset, prevFechaInicio, prevFechaFin, fechaFinActividades, fechaInicioActividades]);
+  
 
   // Segundo useEffect
-  useEffect(() => { 
-    if (fechaInicioActividades && fechaFinActividades && fechaInicioActividades !== "" && fechaFinActividades !== "") {
-      console.log(
-        "Esto se ejecuta solo si hay un cambio en las fechas de inicio o fin de actividades"
-      );
-      const currentFields = methods.getValues("actividadesInmutables") || [];
-      const dates = generateDateRange(
-        fechaInicioActividades,
-        fechaFinActividades
-      );
-      const newFields = dates.map((date) => {
-        const existingField = currentFields.find(
-          (field) => field.fecha === date
-        );
-        return {
-          fecha: date,
-          descripcion: existingField ? existingField.descripcion : "",
-        };
-      });
-      replaceInmutableFields(newFields);
-    }
-  }, [fechaInicioActividades, fechaFinActividades]);
+useEffect(() => { 
+  if (fechaInicioActividades && fechaFinActividades && fechaInicioActividades !== "" && fechaFinActividades !== "") {
+    console.log("Esto se ejecuta solo si hay un cambio en las fechas de inicio o fin de actividades");
+    const currentFields = methods.getValues("actividadesInmutables") || [];
+    const dates = generateDateRange(fechaInicioActividades, fechaFinActividades);
+    const newFields = dates.map((date) => {
+      const existingField = currentFields.find((field) => field.fecha === date);
+      return {
+        fecha: date,
+        descripcion: existingField ? existingField.descripcion : "",
+      };
+    });
+    replaceInmutableFields(newFields);
+  }
+}, [fechaInicioActividades, fechaFinActividades, methods, replaceInmutableFields]);
+
+// Tercer useEffect
+useEffect(() => {
+  console.log("Esto se ejecuta solo una vez al cargar el componente");
+  const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "", horaSalida: "", fechaLlegada: "", horaLlegada: "" };
+  const initialParticipante = { viaticos: false, nombre: "", cedula: "", rol: "", cargo: "", nombreJefeInmediato: "", cargoJefeInmediato: "", banco: "", tipoCuenta: "", numeroCuenta: "", departamento: "" };
+
+  if (participanteFields.length === 0) appendParticipante(initialParticipante);
+  if (fieldsIda.length === 0) appendIda(initialTransporte);
+  if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
+}, []); // Sin dependencias para que se ejecute solo una vez
 
   return (
     <FormProvider {...methods}>
@@ -347,13 +323,13 @@ function NationalSamplingTripsForm() {
             />
             <LabelTitle text="Personal a trasladarse" />
             <div className="scroll-table-container">
-              <table className="activity-schedule-table">
+              <table className="employe-table" >
                 <thead>
                   <tr>
                     <th className="solicita-viaticos">Solicita Viáticos</th>
+                    <th className="rol-proyecto">Rol en el Proyecto</th>
                     <th className="personal-nombre">Personal nombre</th>
                     <th className="cedula" >Cédula</th>
-                    <th className="rol-proyecto">Rol en el Proyecto</th>
                     <th className="cargo">Cargo</th>
                     <th className="nombre-jefe">Nombre Jefe Inmediato</th>
                     <th className="cargo-jefe" >Cargo del Jefe Inmediato</th>
@@ -373,8 +349,7 @@ function NationalSamplingTripsForm() {
 
                     return (
                       <tr
-                        key={field.id}
-                        className={index % 2 === 0 ? "row-even" : "row-odd"}
+                      key={field.id}
                       >
                         {/* Checkbox de Viáticos */}
                         <td>
@@ -385,6 +360,27 @@ function NationalSamplingTripsForm() {
                             {...register(`participante[${index}].viaticos`)}
                           />
                         </td>
+                      {/* Campo de Rol */}
+                      <td>
+                        <select
+                          title="Rol que desempeña el personal en el proyecto"
+                          id={`participante[${index}].rol`}
+                          className="form-select"
+                          {...register(`participante[${index}].rol`, {
+                            required: "Este campo es requerido",
+                          })}
+                        >
+                          <option value="Director">Director</option>
+                          <option value="Codirector">Codirector</option>
+                          <option value="Colaborador">Colaborador</option>
+                        </select>
+                        {errors.participante &&
+                          errors.participante[index]?.rol && (
+                            <span className="error-text">
+                              {errors.participante[index].rol.message}
+                            </span>
+                          )}
+                      </td>
 
                         {/* Campo de Personal a trasladarse */}
                         <td>
@@ -424,27 +420,6 @@ function NationalSamplingTripsForm() {
                           )}
                         </td>
 
-                        {/* Campo de Rol */}
-                        <td>
-                          <select
-                            title="Rol que desempeña el personal en el proyecto"
-                            id={`participante[${index}].rol`}
-                            className="form-input"
-                            {...register(`participante[${index}].rol`, {
-                              required: "Este campo es requerido",
-                            })}
-                          >
-                            <option value="Director">Director</option>
-                            <option value="Codirector">Codirector</option>
-                            <option value="Colaborador">Colaborador</option>
-                          </select>
-                          {errors.participante &&
-                            errors.participante[index]?.rol && (
-                              <span className="error-text">
-                                {errors.participante[index].rol.message}
-                              </span>
-                            )}
-                        </td>
 
                         {/* Campo de Cargo */}
                         <td>
@@ -519,7 +494,7 @@ function NationalSamplingTripsForm() {
                         <td>
                           <select
                             id={`participante[${index}].tipoCuenta`}
-                            className="form-input"
+                            className="form-select"
                             {...register(`participante[${index}].tipoCuenta`)}
                             disabled={!viaticosChecked} // Deshabilitar si no se selecciona Viáticos
                           >
@@ -541,7 +516,7 @@ function NationalSamplingTripsForm() {
                         <td>
                           <select
                             id={`participante[${index}].departamento`}
-                            className="form-input"
+                            className="form-select"
                             {...register(
                               `participante[${index}].departamento`,
                               {
@@ -594,7 +569,7 @@ function NationalSamplingTripsForm() {
                     banco: "",                     // Nombre del Banco
                     tipoCuenta: "",                // Tipo de Cuenta
                     numeroCuenta: "",              // Número de Cuenta
-                    departamento: ""               // Departamento
+                    departamento: "",               // Departamento
                   });
                 }}
                 label="Agregar"
@@ -722,13 +697,28 @@ function NationalSamplingTripsForm() {
                               {
                                 required: "Este campo es requerido",
                                 validate: {
-                                  noPastDate: (value) =>
-                                    value >= today() ||
-                                    "La fecha no puede ser menor a la fecha actual",
-                                  validSequence: (value) =>
-                                    !fechaLlegadaAnterior ||
-                                    value >= fechaLlegadaAnterior ||
-                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                  noPastDate: (value) => {
+                                    return value >= today() || "La fecha no puede ser menor a la fecha actual"+ today();
+                                  },
+                                  validSequence: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaLlegadaAnteriorValue = new Date(fechaLlegadaAnterior);
+                                    return !fechaLlegadaAnterior || dateValue >= fechaLlegadaAnteriorValue ||
+                                      "La fecha de salida debe ser posterior a la fecha de llegada anterior" + (fechaLlegadaAnterior ? fechaLlegadaAnterior : "");
+                                  },
+                              
+                                  validateDate: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaInicioViajeValue = new Date(fechaInicioViaje);
+                                    if (index === 0) {
+                                      return (
+                                        dateValue >= sumarDias(fechaInicioViaje, -1) && dateValue <= fechaInicioViajeValue ||
+                                        "La fecha de salida debe ser el mismo día o como máximo un día antes de la fecha inicio del viaje " + (fechaInicioViaje ? fechaInicioViaje : "")
+                                      );
+                                    } else {
+                                      return true;
+                                    }
+                                  }
                                 },
                               }
                             )}
@@ -774,16 +764,7 @@ function NationalSamplingTripsForm() {
                                     "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida ||
-                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-
-                                  // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
-                                  validateFechaLlegadaIda: (value) =>
-                                    index === fieldsIda.length - 1
-                                      ? validateFechaLlegadaIda(
-                                          value,
-                                          fechaInicioViaje
-                                        )
-                                      : true, // Si no es el último campo, no aplica esta validación
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida " + fechaSalida,
                                 },
                               }
                             )}
@@ -822,7 +803,11 @@ function NationalSamplingTripsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeIda(index)}
+                            onClick={() => {
+                              if(fieldsIda.length > 1){
+                                removeIda(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -834,6 +819,7 @@ function NationalSamplingTripsForm() {
               </table>
               <ActionButton
                 onClick={() => {
+                  
                   appendIda({
                     tipoTransporte: "Aéreo",
                     nombreTransporte: "",
@@ -956,22 +942,29 @@ function NationalSamplingTripsForm() {
                               {
                                 required: "Este campo es requerido",
                                 validate: {
-                                  noPastDate: (value) =>
-                                    value >= today() ||
-                                    "La fecha no puede ser menor a la fecha actual",
-                                  validSequence: (value) =>
-                                    !fechaLlegadaAnterior ||
-                                    value >= fechaLlegadaAnterior ||
-                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                  noPastDate: (value) =>{
+                                  return(value >= today() || "La fecha no puede ser menor a la fecha actual");
+                                  },
 
-                                  // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
-                                  validateRegreso: (value) =>
-                                    index === 0
-                                      ? validateFechaSalidaRegreso(
-                                          value,
-                                          fechaFinViaje
-                                        )
-                                      : true,
+                                  validSequence: (value) =>{
+                                    const dateValue = new Date(value);
+                                    const fechaLlegadaAnteriorValue = new Date(fechaLlegadaAnterior);
+                                    return(!fechaLlegadaAnterior || dateValue >= fechaLlegadaAnteriorValue ||
+                                      "La fecha de salida debe ser posterior a la fecha de llegada anterior" + (fechaLlegadaAnterior? fechaLlegadaAnterior: "") );
+                                  },
+
+                                  validateDate: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaFinViajeValue = new Date(fechaFinViaje);
+                                    if (index === 0) {
+                                      return (
+                                        dateValue >= fechaFinViajeValue && dateValue<= sumarDias(fechaFinViajeValue,1) ||
+                                        "La fecha de retorno debe ser el mismo día o como maximo un dia despues de la fecha de fin de viaje " + (fechaFinViaje? fechaFinViaje: "")
+                                      );
+                                    } else {
+                                      return true;
+                                    }
+                                  }
                                 },
                               }
                             )}
@@ -1023,7 +1016,7 @@ function NationalSamplingTripsForm() {
                                     "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
                                     value >= fechaSalida ||
-                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida" + fechaSalida,
                                 },
                               }
                             )}
@@ -1062,7 +1055,12 @@ function NationalSamplingTripsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeRegreso(index)}
+                            onClick={() => {
+                              if(fieldsRegreso.length > 1){
+
+                                removeRegreso(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -1174,7 +1172,6 @@ function NationalSamplingTripsForm() {
                 id="btn_enviar"
                 type="submit"
                 variant="primary"
-                onClick={datos}
               >
                 Enviar
               </Button>
@@ -1205,7 +1202,7 @@ function NationalSamplingTripsForm() {
                     onClick={handleGeneratePdfAnexosA}
                     icon="IconPdf.png"
                     altText="PDF Icon"
-                    label="Descargar Anexos A .zip"
+                    label="Descargar Anexos A"
                   />
                 </Col>
                 <Col md={4} className="text-center">
@@ -1214,6 +1211,17 @@ function NationalSamplingTripsForm() {
                     icon="IconPdf.png"
                     altText="PDF Icon"
                     label="Descargar Anexo 7"
+                  />
+                </Col>
+              </Row>
+               {/* Botón para descargar todos los documentos */}
+               <Row className="mt-3">
+                <Col className="text-center">
+                  <ActionButton
+                  onClick={handleDownloadAll}
+                  label="Descargar Todo"
+                  variant="success"
+                  loading={loading} // Usar el prop loading
                   />
                 </Col>
               </Row>
