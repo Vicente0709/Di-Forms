@@ -1,4 +1,11 @@
-import { Font, Page, Text, View, Document as PDFDocument, pdf, } from "@react-pdf/renderer";
+import {
+  Font,
+  Page,
+  Text,
+  View,
+  Document as PDFDocument,
+  pdf,
+} from "@react-pdf/renderer";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { text, image, barcodes } from "@pdfme/schemas";
 import { generate } from "@pdfme/generator";
@@ -192,7 +199,10 @@ export function generateMemoWithinProject(data, returnDocument = false) {
   });
 }
 
-export async function generateAnexoAWithinProject(data, returnDocument = false) {
+export async function generateAnexoAWithinProject(
+  data,
+  returnDocument = false
+) {
   const template = {
     schemas: schemasAnexoANational,
     basePdf: basePdfAnexoANational,
@@ -321,7 +331,10 @@ export async function generateAnexoAWithinProject(data, returnDocument = false) 
   );
 }
 
-export async function generateAnexo2WithinProject(data, returnDocument = false ) {
+export async function generateAnexo2WithinProject(
+  data,
+  returnDocument = false
+) {
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
@@ -598,7 +611,7 @@ export async function generateAnexo2WithinProject(data, returnDocument = false )
           3.2 Relevancia del evento para su proyecto
         </Text>
         <Text style={styles.textBlue}>{data.relevanciaEvento}</Text>
-
+        <Text>{"\n\n"}</Text>
         <View>
           <Text style={styles.sectionTitle}>
             4. INFORMACIÓN DEL PAGO DE INSCRIPCIÓN{" "}
@@ -650,17 +663,21 @@ export async function generateAnexo2WithinProject(data, returnDocument = false )
               </View>
               <View style={styles.tableCol}>
                 <View style={styles.tableRow}>
-                  <View style={styles.tableCol}>
+                  <View style={styles.tableColAuto}>
                     <Text style={styles.baseText}>
-                      - Transferencia:
+                      1. Transferencia:
                       <Text style={styles.baseText}>
-                        {"( "}
+                        {" ( "}
                         <Text style={styles.tableCellTextBlue}>
                           {data.metodoPago === "Transferencia" &&
                           data.inscripcion === "SI"
                             ? "X"
                             : ""}
-                          <Text style={styles.baseText}>{" )"}</Text>
+                          <Text style={styles.baseText}>
+                            {
+                              " )  “El pago es realizado por la EOD-UGIPS del VIIV”"
+                            }
+                          </Text>
                         </Text>
                       </Text>
                     </Text>
@@ -668,7 +685,8 @@ export async function generateAnexo2WithinProject(data, returnDocument = false )
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                      a)Formulariodepagosalexterior, ,segunelcaso(Anexo4)
+                      a) Formulario de pagos al exterior, según el caso (Anexo
+                      4)
                     </Text>
                     <Text style={styles.baseText}>
                       b) Documento donde se puede verificar el costo y fechas de
@@ -679,9 +697,9 @@ export async function generateAnexo2WithinProject(data, returnDocument = false )
                 <View style={styles.tableRow}>
                   <View style={styles.tableCol}>
                     <Text style={styles.baseText}>
-                      - Otra(tarjetadecrédito,efectivo,etc...):
+                      2. Otra (tarjeta de crédito, efectivo, etc...):
                       <Text style={styles.baseText}>
-                        {"( "}
+                        {" ( "}
                         <Text style={styles.tableCellTextBlue}>
                           {data.metodoPago === "Otra" &&
                           data.inscripcion === "SI"
@@ -695,11 +713,12 @@ export async function generateAnexo2WithinProject(data, returnDocument = false )
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                      a) Solicitud de REEMBOLSO. Incluir texto con justificación
-                      en el mismo memorando del requerimiento.
+                      a) Solicitud de REEMBOLSO. Incluir en el texto del
+                      memorando la justificación de por qué se solicita este
+                      método de pago.
                     </Text>
                     <Text style={styles.baseText}>
-                      b)Documento donde se puede verificar el costo y fechas de
+                      b) Documento donde se puede verificar el costo y fechas de
                       la inscripción al evento.
                     </Text>
                   </View>
@@ -720,18 +739,24 @@ export async function generateAnexo2WithinProject(data, returnDocument = false )
 
         {/* Nombre completo */}
         <Text style={styles.tableCellTextBlueCenter}>
-          {`${data.nombres || "Nombre de prueba"} ${
-            data.apellidos || "Apellido de prueba"
+          {`${
+            data.rolEnProyecto === "Director"
+              ? data.nombres + " " + data.apellidos
+              : data.nombreDirector.toUpperCase()
           }`}
         </Text>
 
         {/* Nombre del director y código de proyecto */}
         <Text style={styles.tableCellTextBlueCenter}>
-          {`${
-            data.rolEnProyecto === "Director"
-              ? "Director " + data.nombres + " " + data.apellidos
-              : data.nombreDirector.toUpperCase()
-          } - ${data.codigoProyecto || "Código de prueba"}`}
+          {"Director del proyecto - " + data.codigoProyecto}
+        </Text>
+
+        <Text style={styles.baseTextCenter}>
+          **A su regreso el investigador(a) deberá presentar la factura o nota
+          de venta de los gastos de hospedaje y/o alimentación, o de los
+          establecidos en el artículo 9 del Reglamento de Viáticos al Exterior,
+          que no hayan sido cubiertos por estas instituciones u organismos, para
+          el reconocimiento de estos rubros y su correspondiente liquidación.
         </Text>
       </Page>
     </PDFDocument>
@@ -747,7 +772,10 @@ export async function generateAnexo2WithinProject(data, returnDocument = false )
 }
 
 //Documentos de eventos Nacionales fuera de Proyectos
-export async function generateMemoNationalOutsideProject1( data, returnDocument = false) {
+export async function generateMemoNationalOutsideProject1(
+  data,
+  returnDocument = false
+) {
   const departament = capitalizeWords(data.departamento.toLowerCase());
   // Array para almacenar las solicitudes
   let solicitudes = [];
@@ -918,7 +946,10 @@ export async function generateMemoNationalOutsideProject1( data, returnDocument 
   });
 }
 
-export async function generateMemoNationalOutsideProject2( data, returnDocument = false) {
+export async function generateMemoNationalOutsideProject2(
+  data,
+  returnDocument = false
+) {
   let solicitudes = [];
 
   // Verificar si se debe incluir "viáticos y subsistencias"
@@ -1070,7 +1101,7 @@ export async function generateMemoNationalOutsideProject2( data, returnDocument 
           new Paragraph({
             children: [
               new TextRun({
-                text: "Profesor",
+                text: data.puesto.toUpperCase(),
                 size: 20,
                 font: "Times New Roman",
               }),
@@ -1084,13 +1115,15 @@ export async function generateMemoNationalOutsideProject2( data, returnDocument 
     return Packer.toBlob(doc);
   }
 
-
   Packer.toBlob(doc).then((blob) => {
     saveAs(blob, "Memorando del Profesor al Jefe.docx");
   });
 }
 
-export async function generateAnexo10NationalOutsideProject(data, returnDocument = false) {
+export async function generateAnexo10NationalOutsideProject(
+  data,
+  returnDocument = false
+) {
   const MyPDFDocument = (
     <PDFDocument>
       <Page style={styles.page}>
@@ -1368,12 +1401,19 @@ export async function generateAnexo10NationalOutsideProject(data, returnDocument
                 <View style={styles.tableRow}>
                   <View style={styles.tableCol}>
                     <Text style={styles.baseText}>
-                      - Transferencia:
+                      1. Transferencia:
                       <Text style={styles.baseText}>
-                        {"( "}
+                        {" ( "}
                         <Text style={styles.tableCellTextBlue}>
-                          {data.metodoPago === "Transferencia" ? "X" : ""}
-                          <Text style={styles.baseText}>{" )"}</Text>
+                          {data.metodoPago === "Transferencia" &&
+                          data.inscripcion === "SI"
+                            ? "X"
+                            : ""}
+                          <Text style={styles.baseText}>
+                            {
+                              " )  “El pago es realizado por la EOD-UGIPS del VIIV”"
+                            }
+                          </Text>
                         </Text>
                       </Text>
                     </Text>
@@ -1381,8 +1421,7 @@ export async function generateAnexo10NationalOutsideProject(data, returnDocument
                       Adjuntar los siguientes documentos:
                     </Text>
                     <Text style={styles.baseText}>
-                      a) Formulario de pagos al exterior, de ser el caso, (Anexo
-                      4)
+                      a)Formulariodepagosalexterior, ,segunelcaso(Anexo 4)
                     </Text>
                     <Text style={styles.baseText}>
                       b) Documento donde se puede verificar el costo y fechas de
@@ -1461,7 +1500,10 @@ export async function generateAnexo10NationalOutsideProject(data, returnDocument
   );
 }
 
-export async function generateAnexoANationalOutsideProject( data, returnDocument = false) {
+export async function generateAnexoANationalOutsideProject(
+  data,
+  returnDocument = false
+) {
   const template = {
     schemas: schemasAnexoANational,
     basePdf: basePdfAnexoANational,

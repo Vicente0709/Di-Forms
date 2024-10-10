@@ -67,10 +67,13 @@ footer {
 
 .scroll-table-container {
   max-width: 100%; /* Asegura que el contenedor no se salga del ancho de la pantalla */
-  overflow-x: auto; /* Permite desplazamiento horizontal */
-  overflow-y: auto; /* (Opcional) Permite desplazamiento vertical si es necesario */
-  scrollbar-gutter: stable; /* Asegura que la barra de desplazamiento horizontal siempre esté visible */
+  overflow-x: auto; /* Agrega scroll horizontal */
 }
+
+.employe-table  {
+  table-layout: fixed;
+}
+
 
 .input-file {
   margin-top: 20px; /* Separación superior */
@@ -106,19 +109,19 @@ th.solicita-viaticos {
 }
 
 th.personal-nombre {
-  width: 200px;
+  width: 600px;
 }
 
 th.cedula {
-  width: 150px;
+  width: 400px;
 }
 
 th.rol-proyecto {
-  width: 150px;
+  width: 500px;
 }
 
 th.cargo {
-  width: 200px;
+  width: 500px;
 }
 
 th.nombre-jefe {
@@ -134,7 +137,7 @@ th.nombre-banco {
 }
 
 th.tipo-cuenta {
-  width: 150px;
+  width: 350px;
 }
 
 th.numero-cuenta {

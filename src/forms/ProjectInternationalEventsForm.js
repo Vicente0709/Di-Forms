@@ -247,7 +247,6 @@ function ProjectInternationalEventsForm() {
         <Form onSubmit={methods.handleSubmit(onSubmit)}>
           <div className="form-container">
             <LabelTitle text="Detalles del proyecto" disabled={false} />
-
             <InputText
               name="codigoProyecto"
               label="Código del proyecto:"
@@ -461,7 +460,10 @@ function ProjectInternationalEventsForm() {
             <RadioGroup
               name="pasajesAereos"
               label="Pasajes aéreos:"
-              options={pasajesAereosOptions}
+              options={[
+                { label: "SI", value: "SI" },
+                { label: "NO", value: "NO" },
+              ]}
               rules={{ required: "Indique si requiere pasajes aéreos" }}
             />
 
@@ -469,7 +471,10 @@ function ProjectInternationalEventsForm() {
             <RadioGroup
               name="viaticosSubsistencias"
               label="Viáticos y subsistencias:"
-              options={viaticosOptions}
+              options={[
+                { label: "SI", value: "SI" },
+                { label: "NO", value: "NO" },
+              ]}
               rules={{
                 required: "Indique si requiere viáticos y subsistencias",
               }}
@@ -479,7 +484,10 @@ function ProjectInternationalEventsForm() {
             <RadioGroup
               name="inscripcion"
               label="Inscripción:"
-              options={inscripcionOptions}
+              options={[
+                { label: "SI", value: "SI" },
+                { label: "NO", value: "NO" },
+              ]}
               rules={{ required: "Indique si requiere inscripción" }}
             />
 
@@ -1394,10 +1402,10 @@ function ProjectInternationalEventsForm() {
               name="nombreBanco"
               label="Nombre del banco:"
               rules={{
-                required:  watch("viaticosSubsistencias")==="SI" ? "Este campo es requerido" : false,
+                required:  viaticos==="SI" ? "Este campo es requerido" : false,
               }}
               
-              disabled={watch("viaticosSubsistencias")!=="SI"}
+              disabled={viaticos!=="SI"}
             />
 
             {/* Tipo de cuenta */}
@@ -1410,10 +1418,10 @@ function ProjectInternationalEventsForm() {
                 { value: "Corriente", label: "Corriente" },
               ]}
               rules={{
-                required: watch("viaticosSubsistencias")==="SI" ? "Este campo es requerido" : false,
+                required: viaticos==="SI" ? "Este campo es requerido" : false,
               }}
               
-              disabled={watch("viaticosSubsistencias")!=="SI"}
+              disabled={viaticos!=="SI"}
             />
 
             {/* Número de cuenta */}
@@ -1421,10 +1429,10 @@ function ProjectInternationalEventsForm() {
               name="numeroCuenta"
               label="No. De cuenta:"
               rules={{
-                required: watch("viaticosSubsistencias")==="SI" ? "Este campo es requerido" : false,
+                required: viaticos==="SI" ? "Este campo es requerido" : false,
               }}
               
-              disabled={watch("viaticosSubsistencias")!=="SI"}
+              disabled={viaticos!=="SI"}
             />
 
             <LabelTitle
@@ -1652,24 +1660,6 @@ const participationOptions = [
     value: "Presentación de póster, abstract, charla magistral u otros",
   },
   { label: "Asistencia", value: "Asistencia" },
-];
-
-// Opciones para pasajes aéreos
-const pasajesAereosOptions = [
-  { label: "SI", value: "SI" },
-  { label: "NO", value: "NO" },
-];
-
-// Opciones para viáticos y subsistencias
-const viaticosOptions = [
-  { label: "SI", value: "SI" },
-  { label: "NO", value: "NO" },
-];
-
-// Opciones para inscripción
-const inscripcionOptions = [
-  { label: "SI", value: "SI" },
-  { label: "NO", value: "NO" },
 ];
 
 export default ProjectInternationalEventsForm;

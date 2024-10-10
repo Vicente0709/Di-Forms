@@ -1,4 +1,4 @@
-import React, { useState, useEffect,useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import JSZip from "jszip";
@@ -24,7 +24,6 @@ import { generateAnexoAWithinProject, generateMemoWithinProject, generateAnexo2W
 
 //Constaltes globales para el formulario
 const formStorageKey = "formNationalWithinProjects";
-const daysStorageKey = "diasNationalWithinProjects";
 
 function NationalWithinProjectsForm() {
   const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {};
@@ -35,14 +34,12 @@ function NationalWithinProjectsForm() {
   //FielsdArray para tablas de transporte y actividades
   const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
-  const { fields: immutableFields, replace } = useFieldArray({ control, name: "actividadesInmutables" });
+  const { fields: immutableFields, replace: replaceInmutableFields } = useFieldArray({ control, name: "actividadesInmutables" });
   const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
   
   // Observadores de campos
-  const rolEnProyecto = watch("rolEnProyecto");
-  const seleccionViaticosSubsistencias = watch("viaticosSubsistencias");
-  const seleccionInscripcionform = watch("inscripcion");
   const tipoEventoSeleccionado = watch("tipoEvento");
+  const viaticos = watch("viaticosSubsistencias");
   const participacionEvento = watch("participacionEvento");
   const hospedaje = watch("hospedaje");
   const movilizacion = watch("movilizacion");
@@ -52,19 +49,16 @@ function NationalWithinProjectsForm() {
   const metodoPago = watch("metodoPago");
   
   // Estados derivados de las observaciones
-  const habilitarCampos = seleccionViaticosSubsistencias === "SI";
-  const habilitarInscripcion = seleccionInscripcionform === "SI";
+  
   
   // Estados locales para mostrar/ocultar campos
   const [loading, setLoading] = useState(false); //para el spinner de carga
   const [showDownloadSection, setShowDownloadSection] = useState(false);
-  const [diferenciaEnDias, setDiferenciaEnDias] = useState(0);
-  const [showInputDirector, setShowInputDirector] = useState(false);
-  const [showOtherEvent, setShowOtherEvent] = useState(false);
-  
-  const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
-  const [fechaInicioEventoActividades, setFechaInicioEvento] = useState("");
-  const [fechaFinEventoActividades, setFechaFinEvento] = useState(""); 
+  const [cantidadDias, setCantidadDias] = useState(0);
+  const [fechaInicioActividades, setFechaInicioActividades] = useState("");
+  const [fechaFinActividades, setFechaFinActividades] = useState("");
+  const [prevFechaInicio, setPrevFechaInicio] = useState("");
+  const [prevFechaFin, setPrevFechaFin] = useState("");
   
   // Funciones auxiliares y handler de eventos
   const onSubmitNationalEvent = (data) => {
@@ -109,7 +103,6 @@ function NationalWithinProjectsForm() {
 
   const handleClearForm = () => {
     sessionStorage.removeItem(formStorageKey);
-    sessionStorage.removeItem(daysStorageKey);
     setShowDownloadSection(false);
     window.location.reload();
   };
@@ -136,64 +129,6 @@ function NationalWithinProjectsForm() {
     };
     reader.readAsText(file);
   };
-  
-  
-  const extraerYCalcularFechas = useCallback((formData) => {
-    const { transporteIda = [], transporteRegreso = [] } = formData;
-    const fechaInicio = transporteIda[0]?.fechaSalida || "";
-    const fechaFin = transporteRegreso[transporteRegreso.length - 1]?.fechaLlegada || "";
-    calcularDiferenciaEnDias(fechaInicio, fechaFin);
-  },[]);
-
-  const calcularDiferenciaEnDias = (fechaInicioString, fechaFinString) => {
-    const fechaInicio = new Date(fechaInicioString);
-    const fechaFin = new Date(fechaFinString);  
-    if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-      setDiferenciaEnDias(0);
-      sessionStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: 0 }));
-      return;
-    }
-    const diferenciaEnDias = Math.ceil((fechaFin - fechaInicio) / (1000 * 60 * 60 * 24)) + 1;
-    setDiferenciaEnDias(diferenciaEnDias);
-    sessionStorage.setItem(daysStorageKey, JSON.stringify({ diferencia: diferenciaEnDias }));
-  };
-
-  // Funciones auxiliares
-  const limpiarCamposBancarios = useCallback(() => {
-    setValue("nombreBanco", "");
-    setValue("tipoCuenta", "");
-    setValue("numeroCuenta", "");
-    clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
-  },[setValue, clearErrors]);
-
-  const actualizarDeclaracionSegunRubros =  useCallback(( hospedaje, movilizacion, alimentacion ) => {
-    if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
-      setValue("seleccionDeclaracion", "siCubre");
-    } else {
-      setValue("seleccionDeclaracion", "noCubre");
-    }
-  },[setValue]);
-
-  const manejarTablas = useCallback(() => {
-    const initialTransporte = {
-      tipoTransporte: "Aéreo",
-      nombreTransporte: "",
-      ruta: "",
-      fechaSalida: "",
-      horaSalida: "",
-      fechaLlegada: "",
-      horaLlegada: "",
-    };
-    if (fields.length === 0) {
-      append({
-        valorInscripcion: "",
-        pagoLimite: "",
-        limiteFecha: "",
-      });
-    }
-    if (fieldsIda.length === 0) appendIda(initialTransporte);
-    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
-  },[fieldsIda,fieldsRegreso,fields,append,appendIda,appendRegreso]);
 
   const validarFechaLimiteInscripcion = (index) => {
     const limiteFecha = watch(`inscripciones[${index}].limiteFecha`);
@@ -205,98 +140,94 @@ function NationalWithinProjectsForm() {
     return true;
   };
   
-  // UseEffect principal y separado para la suscripción de cambios en el formulario
-  useEffect(() => {
+   // UseEffect principal y separado para la suscrioción de cambios en el formulario
+   useEffect(() => {
+    const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde sessionStorage
     reset(formData);
-    setSeleccionInscripcion(formData.inscripcion || "");
-    extraerYCalcularFechas(formData);
-    
     const subscription = watch((data) => {
       sessionStorage.setItem(formStorageKey, JSON.stringify(data));
-      setSeleccionInscripcion(data.inscripcion || "");
-      extraerYCalcularFechas(data);
+      const fechaInicio = data.transporteIda?.[0]?.fechaSalida || "";
+      const fechaFin = data.transporteRegreso?.length? data.transporteRegreso[data.transporteRegreso.length - 1]?.fechaLlegada: "";
+
+      if (fechaInicio !== prevFechaInicio && fechaInicio !== "" && fechaInicio !== fechaInicioActividades ) {
+        setFechaInicioActividades(fechaInicio);
+        setPrevFechaInicio(fechaInicio);
+      }
+      if (fechaFin !== prevFechaFin && fechaFin !== "" && fechaFin !== fechaFinActividades) {
+        setFechaFinActividades(fechaFin);
+        setPrevFechaFin(fechaFin);
+      }
     });
-    
     return () => subscription.unsubscribe();
-  }, [extraerYCalcularFechas,watch, reset]);
+  }, [watch, reset, prevFechaInicio, prevFechaFin, fechaFinActividades, fechaInicioActividades]);
   
+  // Segundo useEffect
+  useEffect(() => { 
+    if (fechaInicioActividades && fechaFinActividades && fechaInicioActividades !== "" && fechaFinActividades !== "") {
+      console.log(
+        "Esto se ejecuta solo si hay un cambio en las ,fechas de inicio o fin de actividades"
+      );
+      const currentFields = methods.getValues("actividadesInmutables") || [];
+      const dates = generateDateRange(
+        fechaInicioActividades,
+        fechaFinActividades
+      );
+      const newFields = dates.map((date) => {
+        const existingField = currentFields.find(
+          (field) => field.fecha === date
+        );
+        return {
+          fecha: date,
+          descripcion: existingField ? existingField.descripcion : "",
+        };
+      });
+      replaceInmutableFields(newFields);
+      setCantidadDias(newFields.length);
+    }
+  }, [fechaInicioActividades, fechaFinActividades, methods, replaceInmutableFields]);
+
   // useEffect para controlar los campos del formulario
   useEffect(() => {
-    setValue("paisEvento", "Ecuador"); // Valor por defecto para el país
-    manejarTablas();
-
-    if (rolEnProyecto === "Codirector" || rolEnProyecto === "Colaborador") {
-      setShowInputDirector(true);
+    setValue("paisEvento", "Ecuador");
+    if (hospedaje === "SI" || movilizacion === "SI" || alimentacion === "SI") {
+      setValue("seleccionDeclaracion", "siCubre");
     } else {
-      setShowInputDirector(false);
-      setValue("nombreDirector", "");
+      setValue("seleccionDeclaracion", "noCubre");
     }
 
-    if (seleccionViaticosSubsistencias === "NO") limpiarCamposBancarios();
-
-    setShowOtherEvent(tipoEventoSeleccionado === "Otro evento académico");
-    actualizarDeclaracionSegunRubros(hospedaje, movilizacion, alimentacion);
-    
-
-    
-    if (diferenciaEnDias < 16) {
+    const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "", };
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
+    if (fields.length === 0) append(initialInscripcion);
+    if (fieldsIda.length === 0) appendIda(initialTransporte);
+    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
+    if (tipoEventoSeleccionado!== "Otro evento académico")setValue("otroEventoEspecificar", "");
+    if (viaticos==="NO"){
+      setValue("nombreBanco", "");
+      setValue("tipoCuenta", "");
+      setValue("numeroCuenta", "");
+      clearErrors(["nombreBanco", "tipoCuenta", "numeroCuenta"]);
+    }
+    if (cantidadDias < 16) {
       setValue("justificacionComision", "No Aplica")
     }else{
       setValue("justificacionComision", "")
     };
-    
-    if (fechaInicioEventoActividades && fechaFinEventoActividades) {
-      const dates = generateDateRange( fechaInicioEventoActividades, fechaFinEventoActividades );
-      const newFields = dates.map((date) => ({ fecha: date, descripcion: "" }));
-      replace(newFields);
-    }
-    
-    // Limpiar errores si el usuario selecciona 'Asistencia'
-    if (participacionEvento === "Asistencia") {
-      setValue("tituloPonencia", "No Aplica");
-      clearErrors(["tituloPonencia"]);
-    }
-
-    const sincronizarFechasCronogramaActividades = () => {
-      const formData = JSON.parse(sessionStorage.getItem(formStorageKey));
-      
-      if (formData) {
-        const fechaInicio = formData.transporteIda?.[0]?.fechaSalida || "";
-        const fechaFin = formData.transporteRegreso?.[formData.transporteRegreso.length - 1]?.fechaLlegada || "";
-        setFechaInicioEvento(fechaInicio);
-        setFechaFinEvento(fechaFin);
-      }
-      const diferenciaDias = JSON.parse(sessionStorage.getItem(daysStorageKey));
-      if (diferenciaDias) setDiferenciaEnDias(diferenciaDias.diferencia);
-    };
-    
-    // Ejecutar todas las funciones necesarias en cada renderización
-    
-    sincronizarFechasCronogramaActividades();
-    const intervalId = setInterval(sincronizarFechasCronogramaActividades, 1000); // Cada 1 segundo
-    return () => clearInterval(intervalId);
+    if (participacionEvento === "Asistencia") clearErrors(["tituloPonencia"]);
     
   }, [
-    actualizarDeclaracionSegunRubros,
-    seleccionViaticosSubsistencias,
-    diferenciaEnDias,
-    limpiarCamposBancarios,
-    manejarTablas,
-    replace,
-    fields, 
-    append,
-    rolEnProyecto,
-    participacionEvento,
-    fechaInicioEventoActividades,
-    fechaFinEventoActividades,
-    fieldsIda.length,
-    fieldsRegreso.length,
-    tipoEventoSeleccionado,
-    habilitarCampos,
+    cantidadDias,
+    fields,
+    fieldsIda,
+    fieldsRegreso,
     hospedaje,
     movilizacion,
     alimentacion,
-    habilitarInscripcion,
+    participacionEvento,
+    tipoEventoSeleccionado,
+    viaticos,
+    append,
+    appendIda,
+    appendRegreso,
     setValue,
     clearErrors,
   ]);
@@ -393,12 +324,12 @@ function NationalWithinProjectsForm() {
             />
 
             {/* Nombre del Director (si es necesario) */}
-            {showInputDirector && (
+            {watch("rolEnProyecto")!== "Director" && (
               <InputText
                 name="nombreDirector"
                 label="Nombre del Director del proyecto:"
                 rules={{ required: "El nombre del Director es requerido" }}
-                disabled={false}
+                disabled={watch("rolEnProyecto") === "Director"}
               />
             )}
 
@@ -517,7 +448,7 @@ function NationalWithinProjectsForm() {
               rules={{ required: "El tipo de evento es requerido" }}
             />
 
-            {showOtherEvent && (
+            {tipoEventoSeleccionado === "Otro evento académico" && (
               <InputText
                 name="otroEventoEspecificar"
                 label="Especifique el otro evento académico:"
@@ -525,6 +456,7 @@ function NationalWithinProjectsForm() {
                 rules={{
                   required: "Por favor especifique el otro evento académico",
                 }}
+                disabled={tipoEventoSeleccionado !== "Otro evento académico"}
               />
             )}
             <RadioGroup
@@ -549,7 +481,10 @@ function NationalWithinProjectsForm() {
             <RadioGroup
               name="pasajesAereos"
               label="Pasajes aéreos:"
-              options={pasajesAereosOptions}
+              options={[
+                { label: "SI", value: "SI" },
+                { label: "NO", value: "NO" },
+              ]}
               rules={{ required: "Indique si requiere pasajes aéreos" }}
             />
 
@@ -557,7 +492,10 @@ function NationalWithinProjectsForm() {
             <RadioGroup
               name="viaticosSubsistencias"
               label="Viáticos y subsistencias:"
-              options={viaticosOptions}
+              options={[
+                { label: "SI", value: "SI" },
+                { label: "NO", value: "NO" },
+              ]}
               rules={{
                 required: "Indique si requiere viáticos y subsistencias",
               }}
@@ -567,7 +505,10 @@ function NationalWithinProjectsForm() {
             <RadioGroup
               name="inscripcion"
               label="Inscripción:"
-              options={inscripcionOptions}
+              options={[
+                { label: "SI", value: "SI" },
+                { label: "NO", value: "NO" },
+              ]}
               rules={{ required: "Indique si requiere inscripción" }}
             />
 
@@ -605,7 +546,7 @@ function NationalWithinProjectsForm() {
               infoText="Describa la relevancia del evento y aporte al cumplimiento del objetivo."
               disabled={false}
             />
-            <LabelTitle text="Transporte" disabled={false} />
+           <LabelTitle text="Transporte" disabled={false} />
             <LabelText
               text="Por favor, considere que el itinerario es tentativo. Consulte el
                 itinerario del medio de transporte elegido en su página oficial
@@ -614,7 +555,7 @@ function NationalWithinProjectsForm() {
                 caso."
             />
             <Label text="TRANSPORTE DE IDA" />
-            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento." />
+            <LabelText text="Para el ingreso de itinerario de viaje, considere que se puede llegar al destino máximo un día antes del inicio del evento, salida de campo." />
 
             <div className="scroll-table-container">
               <table className="activity-schedule-table">
@@ -764,14 +705,19 @@ function NationalWithinProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   afterSalida: (value) =>
-                                    value >= fechaSalida || "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-                                  
+                                    value >= fechaSalida ||
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
+
                                   // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
                                   validateFechaLlegadaIda: (value) =>
                                     index === fieldsIda.length - 1
-                                      ? validateFechaLlegadaIda(value, fechaInicioEvento)
+                                      ? validateFechaLlegadaIda(
+                                          value,
+                                          fechaInicioEvento
+                                        )
                                       : true, // Si no es el último campo, no aplica esta validación
                                 },
                               }
@@ -811,7 +757,12 @@ function NationalWithinProjectsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeIda(index)}
+                            onClick={() => {
+                              if(fieldsIda.length > 1){
+
+                                removeIda(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -821,9 +772,9 @@ function NationalWithinProjectsForm() {
                   })}
                 </tbody>
               </table>
-
               <ActionButton
                 onClick={() => {
+                  
                   appendIda({
                     tipoTransporte: "Aéreo",
                     nombreTransporte: "",
@@ -947,15 +898,21 @@ function NationalWithinProjectsForm() {
                                 required: "Este campo es requerido",
                                 validate: {
                                   noPastDate: (value) =>
-                                    value >= today() || "La fecha no puede ser menor a la fecha actual",
+                                    value >= today() ||
+                                    "La fecha no puede ser menor a la fecha actual",
                                   validSequence: (value) =>
                                     !fechaLlegadaAnterior ||
                                     value >= fechaLlegadaAnterior ||
                                     "La fecha de salida debe ser posterior a la fecha de llegada anterior",
-                                  
+
                                   // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
                                   validateRegreso: (value) =>
-                                    index === 0 ? validateFechaSalidaRegreso(value, fechaFinEvento) : true,
+                                    index === 0
+                                      ? validateFechaSalidaRegreso(
+                                          value,
+                                          fechaFinEvento
+                                        )
+                                      : true,
                                 },
                               }
                             )}
@@ -1046,7 +1003,12 @@ function NationalWithinProjectsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeRegreso(index)}
+                            onClick={() => {
+                              if(fieldsRegreso.length > 1){
+
+                                removeRegreso(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -1072,92 +1034,85 @@ function NationalWithinProjectsForm() {
                 variant="success"
               />
             </div>
+            
+            {cantidadDias>15 &&
+            <div>
+            <LabelTitle text="CRONOGRAMA DE ACTIVIDADES" />
 
-            {diferenciaEnDias>15 && (
-              <div>
-                <LabelTitle text="CRONOGRAMA DE ACTIVIDADES" />
-                <LabelText
-                  text="Incluir desde la fecha de salida del país y días de traslado
-                  hasta el día de llegada al destino. <br />
-                  Hasta incluir la fecha de llegada al país."
-                />
+            <LabelText
+              text="Incluir desde la fecha de salida del país y días de traslado
+              hasta el día de llegada al destino. <br />
+              Hasta incluir la fecha de llegada al país."
+            />
+            <table className="activity-schedule-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Descripción de la Actividad a Realizar</th>
+                </tr>
+              </thead>
+              <tbody>
+                {immutableFields.map((field, index) => (
+                  <tr
+                    key={field.id}
+                    className={index % 2 === 0 ? "row-even" : "row-odd"}
+                  >
+                    {/* Campo de Fecha */}
+                    <td>
+                      <input
+                        type="date"
+                        id={`actividadesInmutables[${index}].fecha`}
+                        className="form-input"
+                        {...register(`actividadesInmutables[${index}].fecha`, {
+                          required: "La fecha es requerida",
+                        })}
+                        value={field.fecha} // Valor predefinido de la fecha
+                        readOnly
+                      />
+                      {errors.actividadesInmutables &&
+                        errors.actividadesInmutables[index]?.fecha && (
+                          <span className="error-text">
+                            {errors.actividadesInmutables[index].fecha.message}
+                          </span>
+                        )}
+                    </td>
 
-                {/* Tabla de actividades inmutables */}
-                <LabelText text="Fechas del Evento" />
-                <table className="activity-schedule-table">
-                  <thead>
-                    <tr>
-                      <th>Nro.</th>
-                      <th>Fecha</th>
-                      <th>Descripción de la Actividad a Realizar</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {immutableFields.map((field, index) => (
-                      <tr key={field.id}>
-                        <td>
-                          <input
-                            type="number"
-                            value={index + 1} // Asigna el número basado en el índice (1, 2, 3, etc.)
-                            readOnly
-                            className="form-input"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="date"
-                            id={`fechaInmutable-${index}`}
-                            className="form-input"
-                            {...register(
-                              `actividadesInmutables[${index}].fecha`,
-                              {
-                                required: "Este campo es requerido",
-                              }
-                            )}
-                            readOnly // Campo de fecha de solo lectura
-                          />
-                          {errors.actividadesInmutables &&
-                            errors.actividadesInmutables[index]?.fecha && (
-                              <span className="error-text">
-                                {
-                                  errors.actividadesInmutables[index].fecha
-                                    .message
-                                }
-                              </span>
-                            )}
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            id={`descripcionInmutable-${index}`}
-                            className="form-input"
-                            {...register(
-                              `actividadesInmutables[${index}].descripcion`,
-                              {
-                                required: "Este campo es requerido",
-                              }
-                            )}
-                            placeholder="Describe la actividad a realizar"
-                          />
-                          {errors.actividadesInmutables &&
-                            errors.actividadesInmutables[index]
-                              ?.descripcion && (
-                              <span className="error-text">
-                                {
-                                  errors.actividadesInmutables[index]
-                                    .descripcion.message
-                                }
-                              </span>
-                            )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            {diferenciaEnDias >15 && (
-              <div>
+                    <td style={{ width: "100%" }}>
+                      <input
+                        type="text"
+                        id={`actividadesInmutables[${index}].descripcion`}
+                        className="form-input"
+                        placeholder={
+                          cantidadDias > 15
+                            ? "Descripción obligatoria de la actividad" // Placeholder si cantidadDias > 15
+                            : "No es necesario rellenar este campo solo se habilita si se supera los 15 dias "    // Placeholder si cantidadDias <= 15
+                        }
+                        {...register(
+                          `actividadesInmutables[${index}].descripcion`,
+                          {
+                            required: cantidadDias > 15 ? "La descripción es requerida" : false, // Requerido solo si cantidadDias > 15
+                          }
+                        )}
+                        disabled={cantidadDias < 16} 
+                      />
+                      {errors.actividadesInmutables &&
+                        errors.actividadesInmutables[index]?.descripcion && (
+                          <span className="error-text">
+                            {
+                              errors.actividadesInmutables[index].descripcion
+                                .message
+                            }
+                          </span>
+                        )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+            }
+            {cantidadDias>15 &&
+            <div>
                 <LabelTitle
                   text=" Justificar la necesidad de la comisión de servicios mayor
                   a 15 días"
@@ -1169,17 +1124,17 @@ function NationalWithinProjectsForm() {
                 <InputTextArea
                   name="justificacionComision"
                   label="Justificación de la comisión de servicios mayor a 15 días"
-                  placeholder="Escriba aquí la justificación."
                   rules={{
                     required: "Este campo es requerido",
                   }}
-                  disabled={diferenciaEnDias <= 15}
-                  defaultValue="No Aplica"
+                  defaultValue={"No Aplica"} // Valor por defecto si está deshabilitado
+                  disabled={cantidadDias <= 15}
                 />
               </div>
-            )}
+            }
+            
 
-            {seleccionInscripcion === "SI" && 
+            {watch("inscripcion") === "SI" && 
              
              <div >
              <LabelTitle text="Valor de la Inscripción" />
@@ -1386,9 +1341,10 @@ function NationalWithinProjectsForm() {
               name="nombreBanco"
               label="Nombre del banco:"
               rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
+                required:  viaticos==="SI" ? "Este campo es requerido" : false,
               }}
-              disabled={!habilitarCampos}
+              
+              disabled={viaticos!=="SI"}
             />
 
             {/* Tipo de cuenta */}
@@ -1401,9 +1357,10 @@ function NationalWithinProjectsForm() {
                 { value: "Corriente", label: "Corriente" },
               ]}
               rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
+                required: viaticos==="SI" ? "Este campo es requerido" : false,
               }}
-              disabled={!habilitarCampos}
+              
+              disabled={viaticos!=="SI"}
             />
 
             {/* Número de cuenta */}
@@ -1411,9 +1368,10 @@ function NationalWithinProjectsForm() {
               name="numeroCuenta"
               label="No. De cuenta:"
               rules={{
-                required: habilitarCampos ? "Este campo es requerido" : false,
+                required: viaticos==="SI" ? "Este campo es requerido" : false,
               }}
-              disabled={!habilitarCampos}
+              
+              disabled={viaticos!=="SI"}
             />
 
             <LabelTitle
@@ -1650,24 +1608,6 @@ const participationOptions = [
     value: "Presentación de póster, abstract, charla magistral u otros",
   },
   { label: "Asistencia", value: "Asistencia" },
-];
-
-// Opciones para pasajes aéreos
-const pasajesAereosOptions = [
-  { label: "SI", value: "SI" },
-  { label: "NO", value: "NO" },
-];
-
-// Opciones para viáticos y subsistencias
-const viaticosOptions = [
-  { label: "SI", value: "SI" },
-  { label: "NO", value: "NO" },
-];
-
-// Opciones para inscripción
-const inscripcionOptions = [
-  { label: "SI", value: "SI" },
-  { label: "NO", value: "NO" },
 ];
 
 export default NationalWithinProjectsForm;
