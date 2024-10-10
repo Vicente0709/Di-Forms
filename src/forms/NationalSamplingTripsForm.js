@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useForm, FormProvider, useFieldArray, set } from "react-hook-form";
+import { useForm, FormProvider, useFieldArray} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
@@ -280,7 +280,7 @@ useEffect(() => {
               label="Hasta:"
               rules={{
                 required: "La fecha de fin del evento es requerida",
-                validate: (value) => {
+                validateDate: (value) => {
                   return (
                     value >= today() ||
                     "La fecha debe ser mayor a la fecha actual " + today()
@@ -712,7 +712,7 @@ useEffect(() => {
                                     const fechaInicioViajeValue = new Date(fechaInicioViaje);
                                     if (index === 0) {
                                       return (
-                                        dateValue >= sumarDias(fechaInicioViaje, -1) && dateValue <= fechaInicioViajeValue ||
+                                        (dateValue >= sumarDias(fechaInicioViaje, -1) && dateValue <= fechaInicioViajeValue) ||
                                         "La fecha de salida debe ser el mismo día o como máximo un día antes de la fecha inicio del viaje " + (fechaInicioViaje ? fechaInicioViaje : "")
                                       );
                                     } else {
@@ -958,7 +958,7 @@ useEffect(() => {
                                     const fechaFinViajeValue = new Date(fechaFinViaje);
                                     if (index === 0) {
                                       return (
-                                        dateValue >= fechaFinViajeValue && dateValue<= sumarDias(fechaFinViajeValue,1) ||
+                                        (dateValue >= fechaFinViajeValue && dateValue<= sumarDias(fechaFinViajeValue,1))||
                                         "La fecha de retorno debe ser el mismo día o como maximo un dia despues de la fecha de fin de viaje " + (fechaFinViaje? fechaFinViaje: "")
                                       );
                                     } else {

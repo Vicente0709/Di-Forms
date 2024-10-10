@@ -24,7 +24,7 @@ import {
   generateAnexo10NationalOutsideProject,
   generateAnexoANationalOutsideProject,
 } from "../utils/generatorDocuments/event/nationalEventDocuments.js";
-import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
+import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso, sumarDias } from "../utils/validaciones.js";
 
 const formStorageKey = "formNationalOutsideProject"; // Clave para almacenar el formulario en sessionStorage
 
@@ -71,12 +71,17 @@ function ExternalNationalEventsForm() {
     return () => subscription.unsubscribe();
   }, [reset, watch,]);
 
-  // Efecto para manejar la visibilidad de secciones y limpieza de campos
   useEffect(() => {
-
-    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
+    console.log("Esto se ejecuta solo una vez al cargar el componente");
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "", horaSalida: "", fechaLlegada: "", horaLlegada: "" };
+    const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "", };
+    if (fields.length === 0) append(initialInscripcion);
     if (fieldsIda.length === 0) appendIda(initialTransporte);
     if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
+  }, []); // Sin dependencias para que se ejecute solo una vez
+
+  // Efecto para manejar la visibilidad de secciones y limpieza de campos
+  useEffect(() => {
 
     // Manejar la lógica para mostrar/ocultar el campo de detalle del artículo
     setShowInputArticulo(seleccionArticulo === "SI");
@@ -106,16 +111,7 @@ function ExternalNationalEventsForm() {
       setValue("inscripciones")
     }
 
-    if (fields.length === 0) {
-      append({
-        valorInscripcion: "",
-        pagoLimite: "",
-        limiteFecha: "",
-      });
-    }
-
-
-  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, fields.length, setValue, clearErrors]);
+  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, setValue, clearErrors]);
 
   const onSubmitNationalOutside = (data) => {
     setShowDownloadSection(true);
@@ -144,7 +140,6 @@ function ExternalNationalEventsForm() {
     reader.readAsText(file);
   };
   
-
   const handleGenerateMemo1 = () => {
    const formNationalOutsideProject = methods.getValues();
     generateMemoNationalOutsideProject1(formNationalOutsideProject);
@@ -529,13 +524,28 @@ function ExternalNationalEventsForm() {
                               {
                                 required: "Este campo es requerido",
                                 validate: {
-                                  noPastDate: (value) =>
-                                    value >= today() ||
-                                    "La fecha no puede ser menor a la fecha actual",
-                                  validSequence: (value) =>
-                                    !fechaLlegadaAnterior ||
-                                    value >= fechaLlegadaAnterior ||
-                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                  noPastDate: (value) => {
+                                    return value >= today() || "La fecha no puede ser menor a la fecha actual"+ today();
+                                  },
+                                  validSequence: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaLlegadaAnteriorValue = new Date(fechaLlegadaAnterior);
+                                    return !fechaLlegadaAnterior || dateValue >= fechaLlegadaAnteriorValue ||
+                                      "La fecha de salida debe ser posterior a la fecha de llegada anterior" + (fechaLlegadaAnterior ? fechaLlegadaAnterior : "");
+                                  },
+                              
+                                  validateDate: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaInicioViajeValue = new Date(fechaInicioEvento);
+                                    if (index === 0) {
+                                      return (
+                                        (dateValue >= sumarDias(fechaInicioEvento, -1) && dateValue <= fechaInicioViajeValue) ||
+                                        "La fecha de salida debe ser el mismo día o como máximo un día antes de la fecha inicio del evento " + (fechaInicioEvento ? fechaInicioEvento : "")
+                                      );
+                                    } else {
+                                      return true;
+                                    }
+                                  }
                                 },
                               }
                             )}
@@ -578,19 +588,10 @@ function ExternalNationalEventsForm() {
                                 validate: {
                                   noPastDate: (value) =>
                                     value >= today() ||
-                                    "La fecha no puede ser menor a la fecha actual",
+                                    "La fecha no puede ser menor a la fecha actual "+ today(),
                                   afterSalida: (value) =>
                                     value >= fechaSalida ||
-                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida",
-
-                                  // Condicionalmente, aplica la validación de llegada si es el último campo en `fieldsIda`
-                                  validateFechaLlegadaIda: (value) =>
-                                    index === fieldsIda.length - 1
-                                      ? validateFechaLlegadaIda(
-                                          value,
-                                          fechaInicioEvento
-                                        )
-                                      : true, // Si no es el último campo, no aplica esta validación
+                                    "La fecha de llegada debe ser posterior o igual a la fecha de salida "+ fechaSalida,
                                 },
                               }
                             )}
@@ -769,22 +770,29 @@ function ExternalNationalEventsForm() {
                               {
                                 required: "Este campo es requerido",
                                 validate: {
-                                  noPastDate: (value) =>
-                                    value >= today() ||
-                                    "La fecha no puede ser menor a la fecha actual",
-                                  validSequence: (value) =>
-                                    !fechaLlegadaAnterior ||
-                                    value >= fechaLlegadaAnterior ||
-                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                  noPastDate: (value) =>{
+                                  return(value >= today() || "La fecha no puede ser menor a la fecha actual");
+                                  },
 
-                                  // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
-                                  validateRegreso: (value) =>
-                                    index === 0
-                                      ? validateFechaSalidaRegreso(
-                                          value,
-                                          fechaFinEvento
-                                        )
-                                      : true,
+                                  validSequence: (value) =>{
+                                    const dateValue = new Date(value);
+                                    const fechaLlegadaAnteriorValue = new Date(fechaLlegadaAnterior);
+                                    return(!fechaLlegadaAnterior || dateValue >= fechaLlegadaAnteriorValue ||
+                                      "La fecha de salida debe ser posterior a la fecha de llegada anterior" + (fechaLlegadaAnterior? fechaLlegadaAnterior: "") );
+                                  },
+
+                                  validateDate: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaFinViajeValue = new Date(fechaFinEvento);
+                                    if (index === 0) {
+                                      return (
+                                        (dateValue >= fechaFinViajeValue && dateValue<= sumarDias(fechaFinViajeValue,1))||
+                                        "La fecha de retorno debe ser el mismo día o como maximo un dia despues de la fecha de fin de Evento " + (fechaFinEvento? fechaFinEvento: "")
+                                      );
+                                    } else {
+                                      return true;
+                                    }
+                                  }
                                 },
                               }
                             )}
@@ -1001,7 +1009,11 @@ function ExternalNationalEventsForm() {
                      </td>
                      <td>
                       <ActionButton
-                        onClick={() => remove(index)}
+                        onClick={() => {
+                          if(fields.length > 1){
+                            remove(index)
+                          }
+                          }}
                         label="Eliminar"
                         variant="danger"
                       />

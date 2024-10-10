@@ -68,6 +68,15 @@ function ExternalInternationalEventsForm() {
     return () => subscription.unsubscribe();
   }, [watch, reset]);
 
+  useEffect(() => {
+    console.log("Esto se ejecuta solo una vez al cargar el componente");
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "", horaSalida: "", fechaLlegada: "", horaLlegada: "" };
+    const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "", };
+    if (fields.length === 0) append(initialInscripcion);
+    if (fieldsIda.length === 0) appendIda(initialTransporte);
+    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
+  }, []); // Sin dependencias para que se ejecute solo una vez
+
   // Efecto para manejar la visibilidad de secciones y limpieza de campos
   useEffect(() => {
     // Manejar la lógica para mostrar/ocultar el campo de detalle del artículo
@@ -102,15 +111,7 @@ function ExternalInternationalEventsForm() {
       setSeleccionInscripcion(false);
       setValue("inscripciones")
     }
-
- if (fields.length === 0) {
-      append({
-        valorInscripcion: "",
-        pagoLimite: "",
-        limiteFecha: "",
-      });
-    }
-  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, append, fields.length, setValue, clearErrors]);
+  }, [seleccionArticulo, hospedaje, movilizacion, alimentacion, habilitarCampos,inscripcion, setValue, clearErrors]);
 
   // Función que se ejecuta al enviar el formulario
   const onSubmitEventParticipationOutside = (data) => {
@@ -622,7 +623,11 @@ function ExternalInternationalEventsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeIda(index)}
+                            onClick={() => {
+                              if(fieldsIda.length > 1){
+                                removeIda(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -857,7 +862,12 @@ function ExternalInternationalEventsForm() {
                         </td>
                         <td>
                           <ActionButton
-                            onClick={() => removeRegreso(index)}
+                            onClick={() => {
+                              if(fieldsRegreso.length > 1){
+
+                                removeRegreso(index)
+                              }
+                              }}
                             label="Eliminar"
                             variant="danger"
                           />
@@ -999,7 +1009,11 @@ function ExternalInternationalEventsForm() {
                      </td>
                      <td>
                       <ActionButton
-                        onClick={() => remove(index)}
+                        onClick={() => {
+                          if(fields.length > 1){
+                            remove(index)
+                          }
+                          }}
                         label="Eliminar"
                         variant="danger"
                       />

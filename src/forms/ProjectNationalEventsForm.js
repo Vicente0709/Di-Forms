@@ -19,7 +19,7 @@ import DownloadButton from "../components/Buttons/DownloadButton.js";
 // Importación de las funciones
 import today from "../utils/date.js";
 import { generateDateRange } from "../utils/dataRange.js";
-import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
+import { validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda,sumarDias } from "../utils/validaciones.js";
 import { generateAnexoAWithinProject, generateMemoWithinProject, generateAnexo2WithinProject } from "../utils/generatorDocuments/event/nationalEventDocuments.js";
 
 //Constaltes globales para el formulario
@@ -161,6 +161,15 @@ function NationalWithinProjectsForm() {
     return () => subscription.unsubscribe();
   }, [watch, reset, prevFechaInicio, prevFechaFin, fechaFinActividades, fechaInicioActividades]);
   
+  useEffect(() => {
+    console.log("Esto se ejecuta solo una vez al cargar el componente");
+    const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "", };
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
+    if (fields.length === 0) append(initialInscripcion);
+    if (fieldsIda.length === 0) appendIda(initialTransporte);
+    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
+  }, []); // Sin dependencias para que se ejecute solo una vez
+
   // Segundo useEffect
   useEffect(() => { 
     if (fechaInicioActividades && fechaFinActividades && fechaInicioActividades !== "" && fechaFinActividades !== "") {
@@ -195,11 +204,6 @@ function NationalWithinProjectsForm() {
       setValue("seleccionDeclaracion", "noCubre");
     }
 
-    const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "", };
-    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
-    if (fields.length === 0) append(initialInscripcion);
-    if (fieldsIda.length === 0) appendIda(initialTransporte);
-    if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
     if (tipoEventoSeleccionado!== "Otro evento académico")setValue("otroEventoEspecificar", "");
     if (viaticos==="NO"){
       setValue("nombreBanco", "");
@@ -216,9 +220,6 @@ function NationalWithinProjectsForm() {
     
   }, [
     cantidadDias,
-    fields,
-    fieldsIda,
-    fieldsRegreso,
     hospedaje,
     movilizacion,
     alimentacion,
@@ -657,13 +658,28 @@ function NationalWithinProjectsForm() {
                               {
                                 required: "Este campo es requerido",
                                 validate: {
-                                  noPastDate: (value) =>
-                                    value >= today() ||
-                                    "La fecha no puede ser menor a la fecha actual",
-                                  validSequence: (value) =>
-                                    !fechaLlegadaAnterior ||
-                                    value >= fechaLlegadaAnterior ||
-                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                  noPastDate: (value) => {
+                                    return value >= today() || "La fecha no puede ser menor a la fecha actual"+ today();
+                                  },
+                                  validSequence: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaLlegadaAnteriorValue = new Date(fechaLlegadaAnterior);
+                                    return !fechaLlegadaAnterior || dateValue >= fechaLlegadaAnteriorValue ||
+                                      "La fecha de salida debe ser posterior a la fecha de llegada anterior" + (fechaLlegadaAnterior ? fechaLlegadaAnterior : "");
+                                  },
+                              
+                                  validateDate: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaInicioViajeValue = new Date(fechaInicioEvento);
+                                    if (index === 0) {
+                                      return (
+                                        (dateValue >= sumarDias(fechaInicioEvento, -1) && dateValue <= fechaInicioViajeValue) ||
+                                        "La fecha de salida debe ser el mismo día o como máximo un día antes de la fecha inicio del evento " + (fechaInicioEvento ? fechaInicioEvento : "")
+                                      );
+                                    } else {
+                                      return true;
+                                    }
+                                  }
                                 },
                               }
                             )}
@@ -897,22 +913,29 @@ function NationalWithinProjectsForm() {
                               {
                                 required: "Este campo es requerido",
                                 validate: {
-                                  noPastDate: (value) =>
-                                    value >= today() ||
-                                    "La fecha no puede ser menor a la fecha actual",
-                                  validSequence: (value) =>
-                                    !fechaLlegadaAnterior ||
-                                    value >= fechaLlegadaAnterior ||
-                                    "La fecha de salida debe ser posterior a la fecha de llegada anterior",
+                                  noPastDate: (value) =>{
+                                  return(value >= today() || "La fecha no puede ser menor a la fecha actual");
+                                  },
 
-                                  // Condicionalmente, aplica la validación de salida si es el primer campo en `fieldsRegreso`
-                                  validateRegreso: (value) =>
-                                    index === 0
-                                      ? validateFechaSalidaRegreso(
-                                          value,
-                                          fechaFinEvento
-                                        )
-                                      : true,
+                                  validSequence: (value) =>{
+                                    const dateValue = new Date(value);
+                                    const fechaLlegadaAnteriorValue = new Date(fechaLlegadaAnterior);
+                                    return(!fechaLlegadaAnterior || dateValue >= fechaLlegadaAnteriorValue ||
+                                      "La fecha de salida debe ser posterior a la fecha de llegada anterior" + (fechaLlegadaAnterior? fechaLlegadaAnterior: "") );
+                                  },
+
+                                  validateDate: (value) => {
+                                    const dateValue = new Date(value);
+                                    const fechaFinViajeValue = new Date(fechaFinEvento);
+                                    if (index === 0) {
+                                      return (
+                                        (dateValue >= fechaFinViajeValue && dateValue<= sumarDias(fechaFinViajeValue,1))||
+                                        "La fecha de retorno debe ser el mismo día o como maximo un dia despues de la fecha de fin de Evento " + (fechaFinEvento? fechaFinEvento: "")
+                                      );
+                                    } else {
+                                      return true;
+                                    }
+                                  }
                                 },
                               }
                             )}
@@ -1246,7 +1269,12 @@ function NationalWithinProjectsForm() {
                      </td>
                      <td>
                       <ActionButton
-                        onClick={() => remove(index)}
+                        onClick={() => {
+                          if(fields.length > 1){
+
+                            remove(index)
+                          }
+                          }}
                         label="Eliminar"
                         variant="danger"
                       />

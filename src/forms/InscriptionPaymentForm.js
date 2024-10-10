@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray  } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 // Importación de los componentes del formulario
 
@@ -22,7 +23,7 @@ import today from "../utils/date.js";
 import {
   generateMemoInscriptionPaymentOutProyect1,
   generateAnexo5InscriptionPayment,
-} from "../utils/documentGenerator.js";
+} from "../utils/generatorDocuments/services/serviceDocuments";
 import { validarCedulaEcuatoriana, validarFechaFin} from "../utils/validaciones.js";
 
 const formStorageKey = "formInscriptionPayment"; // Clave para almacenar el formulario en localStorage
@@ -51,6 +52,7 @@ function InscriptionPaymentForm() {
   const [showInputParticipacion, setShowInputParticipacion] = useState(false);
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showInputArticulo, setShowInputArticulo] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Efecto para sincronizar con localStorage 
   useEffect(() => {
@@ -160,10 +162,19 @@ function InscriptionPaymentForm() {
 
 
   // Función para descargar todos los documentos
-
-  const handleDownloadAll = () => {
-    handleGenerateMemo1();
-    handleGeneratePdf();
+  const handleDownloadAll = async () => {
+    setLoading(true); // Activar spinner
+    const formData = methods.getValues();
+    const jsonBlob = handleDownloadJson(true);
+    const docxBlob = await generateMemoInscriptionPaymentOutProyect1(formData, true);
+    const pdfBlob = await generateAnexo5InscriptionPayment(formData, true);
+    const zip = new JSZip();
+    zip.file(`Pago de Inscripción.json`, jsonBlob);
+    zip.file(`Memorando Pago de Inscripción.docx`, docxBlob);
+    zip.file(`Anexo 5 - Inscripción.pdf`, pdfBlob);
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "Documentos Pago de Inscripción.zip");
+    setLoading(false); // Desactivar spinner
     setShowDownloadSection(false);
   };
 
@@ -637,6 +648,7 @@ function InscriptionPaymentForm() {
                   onClick={handleDownloadAll}
                   label="Descargar Todo"
                   variant="success"
+                  loading={loading}
                   />
                 </Col>
               </Row>
