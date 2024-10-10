@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 // Importación de los componentes del formulario
 
@@ -23,7 +24,7 @@ import {
   generateAnexo4InstitutionalServices,
   generateMemoInstitutionalServices,
   
-} from "../utils/documentGenerator.js";
+} from "../utils/generatorDocuments/services/serviceDocuments";
 import { validarCedulaEcuatoriana,validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
 const formStorageKey = "formInstitutionalServices"; // Clave para almacenar el formulario en localStorage
 const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
@@ -54,6 +55,7 @@ function InstitutionalServicesForm(){
   const [showInputParticipacion, setShowInputParticipacion] = useState(false);
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showInputFueraProyecto, setShowInputFueraProyecto] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Efecto para sincronizar con localStorage y manejar la visibilidad de secciones
   useEffect(() => {
@@ -184,12 +186,19 @@ function InstitutionalServicesForm(){
 
   // Función para descargar todos los documentos
 //Validación para descargar adecuadamente los archivos necesarios
-  const handleDownloadAll = () => {
-   
-        handleGenerateMemo1();
-        handleGeneratePdf();
-    
-    
+  const handleDownloadAll = async () => {
+    setLoading(true); // Activar spinner
+    const formData = methods.getValues();
+    const jsonBlob = handleDownloadJson(true);
+    const docxBlob = await generateMemoInstitutionalServices(formData, true);
+    const pdfBlob = await generateAnexo4InstitutionalServices(formData, true);
+    const zip = new JSZip();
+    zip.file(`Servicios Institucionales.json`, jsonBlob);
+    zip.file(`Memorando Servicios Institucionales.docx`, docxBlob);
+    zip.file(`Anexo 4 - Servicios Institucionales.pdf`, pdfBlob);
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "Documentos Servicios Institucionales.zip");
+    setLoading(false); // Desactivar spinner
     setShowDownloadSection(false);
   };
 
@@ -909,6 +918,7 @@ function InstitutionalServicesForm(){
                   onClick={handleDownloadAll}
                   label="Descargar Todo"
                   variant="success"
+                  loading={loading}
                   />
                 </Col>
               </Row>

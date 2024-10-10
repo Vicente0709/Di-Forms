@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 // Importación de los componentes del formulario
 
@@ -16,10 +17,10 @@ import DownloadButton from "../components/Buttons/DownloadButton.js";
 // Importación de las funciones para generar documentos
 
 import {
-    generateMemoPublicationPaymentProject,
+  generateMemoPublicationPaymentProject,
   generateAnexo1PublicationPaymentWithin,
   generateAnexo2PublicationPaymentOutside,
-} from "../utils/documentGenerator.js";
+} from "../utils/generatorDocuments/services/serviceDocuments";
 import { validarCedulaEcuatoriana } from "../utils/validaciones.js";
 const formStorageKey = "formPublicationsPayment"; // Clave para almacenar el formulario en localStorage
 const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
@@ -48,6 +49,7 @@ function PublicationsPaymentForm() {
   const [showInputParticipacion, setShowInputParticipacion] = useState(false);
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showInputFueraProyecto, setShowInputFueraProyecto] = useState(false);
+  const [loading, setLoading] = useState(false);
 
 
   // Efecto para sincronizar con localStorage y manejar la visibilidad de secciones
@@ -168,15 +170,26 @@ function PublicationsPaymentForm() {
 
   // Función para descargar todos los documentos
 //Validación para descargar adecuadamente los archivos necesarios
-  const handleDownloadAll = () => {
-    if(participacionProyecto === "dentroProyecto"){
-        handleGenerateMemo1();
-        handleGeneratePdf();
-    }else{
-        handleGenerateMemo1();
-        handleGeneratePdf2();
+  const handleDownloadAll = async () => {
+    setLoading(true); // Activar spinner
+    const formData = methods.getValues();
+    const jsonBlob = handleDownloadJson(true);
+    const docxBlob = await generateMemoPublicationPaymentProject(formData, true);
+    let pdfBlob;
+
+    if (participacionProyecto === "dentroProyecto") {
+      pdfBlob = await generateAnexo1PublicationPaymentWithin(formData, true);
+    } else {
+      pdfBlob = await generateAnexo2PublicationPaymentOutside(formData, true);
     }
-    
+
+    const zip = new JSZip();
+    zip.file(`Pago de Publicaciones.json`, jsonBlob);
+    zip.file(`Memorando Pago de Publicación.docx`, docxBlob);
+    zip.file(`Anexo - Publicación.pdf`, pdfBlob);
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, "Documentos Pago de Publicación.zip");
+    setLoading(false); // Desactivar spinner
     setShowDownloadSection(false);
   };
 
@@ -615,6 +628,7 @@ function PublicationsPaymentForm() {
                   onClick={handleDownloadAll}
                   label="Descargar Todo"
                   variant="success"
+                  loading={loading}
                   />
                 </Col>
               </Row>

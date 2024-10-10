@@ -36,8 +36,6 @@ function InternationalTechnicalTrips() {
   const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
   const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
   const { fields: immutableFields, replace: replaceInmutableFields } = useFieldArray({ control, name: "actividadesInmutables" });
-  
-  const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "",horaSalida: "", fechaLlegada: "", horaLlegada: "", };
 
   // Visualizadores con watch
   const rolEnProyecto = watch("rolEnProyecto");
@@ -132,12 +130,15 @@ function InternationalTechnicalTrips() {
     };
     reader.readAsText(file);
   };  
-  
-  //aqui el use efect donde van todo a el control de las validaciones entre los imputs
   useEffect(() => {
+    console.log("Esto se ejecuta solo una vez al cargar el componente");
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "", horaSalida: "", fechaLlegada: "", horaLlegada: "" };
     if (fieldsIda.length === 0) appendIda(initialTransporte);
     if (fieldsRegreso.length === 0) appendRegreso(initialTransporte);
+  }, []); // Sin dependencias para que se ejecute solo una vez
 
+  //validaciones de los campos
+  useEffect(() => {
     // Limpiar los campos de cuenta bancaria si no se requieren viáticos
     if (!habilitarCampos) {
       setValue("nombreBanco", "");
@@ -151,8 +152,6 @@ function InternationalTechnicalTrips() {
   }, [
     rolEnProyecto,
     habilitarCampos,
-    fieldsIda,
-    fieldsRegreso,
     setValue,
     clearErrors,
   ]);
@@ -970,11 +969,7 @@ function InternationalTechnicalTrips() {
                         type="text"
                         id={`actividadesInmutables[${index}].descripcion`}
                         className="form-input"
-                        placeholder={
-                          cantidadDias > 15
-                            ? "Descripción obligatoria de la actividad" // Placeholder si cantidadDias > 15
-                            : "No es necesario rellenar este campo solo se habilita si se supera los 15 dias "    // Placeholder si cantidadDias <= 15
-                        }
+                        placeholder="Descripción obligatoria de la actividad"
                         {...register(
                           `actividadesInmutables[${index}].descripcion`,
                           {
