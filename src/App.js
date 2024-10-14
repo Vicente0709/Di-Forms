@@ -18,6 +18,7 @@ import ExternalNationalEvents from "./pages/events/ExternalNationalEvents";
 import PublicationsPayment from "./pages/services/PublicationsPayment";
 import NationalSamplingTrips from "./pages/trips/NationalSamplingTrips";
 import InstitutionalServices from "./pages/services/InstitutionalServices";
+import ExternalPayment from "./pages/services/ExternalPayment";
 // Importación del archivo CSS para los estilos de la aplicación
 import "./App.css";
 
@@ -57,6 +58,7 @@ function MainApp() {
           <Route path="/PublicationsPayment" element={<PublicationsPayment />} />
           <Route path="/NationalSamplingTrips" element={<NationalSamplingTrips />} />
           <Route path="/InstitutionalServices" element={<InstitutionalServices />} />
+          <Route path="/ExternalPayment" element={<ExternalPayment />} />
         </Routes>
       </div>
       <Footer />

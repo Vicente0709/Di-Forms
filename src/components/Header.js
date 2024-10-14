@@ -6,7 +6,6 @@ import { NavLink } from "react-router-dom";
 function Header() {
   return (
     <Navbar style={{ backgroundColor: "#001F3E" }} variant="dark" expand="lg" fixed="top" sticky="top" > {/* El componente Navbar de React-Bootstrap para crear una barra de navegación */}
-        {/* Contenedor para centrar y alinear el contenido dentro de la barra de navegación */}
       <Container>
         {/* Marca de la barra de navegación que incluye un logo y un texto */}
         <Navbar.Brand href="/">
@@ -15,7 +14,6 @@ function Header() {
             alt="Logo"
             width="50"
             height="50"
-            
           />
           Dirección de Investigación
         </Navbar.Brand>
@@ -87,6 +85,11 @@ function Header() {
               <NavDropdown.Item as={NavLink} to="/InstitutionalServices"
                 className={({ isActive }) => (isActive ? "active" : "")} >
                 Servicios Institucionales
+              </NavDropdown.Item>
+
+              <NavDropdown.Item as={NavLink} to="/ExternalPayment"
+                className={({ isActive }) => (isActive ? "active" : "")} >
+                Pagos al Exterior
               </NavDropdown.Item>
 
             </NavDropdown>

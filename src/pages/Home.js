@@ -163,6 +163,22 @@ function Home() {
             ]}
           />
         </Col>
+
+        <Col md={4} className="d-flex">
+          <FormCard
+            title="Pago al Exterior"
+            description="Este formulario está diseñado para realizar pagos al exterior con el fin de generar los anexos requeridos para el procedimiento correspondiente a la solicitud."
+            imageSrc="form.png"
+            altText="Formulario"
+            buttonText="Ir al formulario"
+            path="/ExternalPayment"
+            ariaLabel="Ir al formulario para pagos al exterior"
+            documentDetails={[
+              "Memorando solicitud para pago al exterior",
+              "Anexo 3 - Formulario para pago al exterior",
+            ]}
+          />
+        </Col>
       </Row>
     </Container>
   );
