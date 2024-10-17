@@ -3,6 +3,8 @@ import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Importación de los componentes del formulario
 
@@ -15,35 +17,72 @@ import InputTextArea from "../components/Inputs/InputTextArea.js";
 import ActionButton from "../components/Buttons/ActionButton.js";
 import DownloadButton from "../components/Buttons/DownloadButton.js";
 import InputDate from "../components/Inputs/InputDate.js";
-import RadioGroup from "../components/Inputs/RadioGroup.js";
-
 import today from "../utils/date.js";
+// Modals
+import ConfirmationModal from "../components/Modals/ConfirmationModal.js";
+import ConfirmClearModal from "../components/Modals/ConfirmClearModal.js";
 
 import {
-  
   generateAnexo4InstitutionalServices,
   generateMemoInstitutionalServices,
-  
 } from "../utils/generatorDocuments/services/serviceDocuments";
 import { validarCedulaEcuatoriana,validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso } from "../utils/validaciones.js";
 const formStorageKey = "formInstitutionalServices"; // Clave para almacenar el formulario en localStorage
 const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
 
-function InstitutionalServicesForm(){
-    const methods = useForm({
-        mode: "onChange",
-        reValidateMode: "onChange",
-        defaultValues: formData,
-      });
-      const { register, control, watch, reset, setValue, formState:{errors} } = methods;
+const fieldLabels = {
+  codigoProyecto: 'Código del Proyecto',
+  nombreDirector: 'Nombre del Director',
+  cargoDirector: 'Cargo del Director',
 
-      const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
-    
-      const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
-  
-      const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
-    
-      // Observadores para campos clave
+  transporteIda: 'Cronograma de Transporte de Ida',
+  'transporteIda[].tipoTransporte': 'Tipo de Transporte',
+  'transporteIda[].nombreTransporte': 'Nombre del Transporte',
+  'transporteIda[].ruta': 'Ruta',
+  'transporteIda[].fechaSalida': 'Fecha de Salida',
+  'transporteIda[].horaSalida': 'Hora de Salida',
+  'transporteIda[].fechaLlegada': 'Fecha de Llegada',
+  'transporteIda[].horaLlegada': 'Hora de Llegada',
+
+  transporteRegreso: 'Cronograma de Transporte de Regreso',
+  'transporteRegreso[].tipoTransporte': 'Tipo de Transporte',
+  'transporteRegreso[].nombreTransporte': 'Nombre del Transporte',
+  'transporteRegreso[].ruta': 'Ruta de Regreso',
+  'transporteRegreso[].fechaSalida': 'Fecha de Salida',
+  'transporteRegreso[].horaSalida': 'Hora de Salida',
+  'transporteRegreso[].fechaLlegada': 'Fecha de Llegada',
+  'transporteRegreso[].horaLlegada': 'Hora de Llegada',
+
+  nombres: 'Nombres',
+  apellidos: 'Apellidos',
+  cedula: 'Cédula',
+  puesto: 'Puesto',
+  nombreJefeInmediato: 'Nombre del Jefe Inmediato',
+  cargoJefeInmediato: 'Cargo del Jefe Inmediato',
+  tituloEvento: 'Título del Evento',
+  ciudadServicio: 'Ciudad del Servicio',
+  provinciaServicio: 'Provincia del Servicio',
+  nombreUnidad: 'Nombre de la Unidad',
+  servidores: 'Servidores',
+  actividades: 'Actividades',
+  productos: 'Productos',
+  otrasTareas: 'Otras Tareas',
+  fechaInicioEvento: 'Fecha de Inicio del Evento',
+  fechaFinEvento: 'Fecha de Fin del Evento',
+  departamento: 'Departamento',
+  inscripciones: 'Inscripciones'
+};
+
+function InstitutionalServicesForm(){
+
+  const methods = useForm({ mode: "onChange", reValidateMode: "onChange", defaultValues: formData, });
+  const { register, control, watch, reset, setValue, formState:{errors} } = methods;
+
+  const { fields, append, remove } = useFieldArray({ control, name: "inscripciones"});
+  const { fields: fieldsIda, append: appendIda, remove: removeIda } = useFieldArray({ control, name: "transporteIda"});
+  const { fields: fieldsRegreso, append: appendRegreso, remove: removeRegreso} = useFieldArray({ control, name: "transporteRegreso"});
+
+  // Observadores para campos clave
   const participacionProyecto = watch("participacionProyecto");
   const rolEnProyecto = watch("rolEnProyecto");
   const fechaInicioEvento = watch("fechaInicioEvento");
@@ -56,22 +95,18 @@ function InstitutionalServicesForm(){
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showInputFueraProyecto, setShowInputFueraProyecto] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
+  const [modalClearShow, setModalClearShow] = useState(false);
 
-  // Efecto para sincronizar con localStorage y manejar la visibilidad de secciones
+  // Efecto principal 
   useEffect(() => {
-    reset(formData); // Rellenar el formulario con los datos almacenados
-
-    // Suscribirse a los cambios en el formulario para guardar en localStorage
+    reset(formData);
     const subscription = watch((data) => {
       sessionStorage.setItem(formStorageKey, JSON.stringify(data));
-       
-      // Lógica para mostrar u ocultar campos basados en los valores del formulario
       setShowInputParticipacion(data.participacionProyecto === "dentroProyecto");
       setShowInputDirector(data.rolEnProyecto === "Colaborador"||data.rolEnProyecto === "Codirector");
       setShowInputFueraProyecto(data.participacionProyecto === "fueraProyecto");
     });
-
-    // Limpiar la suscripción al desmontar el componente
     return () => subscription.unsubscribe();
   }, [watch, reset]);
 
@@ -138,16 +173,21 @@ function InstitutionalServicesForm(){
 
       // Función que se ejecuta al enviar el formulario
   const onSubmitInstitutionalServices = (data) => {
-    console.log(data);
-    setShowDownloadSection(true);
-    console.log(methods.getValues());
+    toast.success("Datos del Formulario validados correctamente");
+    setModalShow(true); 
   };
 
+  const handleConfirm = () => {
+    toast.success("Confirmación del usuaio que los datos son correctos"); // Notificación de éxito
+    setShowDownloadSection(true);
+    setModalShow(false);
+  };
    
   const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     if (returnDocument === true) return blob;
+    toast.success("Archivo JSON descargado correctamente"); // Notificación de éxito
     saveAs(blob, "Servicios Institucionales.json");
   };
 
@@ -160,7 +200,8 @@ function InstitutionalServicesForm(){
         const json = JSON.parse(e.target.result);
         reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
         sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-      } catch (err) {
+      toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
+} catch (err) {
         console.error("Error al cargar el archivo JSON:", err);
       }
     };
@@ -184,22 +225,47 @@ function InstitutionalServicesForm(){
 
 
 
-  // Función para descargar todos los documentos
-//Validación para descargar adecuadamente los archivos necesarios
+
   const handleDownloadAll = async () => {
-    setLoading(true); // Activar spinner
-    const formData = methods.getValues();
-    const jsonBlob = handleDownloadJson(true);
-    const docxBlob = await generateMemoInstitutionalServices(formData, true);
-    const pdfBlob = await generateAnexo4InstitutionalServices(formData, true);
-    const zip = new JSZip();
-    zip.file(`Servicios Institucionales.json`, jsonBlob);
-    zip.file(`Memorando Servicios Institucionales.docx`, docxBlob);
-    zip.file(`Anexo 4 - Servicios Institucionales.pdf`, pdfBlob);
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "Documentos Servicios Institucionales.zip");
-    setLoading(false); // Desactivar spinner
-    setShowDownloadSection(false);
+    const downloadDocuments = async () => {
+      try {
+        setLoading(true); // Activar spinner
+
+        // Obtener los valores del formulario
+        const formData = methods.getValues();
+
+        // Generar los blobs de los documentos
+        const jsonBlob = handleDownloadJson(true);
+        const docxBlob = await generateMemoInstitutionalServices(formData, true);
+        const pdfBlob = await generateAnexo4InstitutionalServices(formData, true);
+
+        // Crear un nuevo archivo ZIP y agregar los documentos
+        const zip = new JSZip();
+        zip.file("Servicios Institucionales.json", jsonBlob);
+        zip.file("Memorando Servicios Institucionales.docx", docxBlob);
+        zip.file("Anexo 4 - Servicios Institucionales.pdf", pdfBlob);
+
+        // Generar el archivo ZIP final y descargarlo
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, "Documentos_Servicios_Institucionales.zip");
+
+      } catch (error) {
+        throw error; // Lanza el error para que sea manejado por el toast
+      } finally {
+        setLoading(false); // Desactivar spinner
+        setShowDownloadSection(false);
+      }
+    };
+
+    // Usamos `toast.promise` para manejar las notificaciones de la promesa
+    toast.promise(
+      downloadDocuments(),
+      {
+        pending: 'Generando documentos... por favor, espera',
+        success: '¡Documentos generados y descargados con éxito! 🎉',
+        error: 'Error al generar los documentos. Por favor, inténtalo nuevamente 😞'
+      }
+    );
   };
 
   // Función para limpiar el formulario y resetear datos
@@ -929,13 +995,41 @@ function InstitutionalServicesForm(){
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
-              onClick={handleClearForm}
+              onClick={() => setModalClearShow(true)}
               label="Limpiar Formulario"
               variant="danger"
               />
             </Col>
           </Row>
         </Form>
+        <ToastContainer // Agrega este contenedor para que las notificaciones se puedan mostrar
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        {/* Modal de confirmación de los datos estan correctos */}
+        <ConfirmationModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            formData={methods.getValues()}
+            onConfirm={handleConfirm}
+            title="Confirmación del formulario"
+            fieldLabels={fieldLabels} 
+          />
+          {/* Modal de confirmación para limpiar el formulario */}
+          <ConfirmClearModal
+            show={modalClearShow}
+            onHide={() => setModalClearShow(false)} // Cierra el modal sin hacer nada
+            onClear={handleClearForm} // Limpia el formulario
+            onDownload={handleDownloadJson} // Descarga los datos en JSON
+            title="Confirmación de limpieza"
+          />
       </Container>
     </FormProvider>
   );

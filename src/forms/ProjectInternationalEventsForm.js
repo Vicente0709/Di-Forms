@@ -3,6 +3,8 @@ import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Importación de props
 import Label from "../components/Labels/Label.js";
@@ -15,6 +17,9 @@ import InputDate from "../components/Inputs/InputDate.js";
 import RadioGroup from "../components/Inputs/RadioGroup.js";
 import ActionButton from "../components/Buttons/ActionButton.js";
 import DownloadButton from "../components/Buttons/DownloadButton.js";
+// Modals
+import ConfirmationModal from "../components/Modals/ConfirmationModal.js";
+import ConfirmClearModal from "../components/Modals/ConfirmClearModal.js";
 
 // Importación de las funciones
 import today from "../utils/date.js";
@@ -22,8 +27,75 @@ import { generateDateRange } from "../utils/dataRange.js";
 import { generateMemorandoA, generateAnexoA, generateAnexo2A } from "../utils/generatorDocuments/event/internationalEventDocuments.js";
 import {validarCedulaEcuatoriana, validarFechaFin, validateFechaLlegadaIda, validateFechaSalidaRegreso} from "../utils/validaciones.js";
 
+
 //Constaltes globales para el formulario
 const formStorageKey = "formEventParticipationWithinProjects"; // Clave para almacenar el formulario en sessionStorage
+// Diccionario de etiquetas amigables para este formulario específico
+const fieldLabels = {
+  seleccionDeclaracion: 'Selección de Declaración',
+
+  inscripciones: 'Inscripciones',
+  'inscripciones[].valorInscripcion': 'Valor de la Inscripción',
+  'inscripciones[].pagoLimite': 'Límite de Pago',
+  'inscripciones[].limiteFecha': 'Fecha Límite',
+
+  transporteIda: 'Cronograma de Transporte de Ida',
+  'transporteIda[].tipoTransporte': 'Tipo de Transporte',
+  'transporteIda[].nombreTransporte': 'Nombre del Transporte',
+  'transporteIda[].ruta': 'Ruta',
+  'transporteIda[].fechaSalida': 'Fecha de Salida',
+  'transporteIda[].horaSalida': 'Hora de Salida',
+  'transporteIda[].fechaLlegada': 'Fecha de Llegada',
+  'transporteIda[].horaLlegada': 'Hora de Llegada',
+
+  transporteRegreso: 'Cronograma de Transporte de Regreso',
+  'transporteRegreso[].tipoTransporte': 'Tipo de Transporte',
+  'transporteRegreso[].nombreTransporte': 'Nombre del Transporte',
+  'transporteRegreso[].ruta': 'Ruta de Regreso',
+  'transporteRegreso[].fechaSalida': 'Fecha de Salida',
+  'transporteRegreso[].horaSalida': 'Hora de Salida',
+  'transporteRegreso[].fechaLlegada': 'Fecha de Llegada',
+  'transporteRegreso[].horaLlegada': 'Hora de Llegada',
+
+  otroEventoEspecificar: 'Otro Evento Especificar',
+  codigoProyecto: 'Código del Proyecto',
+  tituloProyecto: 'Título del Proyecto',
+  cedula: 'Cédula',
+  nombres: 'Nombres',
+  apellidos: 'Apellidos',
+  cargo: 'Cargo',
+  rolEnProyecto: 'Rol en el Proyecto',
+  nombreDirector: 'Nombre del Director',
+  departamento: 'Departamento',
+  nombreJefeInmediato: 'Nombre del Jefe Inmediato',
+  cargoJefeInmediato: 'Cargo del Jefe Inmediato',
+  tituloEvento: 'Título del Evento',
+  ciudadEvento: 'Ciudad del Evento',
+  paisEvento: 'País del Evento',
+  fechaInicioEvento: 'Fecha de Inicio del Evento',
+  fechaFinEvento: 'Fecha de Fin del Evento',
+  tipoEvento: 'Tipo de Evento',
+  participacionEvento: 'Participación en el Evento',
+  tituloPonencia: 'Título de la Ponencia',
+  pasajesAereos: 'Pasajes Aéreos',
+  viaticosSubsistencias: 'Viáticos y Subsistencias',
+  inscripcion: 'Inscripción',
+  objetivoProyecto: 'Objetivo del Proyecto',
+  relevanciaEvento: 'Relevancia del Evento',
+  hospedaje: 'Hospedaje',
+  movilizacion: 'Movilización',
+  alimentacion: 'Alimentación',
+  servidores: 'Servidores',
+  actividadesInmutables: 'Cronograma de Actividades',
+  'actividadesInmutables[].fecha': 'Fecha de Actividad',
+  'actividadesInmutables[].descripcion': 'Descripción de la Actividad',
+  nombreBanco: 'Nombre del Banco',
+  tipoCuenta: 'Tipo de Cuenta',
+  numeroCuenta: 'Número de Cuenta',
+  metodoPago: 'Método de Pago',
+  
+
+};
 
 function ProjectInternationalEventsForm() {
   const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde sessionStorage
@@ -60,11 +132,19 @@ function ProjectInternationalEventsForm() {
   const [prevFechaInicio, setPrevFechaInicio] = useState("");
   const [prevFechaFin, setPrevFechaFin] = useState("");
   const [cantidadDias, setCantidadDias] = useState(0);
+  const [modalShow, setModalShow] = useState(false);
+  const [modalClearShow, setModalClearShow] = useState(false);
 
   
   // Funciones auxiliares y handler de eventos
   const onSubmit = (data) => {
+    toast.success("Datos del Formulario validados correctamente");
+    setModalShow(true); 
+  };
+  const handleConfirm = () => {
+    toast.success("Confirmación del usuaio que los datos son correctos"); // Notificación de éxito
     setShowDownloadSection(true);
+    setModalShow(false);
   };
 
   const handleGenerateDocx = () => {
@@ -86,33 +166,72 @@ function ProjectInternationalEventsForm() {
   };
 
   const handleDownloadAll = async () => {
-    setLoading(true); // Activar spinner
-    const jsonBlob = handleDownloadJson(true);
-    const formData = methods.getValues();
-    const docxBlob = await generateMemorandoA(formData,true);
-    const pdfBlob = await generateAnexoA(formData,true);
-    const pdfBlob2 = await generateAnexo2A(formData,true);
-    const zip = new JSZip();
-    zip.file("Formulario participación en eventos dentro de proyectos.json", jsonBlob);
-    zip.file(`Memorando solicitud para participar en evento académico ${formData.codigoProyecto}.docx`, docxBlob);
-    zip.file(`Anexo A - Solicitud de Viaticos EPN ${formData.codigoProyecto}.pdf`, pdfBlob);
-    zip.file(`Anexo 2A - Formulario para participacion en eventos dentro de proyectos ${formData.codigoProyecto}.pdf`, pdfBlob2);
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "Documentos participacion en eventos dentro de proyectos.zip");
-    setLoading(false); // Desactivar spinner
-    setShowDownloadSection(false);
+    const downloadDocuments = async () => {
+      try {
+        setLoading(true); // Activar spinner
+  
+        // Obtener los valores del formulario
+        const formData = methods.getValues();
+  
+        // Generar los blobs de los documentos
+        const jsonBlob = handleDownloadJson(true);
+        const docxBlob = await generateMemorandoA(formData, true);
+        const pdfBlob1 = await generateAnexoA(formData, true);
+        const pdfBlob2 = await generateAnexo2A(formData, true);
+  
+        // Crear un nuevo archivo ZIP y agregar los documentos
+        const zip = new JSZip();
+        zip.file("Formulario participación en eventos dentro de proyectos.json", jsonBlob);
+        zip.file(`Memorando solicitud para participar en evento académico ${formData.codigoProyecto}.docx`, docxBlob);
+        zip.file(`Anexo A - Solicitud de Viaticos EPN ${formData.codigoProyecto}.pdf`, pdfBlob1);
+        zip.file(`Anexo 2A - Formulario para participacion en eventos dentro de proyectos ${formData.codigoProyecto}.pdf`, pdfBlob2);
+  
+        // Generar el archivo ZIP final y descargarlo
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, "Documentos participacion en eventos dentro de proyectos.zip");
+  
+      } catch (error) {
+        throw error; // Lanza el error para que sea manejado por el toast
+      } finally {
+        setLoading(false); // Desactivar spinner
+        setShowDownloadSection(false);
+      }
+    };
+    // Usamos `toast.promise` para manejar las notificaciones de la promesa
+    toast.promise(
+      downloadDocuments(),
+      {
+        pending: 'Generando documentos... por favor, espera',
+        success: '¡Documentos generados y descargados con éxito! 🎉',
+        error: 'Error al generar los documentos. Por favor, inténtalo nuevamente 😞'
+      }
+    );
   };
   
   const handleClearForm = () => {
-    sessionStorage.removeItem(formStorageKey);
-    setShowDownloadSection(false);
-    window.location.reload();
+    sessionStorage.removeItem(formStorageKey);  
+    // Set all form values to empty strings
+    Object.keys(fieldLabels).forEach((field) => {
+      setValue(field, "");
+    });
+    replaceInmutableFields([]);
+    removeIda();
+    removeRegreso();
+    remove();
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "", horaSalida: "", fechaLlegada: "", horaLlegada: "" };
+    const initialInscripcion = { valorInscripcion: "", pagoLimite: "", limiteFecha: "" };
+    appendIda(initialTransporte);
+    appendRegreso(initialTransporte);
+    append(initialInscripcion);
+    setModalClearShow(false);
+    toast.success("Formulario limpiado correctamente"); // Notificación de éxito
   };
 
   const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     if (returnDocument === true) return blob;
+    toast.success("Archivo JSON descargado correctamente"); // Notificación de éxito
     saveAs(blob, "Participación en Eventos Dentro Proyectos.json");
   };
 
@@ -126,7 +245,8 @@ function ProjectInternationalEventsForm() {
         reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
         replaceInmutableFields(json.actividadesInmutables);
         sessionStorage.setItem(formStorageKey, JSON.stringify(json)); 
-      } catch (err) {
+      toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
+} catch (err) {
         console.error("Error al cargar el archivo JSON:", err);
       }
     };
@@ -1533,13 +1653,41 @@ function ProjectInternationalEventsForm() {
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
-                onClick={handleClearForm}
+                onClick={() => setModalClearShow(true)}
                 label="Limpiar Formulario"
                 variant="danger"
               />
             </Col>
           </Row>
         </Form>
+        <ToastContainer // Agrega este contenedor para que las notificaciones se puedan mostrar
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        {/* Modal de confirmación de los datos estan correctos */}
+        <ConfirmationModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            formData={methods.getValues()}
+            onConfirm={handleConfirm}
+            title="Confirmación del formulario"
+            fieldLabels={fieldLabels} 
+          />
+          {/* Modal de confirmación para limpiar el formulario */}
+          <ConfirmClearModal
+            show={modalClearShow}
+            onHide={() => setModalClearShow(false)} // Cierra el modal sin hacer nada
+            onClear={handleClearForm} // Limpia el formulario
+            onDownload={handleDownloadJson} // Descarga los datos en JSON
+            title="Confirmación de limpieza"
+          />
       </Container>
     </FormProvider>
   );

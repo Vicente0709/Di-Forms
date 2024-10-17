@@ -3,6 +3,8 @@ import { useForm, FormProvider, useFieldArray} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Importación de los componentes Props
 import Label from "../components/Labels/Label.js";
@@ -15,6 +17,9 @@ import InputDate from "../components/Inputs/InputDate.js";
 import RadioGroup from "../components/Inputs/RadioGroup.js";
 import ActionButton from "../components/Buttons/ActionButton.js";
 import DownloadButton from "../components/Buttons/DownloadButton.js";
+// Modals
+import ConfirmationModal from "../components/Modals/ConfirmationModal.js";
+import ConfirmClearModal from "../components/Modals/ConfirmClearModal.js";
 
 //Importación de funciones
 import today from "../utils/date.js";
@@ -30,9 +35,59 @@ import {
   generateMemoSamplingTripWithinProject,
   NationalSamplingTrips,
 } from "../utils/generatorDocuments/trip/nationalTripDocuments";
+import { replace } from "react-router-dom";
 
 //Constantes globales
 const formStorageKey = "formSamplingTripWithinProject"; // Clave para almacenar el formulario en sessionStorage
+
+// Diccionario de etiquetas amigables para este formulario específico
+const fieldLabels = {
+  participante: 'Participantes',
+  'participante[].viaticos': 'Recibe Viáticos',
+  'participante[].cedula': 'Cédula',
+  'participante[].rol': 'Rol',
+  'participante[].cargo': 'Cargo',
+  'participante[].nombreJefeInmediato': 'Nombre del Jefe Inmediato',
+  'participante[].cargoJefeInmediato': 'Cargo del Jefe Inmediato',
+  'participante[].banco': 'Banco',
+  'participante[].tipoCuenta': 'Tipo de Cuenta',
+  'participante[].numeroCuenta': 'Número de Cuenta',
+  'participante[].departamento': 'Departamento',
+  'participante[].nombre': 'Nombre del Participante',
+
+  transporteIda: 'Cronograma de Transporte de Ida',
+  'transporteIda[].tipoTransporte': 'Tipo de Transporte',
+  'transporteIda[].nombreTransporte': 'Nombre del Transporte',
+  'transporteIda[].ruta': 'Ruta',
+  'transporteIda[].fechaSalida': 'Fecha de Salida ',
+  'transporteIda[].horaSalida': 'Hora de Salida ',
+  'transporteIda[].fechaLlegada': 'Fecha de Llegada ',
+  'transporteIda[].horaLlegada': 'Hora de Llegada ',
+
+  transporteRegreso: 'Cronograma de Transporte de Regreso',
+  'transporteRegreso[].tipoTransporte': 'Tipo de Transporte',
+  'transporteRegreso[].nombreTransporte': 'Nombre del Transporte',
+  'transporteRegreso[].ruta': 'Ruta de Regreso',
+  'transporteRegreso[].fechaSalida': 'Fecha de Salida',
+  'transporteRegreso[].horaSalida': 'Hora de Salida',
+  'transporteRegreso[].fechaLlegada': 'Fecha de Llegada',
+  'transporteRegreso[].horaLlegada': 'Hora de Llegada',
+
+  codigoProyecto: 'Código del Proyecto',
+  tituloProyecto: 'Título del Proyecto',
+  nombreDirector: 'Nombre del Director',
+  ciudad: 'Ciudad',
+  fechaInicioViaje: 'Fecha de Inicio del Viaje',
+  fechaFinViaje: 'Fecha de Fin del Viaje',
+  pasajesAereos: 'Pasajes Aéreos',
+  viaticosSubsistencias: 'Viáticos y Subsistencias',
+  objetivoViaje: 'Objetivo del Viaje',
+
+  actividadesInmutables: 'Cronograma de actividades',
+  'actividadesInmutables[].fecha': 'Fecha de Actividad',
+  'actividadesInmutables[].descripcion': 'Descripción de la Actividad',
+  departamento: 'Departamento'
+};
 
 function NationalSamplingTripsForm() {
   // Configuración del formulario con react-hook-form y valores predeterminados desde sessionStorage
@@ -58,17 +113,26 @@ function NationalSamplingTripsForm() {
   const [prevFechaFin, setPrevFechaFin] = useState("");
   const [loading, setLoading] = useState(false); //para el spinner de carga
   const [showDownloadSection, setShowDownloadSection] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
+  const [modalClearShow, setModalClearShow] = useState(false);
   
   const onSubmitSamplingTrip = (data) => {
-    console.log(data);
+    toast.success("Datos del Formulario validados correctamente");
+    setModalShow(true); 
+  };
+  const handleConfirm = () => {
+    toast.success("Confirmación del usuaio que los datos son correctos"); // Notificación de éxito
     setShowDownloadSection(true);
+    setModalShow(false);
   };
 
   const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     if (returnDocument === true) return blob;
+    toast.success("Archivo JSON descargado correctamente"); // Notificación de éxito
     saveAs(blob, "Viajes de Muestreo Dentro de Proyectos.json");
+    toast.success("Archivo JSON descargado correctamente"); // Notificación de éxito
   };
 
   const handleUploadJson = (event) => {
@@ -81,8 +145,11 @@ function NationalSamplingTripsForm() {
         reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
         replaceInmutableFields(json.actividadesInmutables);
         sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-      } catch (err) {
+        toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
+      toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
+} catch (err) {
         console.error("Error al cargar el archivo JSON:", err);
+        toast.error("Error al cargar el archivo JSON"); // Notificación de error
       }
     };
     reader.readAsText(file);
@@ -92,52 +159,106 @@ function NationalSamplingTripsForm() {
     const data = methods.getValues();
     generateMemoSamplingTripWithinProject(data);
     setShowDownloadSection(false);
-  };
-  const handleGeneratePdfAnexosA = () => {
-    setLoading(true);
-    const data = methods.getValues();
-    NationalSamplingTrips(data);
-    setShowDownloadSection(false);
-    setLoading(false);
+    toast.success("Memorando generado correctamente");
   };
 
+  const handleGeneratePdfAnexosA = async () => {
+    const generateAnexosA = async () => {
+      try {
+        setLoading(true);
+        const formData = methods.getValues();
+        const pdfsZipBlob = await NationalSamplingTrips(formData, true);
+  
+        if (pdfsZipBlob) {
+          saveAs(pdfsZipBlob, "Anexos_A.zip");
+        }
+  
+        setShowDownloadSection(false);
+      } catch (error) {
+        console.error("Error:", error);
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    toast.promise(
+      generateAnexosA,
+      {
+        pending: 'Generando Anexos A para cada participante, por favor, espera',
+        success: '¡Anexos A generados correctamente! 🎉',
+        error: 'Error al generar los Anexos A. Por favor, inténtalo nuevamente 😞'
+      }
+    );
+  };
+  
   const handleGeneratePdf2 = () => {
     const data = methods.getValues();
     generateAnexo7WithinProject(data);
     setShowDownloadSection(false);
+    toast.success("Anexo 7 generado correctamente");
   };
 
   const handleClearForm = () => {
-    sessionStorage.removeItem(formStorageKey);
-    window.location.reload();
+    sessionStorage.removeItem(formStorageKey);  
+    // Set all form values to empty strings
+    Object.keys(fieldLabels).forEach((field) => {
+      setValue(field, "");
+    });
+    replaceInmutableFields([]);
+    removeIda();
+    removeRegreso();
+    removeParticipante();
+    const initialTransporte = { tipoTransporte: "Aéreo", nombreTransporte: "", ruta: "", fechaSalida: "", horaSalida: "", fechaLlegada: "", horaLlegada: "" };
+    const initialParticipante = { viaticos: false, nombre: "", cedula: "", rol: "", cargo: "", nombreJefeInmediato: "", cargoJefeInmediato: "", banco: "", tipoCuenta: "", numeroCuenta: "", departamento: "" };
+    appendIda(initialTransporte);
+    appendRegreso(initialTransporte);
+    appendParticipante(initialParticipante);
+    setModalClearShow(false);
+    toast.success("Formulario limpiado correctamente"); // Notificación de éxito
   };
 
   const handleDownloadAll = async () => {
-    try {
-      setLoading(true); // Activar spinner
-      // Obtener los valores del formulario
-      const formData = methods.getValues();
-      // Generar los blobs de los documentos
-      const jsonBlob = handleDownloadJson(true);
-      const docxBlob = await generateMemoSamplingTripWithinProject(formData, true);
-      const pdfBlob1 = await generateAnexo7WithinProject(formData, true);
-      const pdfsZipBlob = await NationalSamplingTrips(formData, true); // Esta función retorna un blob en formato ZIP
-      // Crear un nuevo archivo ZIP y agregar los documentos
-      const zip = new JSZip();
-      zip.file("Viajes de Muestreo Dentro de Proyectos.json", jsonBlob);
-      zip.file("Memorando de Viaje.docx", docxBlob);
-      zip.file("Anexo 7 - Formulario de Salidas de Campo y de Muestreo.pdf", pdfBlob1);
-      zip.file("Anexos A.zip", pdfsZipBlob);
-      // Generar el archivo ZIP final y descargarlo
-      const content = await zip.generateAsync({ type: "blob" });
-      saveAs(content, "Documentos_Viajes_de_Muestreo.zip");
-
-    } catch (error) {
-      console.error("Error al generar el archivo ZIP:", error);
-    } finally {
-      setLoading(false); // Desactivar spinner
-      setShowDownloadSection(false);
-    }
+    const downloadDocuments = async () => {
+      try {
+        setLoading(true); // Activar spinner
+  
+        // Obtener los valores del formulario
+        const formData = methods.getValues();
+  
+        // Generar los blobs de los documentos
+        const jsonBlob = handleDownloadJson(true);
+        const docxBlob = await generateMemoSamplingTripWithinProject(formData, true);
+        const pdfBlob1 = await generateAnexo7WithinProject(formData, true);
+        const pdfsZipBlob = await NationalSamplingTrips(formData, true); // Esta función retorna un blob en formato ZIP
+  
+        // Crear un nuevo archivo ZIP y agregar los documentos
+        const zip = new JSZip();
+        zip.file("Viajes de Muestreo Dentro de Proyectos.json", jsonBlob);
+        zip.file("Memorando de Viaje.docx", docxBlob);
+        zip.file("Anexo 7 - Formulario de Salidas de Campo y de Muestreo.pdf", pdfBlob1);
+        zip.file("Anexos A.zip", pdfsZipBlob);
+  
+        // Generar el archivo ZIP final y descargarlo
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, "Documentos_Viajes_de_Muestreo.zip");
+  
+      } catch (error) {
+        throw error; // Lanza el error para que sea manejado por el toast
+      } finally {
+        setLoading(false); // Desactivar spinner
+        setShowDownloadSection(false);
+      }
+    };
+    // Usamos `toast.promise` para manejar las notificaciones de la promesa
+    toast.promise(
+      downloadDocuments(),
+      {
+        pending: 'Generando documentos... por favor, espera',
+        success: '¡Documentos generados y descargados con éxito! 🎉',
+        error: 'Error al generar los documentos. Por favor, inténtalo nuevamente 😞'
+      }
+    );
   };
 
   // useEffect principal
@@ -577,15 +698,6 @@ useEffect(() => {
               />
             </div>
            
-            {/* <RadioGroup
-              name="inscripcion"
-              label="Inscripción:"
-              options={[
-                { value: "SI", label: "SI" },
-                { value: "NO", label: "NO" },
-              ]}
-              rules={{ required: "Indique si requiere inscripción" }}
-            /> */}
             <LabelTitle text="Transporte" disabled={false} />
             <LabelText
               text="Por favor, considere que el itinerario es tentativo. Consulte el
@@ -1231,13 +1343,42 @@ useEffect(() => {
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
-                onClick={handleClearForm}
+                onClick={() => setModalClearShow(true)}
                 label="Limpiar Formulario"
                 variant="danger"
               />
             </Col>
           </Row>
         </Form>
+
+        <ToastContainer // Agrega este contenedor para que las notificaciones se puedan mostrar
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        {/* Modal de confirmación de los datos estan correctos */}
+        <ConfirmationModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            formData={methods.getValues()}
+            onConfirm={handleConfirm}
+            title="Confirmación del formulario"
+            fieldLabels={fieldLabels} 
+          />
+          {/* Modal de confirmación para limpiar el formulario */}
+          <ConfirmClearModal
+            show={modalClearShow}
+            onHide={() => setModalClearShow(false)} // Cierra el modal sin hacer nada
+            onClear={handleClearForm} // Limpia el formulario
+            onDownload={handleDownloadJson} // Descarga los datos en JSON
+            title="Confirmación de limpieza"
+          />
       </Container>
     </FormProvider>
   );

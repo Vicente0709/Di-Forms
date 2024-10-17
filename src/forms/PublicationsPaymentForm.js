@@ -3,9 +3,10 @@ import { useForm, FormProvider, useFieldArray } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Importación de los componentes del formulario
-
 import Label from "../components/Labels/Label.js";
 import LabelTitle from "../components/Labels/LabelTitle.js";
 import LabelText from "../components/Labels/LabelText.js";
@@ -14,8 +15,11 @@ import InputText from "../components/Inputs/InputText.js";
 import InputTextArea from "../components/Inputs/InputTextArea.js";
 import ActionButton from "../components/Buttons/ActionButton.js";
 import DownloadButton from "../components/Buttons/DownloadButton.js";
-// Importación de las funciones para generar documentos
+// Modals
+import ConfirmationModal from "../components/Modals/ConfirmationModal.js";
+import ConfirmClearModal from "../components/Modals/ConfirmClearModal.js";
 
+// Importación de las funciones para generar documentos
 import {
   generateMemoPublicationPaymentProject,
   generateAnexo1PublicationPaymentWithin,
@@ -24,6 +28,35 @@ import {
 import { validarCedulaEcuatoriana } from "../utils/validaciones.js";
 const formStorageKey = "formPublicationsPayment"; // Clave para almacenar el formulario en localStorage
 const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+
+const fieldLabels = {
+  codigoProyecto: 'Código del Proyecto',
+  nombreDirector: 'Nombre del Director',
+  cargoDirector: 'Cargo del Director',
+
+  inscripciones: 'Inscripciones',
+  'inscripciones[].valorInscripcion': 'Valor de la Inscripción',
+  'inscripciones[].pagoLimite': 'Límite de Pago',
+  'inscripciones[].limiteFecha': 'Fecha Límite',
+
+  publicaciones: 'Publicaciones',
+  'publicaciones[].monedaPago': 'Moneda de Pago',
+  'publicaciones[].valorPublicacion': 'Valor de la Publicación',
+  'publicaciones[].limiteFecha': 'Fecha Límite',
+
+  metodoPago: 'Método de Pago',
+  nombres: 'Nombres',
+  apellidos: 'Apellidos',
+  cedula: 'Cédula',
+  departamento: 'Departamento',
+  participacionProyecto: 'Participación en el Proyecto',
+  tituloPublicacion: 'Título de la Publicación',
+  nombreRevista: 'Nombre de la Revista',
+  autoresEPN: 'Autores de la EPN',
+  autoresExternos: 'Autores Externos',
+  baseDatos: 'Base de Datos',
+  cuartilPublicacion: 'Cuartil de la Publicación'
+};
 
 function PublicationsPaymentForm() {
  
@@ -50,11 +83,13 @@ function PublicationsPaymentForm() {
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showInputFueraProyecto, setShowInputFueraProyecto] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
+  const [modalClearShow, setModalClearShow] = useState(false);
 
 
-  // Efecto para sincronizar con localStorage y manejar la visibilidad de secciones
+  // Efecto principal
   useEffect(() => {
-    reset(formData); // Rellenar el formulario con los datos almacenados
+    reset(formData); 
 
     // Suscribirse a los cambios en el formulario para guardar en localStorage
     const subscription = watch((data) => {
@@ -117,15 +152,21 @@ function PublicationsPaymentForm() {
 
   // Función que se ejecuta al enviar el formulario
   const onSubmitPublicationsPayment = (data) => {
-    console.log(data);
+    toast.success("Datos del Formulario validados correctamente");
+    setModalShow(true); 
+  };
+
+  const handleConfirm = () => {
+    toast.success("Confirmación del usuaio que los datos son correctos"); // Notificación de éxito
     setShowDownloadSection(true);
-    console.log(methods.getValues());
+    setModalShow(false);
   };
 
   const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     if (returnDocument === true) return blob;
+    toast.success("Archivo JSON descargado correctamente"); // Notificación de éxito
     saveAs(blob, "Pago de Publicaciones.json");
   };
 
@@ -138,7 +179,8 @@ function PublicationsPaymentForm() {
         const json = JSON.parse(e.target.result);
         reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
         sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-      } catch (err) {
+      toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
+} catch (err) {
         console.error("Error al cargar el archivo JSON:", err);
       }
     };
@@ -166,31 +208,53 @@ function PublicationsPaymentForm() {
     setShowInputFueraProyecto(true);
     setShowDownloadSection(false);
   };
-  
 
-  // Función para descargar todos los documentos
-//Validación para descargar adecuadamente los archivos necesarios
   const handleDownloadAll = async () => {
-    setLoading(true); // Activar spinner
-    const formData = methods.getValues();
-    const jsonBlob = handleDownloadJson(true);
-    const docxBlob = await generateMemoPublicationPaymentProject(formData, true);
-    let pdfBlob;
+    const downloadDocuments = async () => {
+      try {
+        setLoading(true); // Activar spinner
 
-    if (participacionProyecto === "dentroProyecto") {
-      pdfBlob = await generateAnexo1PublicationPaymentWithin(formData, true);
-    } else {
-      pdfBlob = await generateAnexo2PublicationPaymentOutside(formData, true);
-    }
+        // Obtener los valores del formulario
+        const formData = methods.getValues();
 
-    const zip = new JSZip();
-    zip.file(`Pago de Publicaciones.json`, jsonBlob);
-    zip.file(`Memorando Pago de Publicación.docx`, docxBlob);
-    zip.file(`Anexo - Publicación.pdf`, pdfBlob);
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "Documentos Pago de Publicación.zip");
-    setLoading(false); // Desactivar spinner
-    setShowDownloadSection(false);
+        // Generar los blobs de los documentos
+        const jsonBlob = handleDownloadJson(true);
+        const docxBlob = await generateMemoPublicationPaymentProject(formData, true);
+        let pdfBlob;
+
+        if (participacionProyecto === "dentroProyecto") {
+          pdfBlob = await generateAnexo1PublicationPaymentWithin(formData, true);
+        } else {
+          pdfBlob = await generateAnexo2PublicationPaymentOutside(formData, true);
+        }
+
+        // Crear un nuevo archivo ZIP y agregar los documentos
+        const zip = new JSZip();
+        zip.file("Pago de Publicaciones.json", jsonBlob);
+        zip.file("Memorando Pago de Publicación.docx", docxBlob);
+        zip.file("Anexo - Publicación.pdf", pdfBlob);
+
+        // Generar el archivo ZIP final y descargarlo
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, "Documentos Pago de Publicación.zip");
+
+      } catch (error) {
+        throw error; // Lanza el error para que sea manejado por el toast
+      } finally {
+        setLoading(false); // Desactivar spinner
+        setShowDownloadSection(false);
+      }
+    };
+
+    // Usamos `toast.promise` para manejar las notificaciones de la promesa
+    toast.promise(
+      downloadDocuments(),
+      {
+        pending: 'Generando documentos... por favor, espera',
+        success: '¡Documentos generados y descargados con éxito! 🎉',
+        error: 'Error al generar los documentos. Por favor, inténtalo nuevamente 😞'
+      }
+    );
   };
 
   // Función para limpiar el formulario y resetear datos
@@ -639,13 +703,41 @@ function PublicationsPaymentForm() {
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
-              onClick={handleClearForm}
+              onClick={() => setModalClearShow(true)}
               label="Limpiar Formulario"
               variant="danger"
               />
             </Col>
           </Row>
         </Form>
+        <ToastContainer // Agrega este contenedor para que las notificaciones se puedan mostrar
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        {/* Modal de confirmación de los datos estan correctos */}
+        <ConfirmationModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            formData={methods.getValues()}
+            onConfirm={handleConfirm}
+            title="Confirmación del formulario"
+            fieldLabels={fieldLabels} 
+          />
+          {/* Modal de confirmación para limpiar el formulario */}
+          <ConfirmClearModal
+            show={modalClearShow}
+            onHide={() => setModalClearShow(false)} // Cierra el modal sin hacer nada
+            onClear={handleClearForm} // Limpia el formulario
+            onDownload={handleDownloadJson} // Descarga los datos en JSON
+            title="Confirmación de limpieza"
+          />
       </Container>
     </FormProvider>
   );

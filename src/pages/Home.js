@@ -174,8 +174,7 @@ function Home() {
             path="/ExternalPayment"
             ariaLabel="Ir al formulario para pagos al exterior"
             documentDetails={[
-              "Memorando solicitud para pago al exterior",
-              "Anexo 3 - Formulario para pago al exterior",
+              "Anexo 6 - Formulario para pago al exterior",
             ]}
           />
         </Col>

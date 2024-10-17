@@ -3,6 +3,8 @@ import { useForm, FormProvider,useFieldArray} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Importación de los componentes Props
 import Label from "../components/Labels/Label.js";
@@ -15,6 +17,9 @@ import InputDate from "../components/Inputs/InputDate.js";
 import RadioGroup from "../components/Inputs/RadioGroup.js";
 import ActionButton from "../components/Buttons/ActionButton.js";
 import DownloadButton from "../components/Buttons/DownloadButton.js";
+// Modals
+import ConfirmationModal from "../components/Modals/ConfirmationModal.js";
+import ConfirmClearModal from "../components/Modals/ConfirmClearModal.js";
 
 // Importación de funciones 
 import { generateDateRange } from "../utils/dataRange.js";
@@ -24,6 +29,55 @@ import { generateAnexoATripWithingProject, generateMemoTrip, generateAnexoB2With
 
 //Constantes globales para el formulario
 const formStorageKey = "formTechnicalTripWithinProjects";
+
+// Diccionario de etiquetas amigables para este formulario específico
+const fieldLabels = {
+  transporteIda: 'Cronograma de Transporte de Ida',
+  'transporteIda[].tipoTransporte': 'Tipo de Transporte',
+  'transporteIda[].nombreTransporte': 'Nombre del Transporte',
+  'transporteIda[].ruta': 'Ruta',
+  'transporteIda[].fechaSalida': 'Fecha de Salida',
+  'transporteIda[].horaSalida': 'Hora de Salida',
+  'transporteIda[].fechaLlegada': 'Fecha de Llegada',
+  'transporteIda[].horaLlegada': 'Hora de Llegada',
+
+  transporteRegreso: 'Cronograma de Transporte de Regreso',
+  'transporteRegreso[].tipoTransporte': 'Tipo de Transporte',
+  'transporteRegreso[].nombreTransporte': 'Nombre del Transporte',
+  'transporteRegreso[].ruta': 'Ruta de Regreso',
+  'transporteRegreso[].fechaSalida': 'Fecha de Salida',
+  'transporteRegreso[].horaSalida': 'Hora de Salida',
+  'transporteRegreso[].fechaLlegada': 'Fecha de Llegada',
+  'transporteRegreso[].horaLlegada': 'Hora de Llegada',
+
+  codigoProyecto: 'Código del Proyecto',
+  tituloProyecto: 'Título del Proyecto',
+  cedula: 'Cédula',
+  nombres: 'Nombres',
+  apellidos: 'Apellidos',
+  cargo: 'Cargo',
+  rolEnProyecto: 'Rol en el Proyecto',
+  nombreDirector: 'Nombre del Director',
+  departamento: 'Departamento',
+  nombreJefeInmediato: 'Nombre del Jefe Inmediato',
+  cargoJefeInmediato: 'Cargo del Jefe Inmediato',
+  nombreIntitucionAcogida: 'Nombre de la Institución de Acogida',
+  ciudadEvento: 'Ciudad del Evento',
+  paisEvento: 'País del Evento',
+  fechaInicioEvento: 'Fecha de Inicio del Evento',
+  fechaFinEvento: 'Fecha de Fin del Evento',
+  pasajesAereos: 'Pasajes Aéreos',
+  viaticosSubsistencias: 'Viáticos y Subsistencias',
+  objetivoProyecto: 'Objetivo del Proyecto',
+  relevanciaViajeTecnico: 'Relevancia del Viaje Técnico',
+  servidores: 'Servidores',
+  actividadesInmutables: 'Cronograma de Actividades',
+  'actividadesInmutables[].fecha': 'Fecha de Actividad',
+  'actividadesInmutables[].descripcion': 'Descripción de la Actividad',
+  nombreBanco: 'Nombre del Banco',
+  tipoCuenta: 'Tipo de Cuenta',
+  numeroCuenta: 'Número de Cuenta'
+};
 
 function InternationalTechnicalTrips() {
   const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {};
@@ -50,17 +104,25 @@ function InternationalTechnicalTrips() {
   const [showDownloadSection, setShowDownloadSection] = useState(false);
 
  //manejadores de estado para actividades
- const [loading, setLoading] = useState(false); //para el spinner de carga
- const [fechaInicioActividades, setFechaInicioActividades] = useState("");
- const [fechaFinActividades, setFechaFinActividades] = useState("");
- const [prevFechaInicio, setPrevFechaInicio] = useState("");
- const [prevFechaFin, setPrevFechaFin] = useState("");
- const [cantidadDias, setCantidadDias] = useState(0);  
+  const [loading, setLoading] = useState(false); //para el spinner de carga
+  const [fechaInicioActividades, setFechaInicioActividades] = useState("");
+  const [fechaFinActividades, setFechaFinActividades] = useState("");
+  const [prevFechaInicio, setPrevFechaInicio] = useState("");
+  const [prevFechaFin, setPrevFechaFin] = useState("");
+  const [cantidadDias, setCantidadDias] = useState(0);
+  const [modalShow, setModalShow] = useState(false);
+  const [modalClearShow, setModalClearShow] = useState(false);  
 
   // Funciónes auxiliares y handlers para eventos
   const onSubmitTechnicalTrip = (data) => {
-    console.log(data);
+    toast.success("Datos del Formulario validados correctamente");
+    setModalShow(true); 
+  };
+
+  const handleConfirm = () => {
+    toast.success("Confirmación del usuaio que los datos son correctos"); // Notificación de éxito
     setShowDownloadSection(true);
+    setModalShow(false);
   };
 
   const handleGenerateDocx = () => {
@@ -83,22 +145,47 @@ function InternationalTechnicalTrips() {
   };
 
   const handleDownloadAll = async () => {
-    setLoading(true);
-    const zip = new JSZip();
-    const formTripData = methods.getValues();
-    const jsonBlob = handleDownloadJson(true);
-    const memo = await generateMemoTrip(formTripData, true);
-    const anexoA = await generateAnexoATripWithingProject(formTripData, true);
-    const anexoB2 = await generateAnexoB2WithinProject(formTripData, true);
-    zip.file("Formulario para participación en viajes técnicos dentro de proyectos.json", jsonBlob);
-    zip.file("Memorando - Solicitud para viaje técnico.docx", memo);
-    zip.file("AnexoA - Solicitud de viaticos EPN.pdf", anexoA);
-    zip.file("Anexo 2B - Formulario para participación en viajes técnicos dentro de proyectos.pdf", anexoB2);
-  
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "Documentos Viaje Técnico Dentro de Proyectos.zip"); 
-    setLoading(false);
-    setShowDownloadSection(false);
+    const downloadDocuments = async () => {
+      try {
+        setLoading(true); // Activar spinner
+
+        // Obtener los valores del formulario
+        const formData = methods.getValues();
+
+        // Generar los blobs de los documentos
+        const jsonBlob = handleDownloadJson(true);
+        const memo = await generateMemoTrip(formData, true);
+        const anexoA = await generateAnexoATripWithingProject(formData, true);
+        const anexoB2 = await generateAnexoB2WithinProject(formData, true);
+
+        // Crear un nuevo archivo ZIP y agregar los documentos
+        const zip = new JSZip();
+        zip.file("Formulario para participación en viajes técnicos dentro de proyectos.json", jsonBlob);
+        zip.file("Memorando - Solicitud para viaje técnico.docx", memo);
+        zip.file("AnexoA - Solicitud de viaticos EPN.pdf", anexoA);
+        zip.file("Anexo 2B - Formulario para participación en viajes técnicos dentro de proyectos.pdf", anexoB2);
+
+        // Generar el archivo ZIP final y descargarlo
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, "Documentos Viaje Técnico Dentro de Proyectos.zip");
+
+      } catch (error) {
+        throw error; // Lanza el error para que sea manejado por el toast
+      } finally {
+        setLoading(false); // Desactivar spinner
+        setShowDownloadSection(false);
+      }
+    };
+
+    // Usamos `toast.promise` para manejar las notificaciones de la promesa
+    toast.promise(
+      downloadDocuments(),
+      {
+        pending: 'Generando documentos... por favor, espera',
+        success: '¡Documentos generados y descargados con éxito! 🎉',
+        error: 'Error al generar los documentos. Por favor, inténtalo nuevamente 😞'
+      }
+    );
   };
   
 
@@ -112,6 +199,7 @@ function InternationalTechnicalTrips() {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     if (returnDocument === true) return blob;
+    toast.success("Archivo JSON descargado correctamente"); // Notificación de éxito
     saveAs(blob, "Viajes Técnicos Dentro de Proyectos.json");
   };
   
@@ -124,6 +212,7 @@ function InternationalTechnicalTrips() {
         const json = JSON.parse(e.target.result);
         reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
         sessionStorage.setItem(formStorageKey, JSON.stringify(json));
+       toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
       } catch (err) {
         console.error("Error al cargar el archivo JSON:", err);
       }
@@ -158,6 +247,7 @@ function InternationalTechnicalTrips() {
 
     // UseEffect principal y separado para la suscrioción de cambios en el formulario
   useEffect(() => {
+    console.log(methods.getValues());
     reset(formData);
     const subscription = watch((data) => {
       sessionStorage.setItem(formStorageKey, JSON.stringify(data));
@@ -1138,13 +1228,41 @@ function InternationalTechnicalTrips() {
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
-                onClick={handleClearForm}
+                onClick={() => setModalClearShow(true)}
                 label="Limpiar Formulario"
                 variant="danger"
               />
             </Col>
           </Row>
         </Form>
+        <ToastContainer // Agrega este contenedor para que las notificaciones se puedan mostrar
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        {/* Modal de confirmación de los datos estan correctos */}
+        <ConfirmationModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            formData={methods.getValues()}
+            onConfirm={handleConfirm}
+            title="Confirmación del formulario"
+            fieldLabels={fieldLabels} 
+          />
+          {/* Modal de confirmación para limpiar el formulario */}
+          <ConfirmClearModal
+            show={modalClearShow}
+            onHide={() => setModalClearShow(false)} // Cierra el modal sin hacer nada
+            onClear={handleClearForm} // Limpia el formulario
+            onDownload={handleDownloadJson} // Descarga los datos en JSON
+            title="Confirmación de limpieza"
+          />
       </Container>
     </FormProvider>
   );
