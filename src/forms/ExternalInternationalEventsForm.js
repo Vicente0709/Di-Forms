@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useForm, FormProvider, useFieldArray} from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import JSZip from "jszip";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Importación de los componentes del formulario
 import Label from "../components/Labels/Label.js";
@@ -14,6 +16,9 @@ import InputDate from "../components/Inputs/InputDate.js";
 import RadioGroup from "../components/Inputs/RadioGroup.js";
 import ActionButton from "../components/Buttons/ActionButton.js";
 import DownloadButton from "../components/Buttons/DownloadButton.js";
+// Modals
+import ConfirmationModal from "../components/Modals/ConfirmationModal.js";
+import ConfirmClearModal from "../components/Modals/ConfirmClearModal.js";
 
 
 // Importación de las funciones para generar documentos
@@ -25,6 +30,55 @@ import { saveAs } from "file-saver";
 
 const formStorageKey = "formEventOutsideProject"; // Clave para almacenar el formulario en localStorage
 const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+
+const fieldLabels = {
+  transporteIda: 'Cronograma de Transporte de Ida',
+  'transporteIda[].tipoTransporte': 'Tipo de Transporte',
+  'transporteIda[].nombreTransporte': 'Nombre del Transporte',
+  'transporteIda[].ruta': 'Ruta',
+  'transporteIda[].fechaSalida': 'Fecha de Salida',
+  'transporteIda[].horaSalida': 'Hora de Salida',
+  'transporteIda[].fechaLlegada': 'Fecha de Llegada',
+  'transporteIda[].horaLlegada': 'Hora de Llegada',
+
+  transporteRegreso: 'Cronograma de Transporte de Regreso',
+  'transporteRegreso[].tipoTransporte': 'Tipo de Transporte',
+  'transporteRegreso[].nombreTransporte': 'Nombre del Transporte',
+  'transporteRegreso[].ruta': 'Ruta de Regreso',
+  'transporteRegreso[].fechaSalida': 'Fecha de Salida',
+  'transporteRegreso[].horaSalida': 'Hora de Salida',
+  'transporteRegreso[].fechaLlegada': 'Fecha de Llegada',
+  'transporteRegreso[].horaLlegada': 'Hora de Llegada',
+
+  detalleArticuloSI: 'Detalle del Artículo (SI)',
+  nombreBanco: 'Nombre del Banco',
+  tipoCuenta: 'Tipo de Cuenta',
+  numeroCuenta: 'Número de Cuenta',
+  nombres: 'Nombres',
+  apellidos: 'Apellidos',
+  cedula: 'Cédula',
+  puesto: 'Puesto',
+  departamento: 'Departamento',
+  nombreJefeInmediato: 'Nombre del Jefe Inmediato',
+  cargoJefeInmediato: 'Cargo del Jefe Inmediato',
+  tituloEvento: 'Título del Evento',
+  ciudadEvento: 'Ciudad del Evento',
+  paisEvento: 'País del Evento',
+  fechaInicioEvento: 'Fecha de Inicio del Evento',
+  fechaFinEvento: 'Fecha de Fin del Evento',
+  RelevanciaAcademica: 'Relevancia Académica',
+  tituloPonencia: 'Título de la Ponencia',
+  tipoPonencia: 'Tipo de Ponencia',
+  articuloPublicado: 'Artículo Publicado',
+  pasajesAereos: 'Pasajes Aéreos',
+  viaticosSubsistencias: 'Viáticos y Subsistencias',
+  inscripcion: 'Inscripción',
+  hospedaje: 'Hospedaje',
+  movilizacion: 'Movilización',
+  alimentacion: 'Alimentación',
+  servidores: 'Servidores',
+  inscripciones: 'Inscripciones'
+};
 
 
 function ExternalInternationalEventsForm() {
@@ -58,6 +112,8 @@ function ExternalInternationalEventsForm() {
   const [showDownloadSection, setShowDownloadSection] = useState(false);
   const [seleccionInscripcion, setSeleccionInscripcion] = useState("");
   const [showInputArticulo, setShowInputArticulo] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
+  const [modalClearShow, setModalClearShow] = useState(false);
 
   useEffect(() => {
     const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde sessionStorage
@@ -115,9 +171,14 @@ function ExternalInternationalEventsForm() {
 
   // Función que se ejecuta al enviar el formulario
   const onSubmitEventParticipationOutside = (data) => {
-    console.log(data);
+    toast.success("Datos del Formulario validados correctamente");
+    setModalShow(true); 
+  };
+
+  const handleConfirm = () => {
+    toast.success("Confirmación del usuaio que los datos son correctos"); // Notificación de éxito
     setShowDownloadSection(true);
-    console.log(methods.getValues());
+    setModalShow(false);
   };
 
   // Funciones para manejar la generación de documentos
@@ -146,25 +207,52 @@ function ExternalInternationalEventsForm() {
   };
 
   // Función para descargar todos los documentos
-  const handleDownloadAll = async() => {
-    setLoading(true); // Activar spinner
-    const formData = methods.getValues();
-    const jsonBlob = handleDownloadJson(true);
-    const docxBlob1 = await generateMemoOutsideProject1(formData,true);
-    const docxBlob2 = await generateMemoOutsideProject2(formData,true);
-    const pdfBlob1 = await generateAnexoAOutsideProject(formData,true);
-    const pdfBlob2 = await generateAnexo8(formData,true);
-    const zip = new JSZip();
-    zip.file("Datos Participación en Eventos Fuera de Proyecto.json", jsonBlob);
-    zip.file("Memorando del Jefe del Departamento.docx", docxBlob1);
-    zip.file("Memorando del profesor al jefe.docx", docxBlob2);
-    zip.file("Anexo A - Solicitud de Viaticos EPN .pdf", pdfBlob1);
-    zip.file("Anexo 8 - Participacion en eventos fuera de proyectos.pdf", pdfBlob2);
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "Documentos de Participación en Eventos Fuera de Proyecto.zip");
-    setLoading(false); // Desactivar spinner
-    setShowDownloadSection(false);
+  const handleDownloadAll = async () => {
+    const downloadDocuments = async () => {
+      try {
+        setLoading(true); // Activar spinner
+
+        // Obtener los valores del formulario
+        const formData = methods.getValues();
+
+        // Generar los blobs de los documentos
+        const jsonBlob = handleDownloadJson(true);
+        const docxBlob1 = await generateMemoOutsideProject1(formData, true);
+        const docxBlob2 = await generateMemoOutsideProject2(formData, true);
+        const pdfBlob1 = await generateAnexoAOutsideProject(formData, true);
+        const pdfBlob2 = await generateAnexo8(formData, true);
+
+        // Crear un nuevo archivo ZIP y agregar los documentos
+        const zip = new JSZip();
+        zip.file("Datos Participación en Eventos Fuera de Proyecto.json", jsonBlob);
+        zip.file("Memorando del Jefe del Departamento.docx", docxBlob1);
+        zip.file("Memorando del profesor al jefe.docx", docxBlob2);
+        zip.file("Anexo A - Solicitud de Viaticos EPN .pdf", pdfBlob1);
+        zip.file("Anexo 8 - Participacion en eventos fuera de proyectos.pdf", pdfBlob2);
+
+        // Generar el archivo ZIP final y descargarlo
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, "Documentos de Participación en Eventos Fuera de Proyecto.zip");
+
+      } catch (error) {
+        throw error; // Lanza el error para que sea manejado por el toast
+      } finally {
+        setLoading(false); // Desactivar spinner
+        setShowDownloadSection(false);
+      }
+    };
+
+    // Usamos `toast.promise` para manejar las notificaciones de la promesa
+    toast.promise(
+      downloadDocuments(),
+      {
+        pending: 'Generando documentos... por favor, espera',
+        success: '¡Documentos generados y descargados con éxito! 🎉',
+        error: 'Error al generar los documentos. Por favor, inténtalo nuevamente 😞'
+      }
+    );
   };
+   
 
   // Función para limpiar el formulario y resetear datos
   const handleClearForm = () => {
@@ -191,7 +279,8 @@ function ExternalInternationalEventsForm() {
         const json = JSON.parse(e.target.result);
         reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
         sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-      } catch (err) {
+      toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
+} catch (err) {
         console.error("Error al cargar el archivo JSON:", err);
       }
     };
@@ -1266,13 +1355,41 @@ function ExternalInternationalEventsForm() {
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
-              onClick={handleClearForm}
+              onClick={() => setModalClearShow(true)}
               label="Limpiar Formulario"
               variant="danger"
               />
             </Col>
           </Row>
         </Form>
+        <ToastContainer // Agrega este contenedor para que las notificaciones se puedan mostrar
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        {/* Modal de confirmación de los datos estan correctos */}
+        <ConfirmationModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            formData={methods.getValues()}
+            onConfirm={handleConfirm}
+            title="Confirmación del formulario"
+            fieldLabels={fieldLabels} 
+          />
+          {/* Modal de confirmación para limpiar el formulario */}
+          <ConfirmClearModal
+            show={modalClearShow}
+            onHide={() => setModalClearShow(false)} // Cierra el modal sin hacer nada
+            onClear={handleClearForm} // Limpia el formulario
+            onDownload={handleDownloadJson} // Descarga los datos en JSON
+            title="Confirmación de limpieza"
+          />
       </Container>
     </FormProvider>
   );

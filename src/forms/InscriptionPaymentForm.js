@@ -3,10 +3,10 @@ import { useForm, FormProvider, useFieldArray  } from "react-hook-form";
 import { Container, Button, Row, Col, Form } from "react-bootstrap";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Importación de los componentes del formulario
-
-
 import Label from "../components/Labels/Label.js";
 import LabelTitle from "../components/Labels/LabelTitle.js";
 import LabelText from "../components/Labels/LabelText.js";
@@ -18,6 +18,9 @@ import RadioGroup from "../components/Inputs/RadioGroup.js";
 import ActionButton from "../components/Buttons/ActionButton.js";
 import DownloadButton from "../components/Buttons/DownloadButton.js";
 import today from "../utils/date.js";
+// Modals
+import ConfirmationModal from "../components/Modals/ConfirmationModal.js";
+import ConfirmClearModal from "../components/Modals/ConfirmClearModal.js";
 
 // Importación de las funciones para generar documentos
 import {
@@ -28,15 +31,41 @@ import { validarCedulaEcuatoriana, validarFechaFin} from "../utils/validaciones.
 
 const formStorageKey = "formInscriptionPayment"; // Clave para almacenar el formulario en localStorage
 const formData = JSON.parse(sessionStorage.getItem(formStorageKey)) || {}; // Datos del formulario desde localStorage
+// Diccionario de etiquetas amigables para este formulario específico
+const fieldLabels = {
+  codigoProyecto: 'Código del Proyecto',
+  nombreDirector: 'Nombre del Director',
+  cargoDirector: 'Cargo del Director',
+  detalleArticuloSI: 'Detalle del Artículo (SI)',
+
+  inscripciones: 'Inscripciones',
+  'inscripciones[].valorInscripcion': 'Valor de la Inscripción',
+  'inscripciones[].pagoLimite': 'Límite de Pago',
+  'inscripciones[].limiteFecha': 'Fecha Límite',
+  'inscripciones[].monedaPago': 'Moneda de Pago',
+
+  metodoPago: 'Método de Pago',
+  nombres: 'Nombres',
+  apellidos: 'Apellidos',
+  cedula: 'Cédula',
+  departamento: 'Departamento',
+  participacionProyecto: 'Participación en el Proyecto',
+  tituloEvento: 'Título del Evento',
+  ciudadEvento: 'Ciudad del Evento',
+  paisEvento: 'País del Evento',
+  fechaInicioEvento: 'Fecha de Inicio del Evento',
+  fechaFinEvento: 'Fecha de Fin del Evento',
+  RelevanciaAcademica: 'Relevancia Académica',
+  tituloPonencia: 'Título de la Ponencia',
+  tituloArticulo: 'Título del Artículo',
+  articuloPublicado: 'Artículo Publicado'
+};
+
 
 function InscriptionPaymentForm() {
   
   // Configuración del formulario con react-hook-form y valores predeterminados desde localStorage
-  const methods = useForm({
-    mode: "onChange",
-    reValidateMode: "onChange",
-    defaultValues: formData,
-  });
+  const methods = useForm({mode: "onChange", reValidateMode: "onChange", defaultValues: formData,});
 
   const { register, control, watch, reset, setValue, formState:{errors} } = methods;
 
@@ -53,6 +82,8 @@ function InscriptionPaymentForm() {
   const [showInputDirector, setShowInputDirector] = useState(false);
   const [showInputArticulo, setShowInputArticulo] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
+  const [modalClearShow, setModalClearShow] = useState(false);
 
   // Efecto para sincronizar con localStorage 
   useEffect(() => {
@@ -119,15 +150,21 @@ function InscriptionPaymentForm() {
 
   // Función que se ejecuta al enviar el formulario
   const onSubmitInscriptionPayment = (data) => {
-    console.log(data);
+    toast.success("Datos del Formulario validados correctamente");
+    setModalShow(true); 
+  };
+
+  const handleConfirm = () => {
+    toast.success("Confirmación del usuaio que los datos son correctos"); // Notificación de éxito
     setShowDownloadSection(true);
-    console.log(methods.getValues());
+    setModalShow(false);
   };
 
   const handleDownloadJson = (returnDocument = false) => {
     const data = methods.getValues();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     if (returnDocument === true) return blob;
+    toast.success("Archivo JSON descargado correctamente"); // Notificación de éxito
     saveAs(blob, "Pago de Inscripción.json");
   };
 
@@ -140,7 +177,8 @@ function InscriptionPaymentForm() {
         const json = JSON.parse(e.target.result);
         reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
         sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-      } catch (err) {
+      toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
+} catch (err) {
         console.error("Error al cargar el archivo JSON:", err);
       }
     };
@@ -161,21 +199,46 @@ function InscriptionPaymentForm() {
   };
 
 
-  // Función para descargar todos los documentos
   const handleDownloadAll = async () => {
-    setLoading(true); // Activar spinner
-    const formData = methods.getValues();
-    const jsonBlob = handleDownloadJson(true);
-    const docxBlob = await generateMemoInscriptionPaymentOutProyect1(formData, true);
-    const pdfBlob = await generateAnexo5InscriptionPayment(formData, true);
-    const zip = new JSZip();
-    zip.file(`Pago de Inscripción.json`, jsonBlob);
-    zip.file(`Memorando Pago de Inscripción.docx`, docxBlob);
-    zip.file(`Anexo 5 - Inscripción.pdf`, pdfBlob);
-    const content = await zip.generateAsync({ type: "blob" });
-    saveAs(content, "Documentos Pago de Inscripción.zip");
-    setLoading(false); // Desactivar spinner
-    setShowDownloadSection(false);
+    const downloadDocuments = async () => {
+      try {
+        setLoading(true); // Activar spinner
+
+        // Obtener los valores del formulario
+        const formData = methods.getValues();
+
+        // Generar los blobs de los documentos
+        const jsonBlob = handleDownloadJson(true);
+        const docxBlob = await generateMemoInscriptionPaymentOutProyect1(formData, true);
+        const pdfBlob = await generateAnexo5InscriptionPayment(formData, true);
+
+        // Crear un nuevo archivo ZIP y agregar los documentos
+        const zip = new JSZip();
+        zip.file("Pago de Inscripción.json", jsonBlob);
+        zip.file("Memorando Pago de Inscripción.docx", docxBlob);
+        zip.file("Anexo 5 - Inscripción.pdf", pdfBlob);
+
+        // Generar el archivo ZIP final y descargarlo
+        const content = await zip.generateAsync({ type: "blob" });
+        saveAs(content, "Documentos Pago de Inscripción.zip");
+
+      } catch (error) {
+        throw error; // Lanza el error para que sea manejado por el toast
+      } finally {
+        setLoading(false); // Desactivar spinner
+        setShowDownloadSection(false);
+      }
+    };
+
+    // Usamos `toast.promise` para manejar las notificaciones de la promesa
+    toast.promise(
+      downloadDocuments(),
+      {
+        pending: 'Generando documentos... por favor, espera',
+        success: '¡Documentos generados y descargados con éxito! 🎉',
+        error: 'Error al generar los documentos. Por favor, inténtalo nuevamente 😞'
+      }
+    );
   };
 
   // Función para limpiar el formulario y resetear datos
@@ -659,13 +722,41 @@ function InscriptionPaymentForm() {
           <Row className="mt-4">
             <Col className="text-center">
               <ActionButton
-              onClick={handleClearForm}
+              onClick={() => setModalClearShow(true)}
               label="Limpiar Formulario"
               variant="danger"
               />
             </Col>
           </Row>
         </Form>
+        <ToastContainer // Agrega este contenedor para que las notificaciones se puedan mostrar
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+        {/* Modal de confirmación de los datos estan correctos */}
+        <ConfirmationModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            formData={methods.getValues()}
+            onConfirm={handleConfirm}
+            title="Confirmación del formulario"
+            fieldLabels={fieldLabels} 
+          />
+          {/* Modal de confirmación para limpiar el formulario */}
+          <ConfirmClearModal
+            show={modalClearShow}
+            onHide={() => setModalClearShow(false)} // Cierra el modal sin hacer nada
+            onClear={handleClearForm} // Limpia el formulario
+            onDownload={handleDownloadJson} // Descarga los datos en JSON
+            title="Confirmación de limpieza"
+          />
       </Container>
     </FormProvider>
   );

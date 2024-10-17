@@ -6,13 +6,16 @@ import {
   Document as PDFDocument,
   pdf,
 } from "@react-pdf/renderer";
-import JSZip from "jszip";
-import { Document, Packer, Paragraph, TextRun,Table, TableRow, TableCell } from "docx";
+import { Document, Packer, Paragraph, TextRun } from "docx";
 import { text, image, barcodes } from "@pdfme/schemas";
 import { generate } from "@pdfme/generator";
 import { saveAs } from "file-saver";
 import styles from "../../stylesPdf";
 import { capitalizeWords, formatDate } from "../../validaciones";
+
+import { schemasAnexoA6 } from "../../schemasAnexo6";
+import { basePdfAnexo6 } from "../../basePdfAnexo6";
+
 Font.register({
   family: "Roboto",
   src: "https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu72xKOzY.woff2",
@@ -1880,161 +1883,41 @@ export function generateMemoInstitutionalServices(data) {
 }
 
 //Pagos al exterior
- export async function generateAnexo6(data) {
-  
-  const MyPDFDocument = (
-    <PDFDocument>
-      <Page style={styles.page}>
-        <Text style={styles.header}>Anexo 5 - Formato de solicitud de pago al exterior</Text>
+export async function generateAnexo6(data, returnDocument = false) {
+  const template = {
+    schemas: schemasAnexoA6,
+    basePdf: basePdfAnexo6,
+  };
+  const plugins = { text, image, qrcode: barcodes.qrcode };
+  const inputs = [
+    {
+      moneda: data.moneda,
+      nombreBeneficiario: data.nombreBeneficiario,
+      direccion: data.direccionBeneficiario,
+      pais: data.paisBeneficiario,
+      ciudad: data.ciudadBeneficiario,
+      nombreBanco: data.nombreBanco,
+      codigoBanco: data.codigoSwift,
+      numeroCuenta: data.numeroCuenta,
+      paisBanco: data.paisBanco,
+      ciudadBanco: data.ciudadBanco,
+      nombreBancoIntermediario: data.nombreBancoIntermediario,
+      codigoBancoIntermediario: data.codigoSwiftIntermediario,
+      paisBancoIntermediario: data.paisBancoIntermediario,
+      ciudadBancoIntermediario: data.ciudadBancoIntermediario,
+      firmaNombre: `${data.nombresSolcitante.toUpperCase()} ${data.apellidoSolicitante.toUpperCase()}`,
+      firmaCorreo: data.correoElectronico,
+    },
+];
+const pdf = await generate({ template, plugins, inputs });
+  const blob = new Blob([pdf.buffer], { type: "application/pdf" });
+  if (returnDocument) {
+    return blob;
+  } 
 
-        <Text style={styles.sectionTitle}>DATOS DEL SOLICITANTE</Text>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>NOMBRES Y APELLIDOS: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.nombresApellidos}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>CÉDULA DE IDENTIDAD: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.cedulaIdentidad}</Text>
-            </View>
-          </View>
-        </View>
-
-        <Text style={styles.sectionTitle}>DATOS DEL BENEFICIARIO</Text>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>MONEDA / CURRENCY: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.moneda}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>NOMBRE DE BENEFICIARIO / BENEFICIARY'S NAME: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.beneficiaryName}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>DIRECCIÓN / ADDRESS: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.beneficiaryAddress}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>PAÍS / COUNTRY: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.beneficiaryCountry}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>CIUDAD / CITY: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.beneficiaryCity}</Text>
-            </View>
-          </View>
-        </View>
-
-        <Text style={styles.sectionTitle}>DATOS DEL BANCO</Text>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>NOMBRE DEL BANCO / BANK NAME: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.bankName}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>CÓDIGO ABA O SWIFT / CODE ABA OR SWIFT: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.swiftCode}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>NÚMERO DE CUENTA / IBAN; ACCOUNT NUMBER / IBAN: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.accountNumber}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>PAÍS / COUNTRY: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.bankCountry}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>CIUDAD / CITY: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.bankCity}</Text>
-            </View>
-          </View>
-        </View>
-
-        <Text style={styles.sectionTitle}>DATOS DEL BANCO INTERMEDIARIO</Text>
-        <View style={styles.table}>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>NOMBRE DE BANCO INTERMEDIARIO / INTERMEDIARY BANK NAME: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.intermediaryBankName}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>CÓDIGO ABA O SWIFT / CODE ABA OR SWIFT: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.intermediarySwiftCode}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>PAÍS / COUNTRY: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.intermediaryBankCountry}</Text>
-            </View>
-          </View>
-          <View style={styles.tableRow}>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellText}>CIUDAD / CITY: </Text>
-            </View>
-            <View style={styles.tableCol50}>
-              <Text style={styles.tableCellTextBlue}>{data.intermediaryBankCity}</Text>
-            </View>
-          </View>
-        </View>
-      </Page>
-    </PDFDocument>
+  saveAs(
+    blob,
+    "Anexo 6 - Pagos al exterior.pdf"
   );
-  // Convertir el documento PDF a un Blob
-  const blob = await pdf(MyPDFDocument).toBlob();
-  saveAs(blob, `Anexo 6 - Solicitud de pago al exterior.pdf`);
-
+  
 }
