@@ -177,7 +177,7 @@ function InscriptionPaymentForm() {
         const json = JSON.parse(e.target.result);
         reset(json, { keepErrors: false, keepDirty: false, keepValues: false, keepTouched: false, keepIsSubmitted: false });
         sessionStorage.setItem(formStorageKey, JSON.stringify(json));
-      toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
+        toast.success("Archivo JSON cargado correctamente"); // Notificación de éxito
 } catch (err) {
         console.error("Error al cargar el archivo JSON:", err);
       }
